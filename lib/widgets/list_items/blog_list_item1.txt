@@ -1,0 +1,133 @@
+
+flexibleSpace: FlexibleSpaceBar(
+              title: Row(
+                children: [
+                  Icon(!_showSaved ? Icons.bookmark_outline : Icons.bookmark,size: 16,),
+                  Text(
+                    'Сохраненные',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )
+                ],
+              ),
+              background: Image.asset(
+                'assets/temp/app_bar.jpg',
+                fit: BoxFit.cover,
+                opacity: const AlwaysStoppedAnimation(0.4),
+              ),
+            ),
+
+import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/models/blog_post.dart';
+import 'package:lines_top_mobile/screens/details_screens/blog_post_details_screen.dart';
+
+// ignore: must_be_immutable
+class BlogListItem extends StatefulWidget {
+  final BlogPost post;
+  final bool isOnList;
+  late Duration waitTimer;
+  BlogListItem(this.post,{this.isOnList = true,Duration? waitTimer}){
+    this.waitTimer = waitTimer ?? const Duration(milliseconds: 1000);
+  }
+
+  @override
+  State<BlogListItem> createState() => _BlogListItemState();
+}
+
+class _BlogListItemState extends State<BlogListItem> with TickerProviderStateMixin{
+
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  void _startAnimations()async{
+    await Future.delayed(widget.isOnList ? const Duration(milliseconds: 600): widget.waitTimer);
+    // ignore: empty_catches
+    try {_animationController.forward();} catch(e){}
+  }
+
+  @override
+  void initState() {
+    _animationController = AnimationController(vsync: this,duration:const Duration(milliseconds: 600));
+    _opacityAnimation = Tween(begin: 0.0,end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    _slideAnimation = Tween(begin:const Offset(0.0,0.7),end: const Offset(0.0,0.0)).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
+    _startAnimations();
+    
+    super.initState();
+  }
+
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pushNamed(BlogPostDetailsScreen.routeName,arguments: [widget.post]),
+          child: Card(
+            elevation: 2,
+            child: Container(
+              //decoration: BoxDecoration(border: widget.isOnList ? null: Border.all(width: 0.5,color: Colors.black)),
+                padding: const EdgeInsets.only(bottom: 2.0),
+                child: Column(
+                  
+                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      fit: FlexFit.tight,
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top:12),
+                        child: Image.file(
+                          widget.post.images[0],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      fit: FlexFit.tight,
+                      flex: 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: widget.isOnList ? 15 : 5,left: 10,right: 10,bottom: 3),
+                        child: Text(
+                          widget.post.title,
+                          textAlign: widget.isOnList ? TextAlign.center: TextAlign.start,
+                          style: widget.isOnList ? Theme.of(context).textTheme.headlineSmall : Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 17),
+                        ),
+                      ),
+                    ),
+                    if(widget.isOnList) Flexible(
+                      fit: FlexFit.tight,
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10,right: 10),
+                        child: Text(
+                          widget.post.shortDesc,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(widget.post.date,
+                        //'${date.day}.${date.month}.${date.year}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
