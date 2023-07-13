@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/widgets/flexible_space.dart';
 import '../../models/program.dart';
 import '../../widgets/list_items/horizontal_list_item.dart';
 import 'sections_list_screen.dart';
@@ -23,17 +24,17 @@ class _TrainingsListScreenState extends State<TrainingsListScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            key: ValueKey('training_list'),
+            expandedHeight: 150,
+            flexibleSpace: FlexibleSpace(key: const ValueKey('training_list'),title: widget.program.title, children: [],lowSpace: true,),
+            stretch: false,
             pinned: true,
-            title: Text(
-              widget.program.title,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
           ),
           SliverToBoxAdapter(
             child: UnconstrainedBox(
               child: ConstrainedBox(
                 constraints:
-                    BoxConstraints.tight(Size(deviceSize.width * 0.8, 500)),
+                    BoxConstraints.tight(Size(deviceSize.width * 0.9, MediaQuery.of(context).size.height)),
                 child: ListView.builder(
                   itemCount: widget.program.trainings.length,
                   itemBuilder: (context, index) => HorizontalListItem(

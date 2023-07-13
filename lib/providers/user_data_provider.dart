@@ -99,7 +99,11 @@ class UserDataProvider with ChangeNotifier{
       this.email = userData['email'];
       paidAccount = userData['paid_account'];
       userName = userData['user_name'];
-      savedBlogPostIds = userData['saved_posts'];
+      var savedDynamic = userData['saved_posts'] as List<dynamic>;
+      savedBlogPostIds = [];
+      for(String el in savedDynamic){
+        savedBlogPostIds!.add(el);
+      }
       Map<String,List<int>> tempProgress = {};
       var progressDynamic = userData['progress'] as Map<String,dynamic>;
       for(String prName in progressDynamic.keys){

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/providers/user_data_provider.dart';
+import 'package:provider/provider.dart';
 import '../../screens/details_screens/blog_post_details_screen.dart';
 
 import '../../models/blog_post.dart';
@@ -29,11 +31,12 @@ class _BlogListItemState extends State<BlogListItem>
     _disposed = false;
     _slideAnimation =
         Tween(begin: const Offset(-1.0, 0.0), end: const Offset(0.0, 0.0))
-            .animate(CurvedAnimation(parent: _controller, curve: Curves.fastLinearToSlowEaseIn));
+            .animate(CurvedAnimation(
+                parent: _controller, curve: Curves.fastLinearToSlowEaseIn));
     Future.delayed(widget.waitTimer).whenComplete(() {
       try {
-       if(!_disposed) _controller.forward();
-      // ignore: empty_catches
+        if (!_disposed) _controller.forward();
+        // ignore: empty_catches
       } catch (e) {}
     });
   }
@@ -48,6 +51,15 @@ class _BlogListItemState extends State<BlogListItem>
 
   @override
   Widget build(BuildContext context) {
+    var authData = Provider.of<UserDataProvider>(context, listen: false);
+    IconData iconData;
+    if (!authData.isAuth) {
+      iconData = Icons.bookmark_outline;
+    } else {
+      iconData = authData.savedBlogPostIds!.contains(widget.post.id)
+          ? Icons.bookmark
+          : Icons.bookmark_outline;
+    }
     return GestureDetector(
       onTap: () => Navigator.of(context)
           .pushNamed(BlogPostDetailsScreen.routeName, arguments: [widget.post]),
@@ -60,18 +72,45 @@ class _BlogListItemState extends State<BlogListItem>
                   fit: BoxFit.cover,
                   opacity: 0.2)),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Text(
-                  widget.post.title,
-                  style: Theme.of(context).textTheme.titleLarge,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: IconButton(
+                  icon: Icon(iconData),
+                  onPressed: ()async {
+                    if (iconData == Icons.bookmark) {
+                      await authData.removeSavedId(widget.post.id);
+                      iconData = Icons.bookmark_outline;
+                    } else {
+                      await authData.addSavedId(widget.post.id);
+                      iconData = Icons.bookmark;
+                    }
+                    setState(() {});
+                  },
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(right: 16.0),
-                child: Icon(Icons.arrow_forward_ios,color: Color.fromARGB(120, 0, 0, 0),),
+              Flexible(
+                fit: FlexFit.tight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15.0),
+                      child: Text(
+                        widget.post.title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Color.fromARGB(120, 0, 0, 0),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
