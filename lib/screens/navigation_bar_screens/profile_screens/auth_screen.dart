@@ -57,12 +57,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
       body: CustomScrollView(
         physics: const NeverScrollableScrollPhysics(),
         slivers: [
-          SliverAppBar(
+          SliverAppBar.large(
+            backgroundColor: Theme.of(context).primaryColor,
             automaticallyImplyLeading: false,
             pinned: true,
             title: Text(
               'Профиль',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
           SliverToBoxAdapter(
@@ -85,6 +86,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                       Platform.isIOS
                           ? CupertinoTextFormFieldRow(
                             key: usernameKey,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                               prefix: Text('Имя пользователя',style: Theme.of(context).textTheme.bodySmall,),
                               controller: _usernameController,
                               validator: (value) {
@@ -99,6 +101,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                             )
                           : TextFormField(
                             key: usernameKey,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                               controller: _usernameController,
                               decoration: const InputDecoration(
                                   hintText: 'Имя пользователя'),
@@ -114,10 +117,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                             ),
                     Platform.isIOS ? CupertinoTextFormFieldRow(
                       key: emailKey,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                       prefix: Text('Электронная почта',style: Theme.of(context).textTheme.bodySmall,),
                       controller: _emailController,
                       validator: (value) {
-                        if (value == null) return 'Введите почту';
+                        if (value == null || value.isEmpty) return 'Введите почту';
                         if (!value.contains('@')) return 'Неверный формат';
                         if (!value.contains('.')) return 'Неверный формат!';
                         return null;
@@ -125,10 +129,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                     ) : TextFormField(
                       key: emailKey,
                       controller: _emailController,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                       decoration:
                           const InputDecoration(hintText: 'Электронная почта'),
                       validator: (value) {
-                        if (value == null) return 'Введите почту';
+                        if (value == null || value.isEmpty) return 'Введите почту';
                         if (!value.contains('@')) return 'Неверный формат';
                         if (!value.contains('.')) return 'Неверный формат!';
                         return null;
@@ -136,6 +141,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                     ),
                     Platform.isIOS ? CupertinoTextFormFieldRow(
                       key: passwordKey,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                       prefix: Text('Пароль',style: Theme.of(context).textTheme.bodySmall,),
                       controller: _passwordController,
                       obscureText: true,
@@ -148,6 +154,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                       },
                     ) : TextFormField(
                       key: passwordKey,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                       controller: _passwordController,
                       obscureText: true,
                       decoration: const InputDecoration(hintText: 'Пароль'),
@@ -162,6 +169,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                     if (_isReg)
                       Platform.isIOS ? CupertinoTextFormFieldRow(
                         key: passwordRepeatKey,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                         prefix: Text('Повтор пароля',style: Theme.of(context).textTheme.bodySmall,),
                         controller: _passwordRepeatController,
                         obscureText: true,
@@ -178,6 +186,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                         key: passwordRepeatKey,
                         controller: _passwordRepeatController,
                         obscureText: true,
+                      cursorColor: Theme.of(context).colorScheme.onSecondary,
                         decoration: const InputDecoration(
                             hintText: 'Подтверждение пароля'),
                         validator: (value) {
@@ -196,12 +205,12 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                           onPressed: () => setState(() => _isReg = !_isReg),
                           child: Text(_isReg
                               ? 'У меня уже есть аккаунт'
-                              : 'У меня нет аккаунта')),
+                              : 'У меня нет аккаунта',style: Theme.of(context).textTheme.bodyMedium,)),
                     ),
                     ElevatedButton(
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(
-                              Theme.of(context).primaryColorLight)),
+                              Theme.of(context).colorScheme.background)),
                       onPressed: _tryAuth,
                       child: Text(
                         _isReg ? 'Зарегистрироваться' : 'Войти',

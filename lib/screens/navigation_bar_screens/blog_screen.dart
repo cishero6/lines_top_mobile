@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/models/blog_post.dart';
 import 'package:lines_top_mobile/providers/blog_provider.dart';
+import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
 import 'package:lines_top_mobile/providers/user_data_provider.dart';
-import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screens/auth_screen.dart';
+import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screen.dart';
 import 'package:lines_top_mobile/widgets/flexible_space.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/list_items/blog_list_item.dart';
@@ -16,7 +17,7 @@ class BlogScreen extends StatefulWidget {
 }
 
 class _BlogScreenState extends State<BlogScreen> with TickerProviderStateMixin {
-  List<BlogPost> _items = [];
+  List<BlogPost> _items = [];  
   List<BlogPost> _candidatesItems = [];
   List<BlogPost> _shownItems = [];
   bool _showSaved = false;
@@ -57,14 +58,18 @@ class _BlogScreenState extends State<BlogScreen> with TickerProviderStateMixin {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               TextButton(
-                  onPressed: () => Navigator.of(context)
-                      .pushReplacementNamed(AuthScreen.routeName),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacementNamed(ProfileScreen.routeName);
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    Provider.of<BottomNavigationProvider>(context,listen: false).setIndex(1);
+                  },
                   child: Text(
                     'Войти',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ))
             ],
-          )));
+          ),),);
       return;
     }
     if (!_showSaved) {
@@ -117,7 +122,8 @@ class _BlogScreenState extends State<BlogScreen> with TickerProviderStateMixin {
     }
     _shownItems = [
       ..._candidatesItems
-          .where((element) => element.title.contains(value))
+          .where((element) =>
+              element.title.toLowerCase().contains(value.toLowerCase()))
           .toList()
     ];
     setState(() {});
@@ -133,7 +139,6 @@ class _BlogScreenState extends State<BlogScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     int waitTimer = -200;
-
     return Scaffold(
       body: NotificationListener(
         onNotification: (t) {
@@ -154,90 +159,93 @@ class _BlogScreenState extends State<BlogScreen> with TickerProviderStateMixin {
           controller: _scrollController,
           slivers: [
             SliverAppBar(
-              key: ValueKey('blog'),
+              expandedHeight: 150,
+              elevation: 4,
+              pinned: true,
               automaticallyImplyLeading: false,
               scrolledUnderElevation: 0,
-              flexibleSpace: FlexibleSpace(key: const ValueKey('blog'),title: 'Блог', children: [
-                SlideTransition(
-                  transformHitTests: true,
-                  position: _slideAnimation,
-                  child: GestureDetector(
-                    onTap: _tryToggleSaved,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.fastEaseInToSlowEaseOut,
-                      width: _isBelow ? 42 : 150,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          border: Border.all(
-                            color: const Color.fromARGB(120, 0, 0, 0),
-                          )),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Icon(
-                              !_showSaved
-                                  ? Icons.bookmark_outline
-                                  : Icons.bookmark,
-                              size: 24,
-                              color: const Color.fromARGB(120, 0, 0, 0),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              flexibleSpace: FlexibleSpace(
+                  key: const ValueKey('blog'),
+                  title: 'Блог',
+                  children: [
+                    SlideTransition(
+                      transformHitTests: true,
+                      position: _slideAnimation,
+                      child: GestureDetector(
+                        onTap: _tryToggleSaved,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.fastEaseInToSlowEaseOut,
+                          width: _isBelow ? 42 : 150,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(
+                                color: const Color.fromARGB(120, 0, 0, 0),
+                              )),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Icon(
+                                  !_showSaved
+                                      ? Icons.bookmark_outline
+                                      : Icons.bookmark,
+                                  size: 24,
+                                  color: const Color.fromARGB(120, 0, 0, 0),
+                                ),
+                                Flexible(
+                                  fit: FlexFit.tight,
+                                  child: Text(
+                                    _isBelow ? '' : 'Сохраненные',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.fade,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(
+                                            color: const Color.fromARGB(
+                                                120, 0, 0, 0)),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Flexible(
-                              fit: FlexFit.tight,
-                              child: Text(
-                                _isBelow ? '' : 'Сохраненные',
-                                maxLines: 1,
-                                overflow: TextOverflow.fade,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                        color:
-                                            const Color.fromARGB(120, 0, 0, 0)),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      color: _searchActivated ? Colors.white : Colors.white70,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: _pressSearch,
-                        splashRadius: 0.1,
-                        icon: const Icon(Icons.search_outlined),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          color:
+                              _searchActivated ? Colors.white : Colors.white70,
+                          borderRadius: BorderRadius.circular(30)),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: _pressSearch,
+                            splashRadius: 0.1,
+                            icon: const Icon(Icons.search_outlined),
+                          ),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.fastEaseInToSlowEaseOut,
+                            width: _searchActivated ? 70 : 0,
+                            child: CupertinoTextField.borderless(
+                              focusNode: _focusNode,
+                              controller: _textController,
+                              placeholder: 'Поиск',
+                              onEditingComplete: _submitSearch,
+                              onChanged: _trySearch,
+                            ),
+                          ),
+                        ],
                       ),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.fastEaseInToSlowEaseOut,
-                        width: _searchActivated ? 70 : 0,
-                        child: CupertinoTextField.borderless(
-                          focusNode: _focusNode,
-                          controller: _textController,
-                          placeholder: 'Поиск',
-                          onEditingComplete: _submitSearch,
-                          onChanged: _trySearch,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ]),
-              expandedHeight: 150,
-              elevation: 0,
-              pinned: true,
-              backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+                    ),
+                  ]),
             ),
             SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

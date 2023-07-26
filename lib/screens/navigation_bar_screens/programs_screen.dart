@@ -22,7 +22,7 @@ late List<Program> _programs =[];
       body: CustomScrollView(
         physics: const NeverScrollableScrollPhysics(),
         slivers: [
-        SliverAppBar(automaticallyImplyLeading: false,title: Text('Программы',style: Theme.of(context).textTheme.headlineSmall,),),
+        SliverAppBar(backgroundColor: Theme.of(context).colorScheme.primary,automaticallyImplyLeading: false,title: Text('Программы',style: Theme.of(context).textTheme.headlineSmall,),),
         SliverList(
           delegate: SliverChildListDelegate([
             Center(

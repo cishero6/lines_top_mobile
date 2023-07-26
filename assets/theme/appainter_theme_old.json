@@ -1,10 +1,54 @@
 {
+  "appBarTheme": {
+    "titleTextStyle": {
+      "color": "#ffffffff",
+      "decoration": "none",
+      "fontFamily": "Roboto",
+      "fontSize": 24,
+      "fontWeight": "w400",
+      "inherit": false,
+      "letterSpacing": 0,
+      "textBaseline": "alphabetic"
+    },
+    "toolbarTextStyle": {
+      "color": "#ffffffff",
+      "decoration": "none",
+      "fontFamily": "Roboto",
+      "fontSize": 14,
+      "fontWeight": "w500",
+      "inherit": false,
+      "letterSpacing": 1.25,
+      "textBaseline": "alphabetic"
+    }
+  },
   "applyElevationOverlayColor": false,
+  "bottomNavigationBarTheme": {
+    "selectedLabelStyle": {
+      "color": "#ffffffff",
+      "decoration": "none",
+      "fontFamily": "Roboto",
+      "fontSize": 14,
+      "fontWeight": "w500",
+      "inherit": false,
+      "letterSpacing": 1.25,
+      "textBaseline": "alphabetic"
+    },
+    "unselectedLabelStyle": {
+      "color": "#ffffffff",
+      "decoration": "none",
+      "fontFamily": "Roboto",
+      "fontSize": 14,
+      "fontWeight": "w500",
+      "inherit": false,
+      "letterSpacing": 1.25,
+      "textBaseline": "alphabetic"
+    }
+  },
   "brightness": "light",
   "buttonTheme": {
     "alignedDropdown": false,
     "colorScheme": {
-      "background": "#fff6ece1",
+      "background": "#fff5f6f7",
       "brightness": "light",
       "error": "#ffb00020",
       "errorContainer": "#ffb00020",
@@ -13,7 +57,7 @@
       "onBackground": "#ff000000",
       "onError": "#ffffffff",
       "onErrorContainer": "#ffffffff",
-      "onInverseSurface": "#fffac4ea",
+      "onInverseSurface": "#ffd4e3f9",
       "onPrimary": "#ffffffff",
       "onPrimaryContainer": "#ffffffff",
       "onSecondary": "#ff000000",
@@ -23,17 +67,17 @@
       "onTertiary": "#ff000000",
       "onTertiaryContainer": "#ff000000",
       "outline": "#ff000000",
-      "outlineVariant": "#ff000000",
-      "primary": "#ff903e0f",
-      "primaryContainer": "#ff6c2c08",
-      "secondary": "#ff0f6432",
-      "secondaryContainer": "#ff084a23",
+      "outlineVarient": "#ff000000",
+      "primary": "#ff91279e",
+      "primaryContainer": "#ff6d1b77",
+      "secondary": "#ff7b4f1e",
+      "secondaryContainer": "#ff5c3a14",
       "shadow": "#ff000000",
-      "surface": "#fffac4ea",
-      "surfaceTint": "#ff903e0f",
-      "surfaceVariant": "#fffac4ea",
-      "tertiary": "#ff0f6432",
-      "tertiaryContainer": "#ff0f6432"
+      "surface": "#ffd4e3f9",
+      "surfaceTint": "#ff91279e",
+      "surfaceVariant": "#ffd4e3f9",
+      "tertiary": "#ff7b4f1e",
+      "tertiaryContainer": "#ff7b4f1e"
     },
     "height": 36,
     "layoutBehavior": "padded",
@@ -78,10 +122,10 @@
     },
     "textTheme": "normal"
   },
-  "canvasColor": "#fff6ece1",
-  "cardColor": "#fffac4ea",
+  "canvasColor": "#fff5f6f7",
+  "cardColor": "#ffd4e3f9",
   "colorScheme": {
-    "background": "#fff6ece1",
+    "background": "#fff5f6f7",
     "brightness": "light",
     "error": "#ffb00020",
     "errorContainer": "#ffb00020",
@@ -90,7 +134,7 @@
     "onBackground": "#ff000000",
     "onError": "#ffffffff",
     "onErrorContainer": "#ffffffff",
-    "onInverseSurface": "#fffac4ea",
+    "onInverseSurface": "#ffd4e3f9",
     "onPrimary": "#ffffffff",
     "onPrimaryContainer": "#ffffffff",
     "onSecondary": "#ff000000",
@@ -100,19 +144,19 @@
     "onTertiary": "#ff000000",
     "onTertiaryContainer": "#ff000000",
     "outline": "#ff000000",
-    "outlineVariant": "#ff000000",
-    "primary": "#ff903e0f",
-    "primaryContainer": "#ff6c2c08",
-    "secondary": "#ff0f6432",
-    "secondaryContainer": "#ff084a23",
+    "outlineVarient": "#ff000000",
+    "primary": "#ff91279e",
+    "primaryContainer": "#ff6d1b77",
+    "secondary": "#ff7b4f1e",
+    "secondaryContainer": "#ff5c3a14",
     "shadow": "#ff000000",
-    "surface": "#fffac4ea",
-    "surfaceTint": "#ff903e0f",
-    "surfaceVariant": "#fffac4ea",
-    "tertiary": "#ff0f6432",
-    "tertiaryContainer": "#ff0f6432"
+    "surface": "#ffd4e3f9",
+    "surfaceTint": "#ff91279e",
+    "surfaceVariant": "#ffd4e3f9",
+    "tertiary": "#ff7b4f1e",
+    "tertiaryContainer": "#ff7b4f1e"
   },
-  "dialogBackgroundColor": "#fff6ece1",
+  "dialogBackgroundColor": "#fff5f6f7",
   "disabledColor": "#61000000",
   "dividerColor": "#1f000000",
   "focusColor": "#1f000000",
@@ -132,7 +176,8 @@
     "isDense": false
   },
   "materialTapTargetSize": "shrinkWrap",
-  "primaryColor": "#ff903e0f",
+  "platform": "macOS",
+  "primaryColor": "#ff91279e",
   "primaryColorDark": "#ff1976d2",
   "primaryColorLight": "#ffbbdefb",
   "primaryIconTheme": {
@@ -230,11 +275,33 @@
       "inherit": true
     }
   },
-  "scaffoldBackgroundColor": "#fff6ece1",
+  "scaffoldBackgroundColor": "#fff5f6f7",
   "secondaryHeaderColor": "#ffe3f2fd",
   "shadowColor": "#ff000000",
   "splashColor": "#66c8c8c8",
   "splashFactory": "splash",
+  "tabBarTheme": {
+    "labelStyle": {
+      "color": "#ffffffff",
+      "decoration": "none",
+      "fontFamily": "Roboto",
+      "fontSize": 14,
+      "fontWeight": "w500",
+      "inherit": false,
+      "letterSpacing": 0.1,
+      "textBaseline": "alphabetic"
+    },
+    "unselectedLabelStyle": {
+      "color": "#ffffffff",
+      "decoration": "none",
+      "fontFamily": "Roboto",
+      "fontSize": 14,
+      "fontWeight": "w500",
+      "inherit": false,
+      "letterSpacing": 0.1,
+      "textBaseline": "alphabetic"
+    }
+  },
   "textTheme": {
     "bodyLarge": {
       "color": "#dd000000",

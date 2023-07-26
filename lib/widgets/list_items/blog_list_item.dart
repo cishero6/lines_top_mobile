@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:provider/provider.dart';
+import '../../providers/bottom_navigation_provider.dart';
 import '../../screens/details_screens/blog_post_details_screen.dart';
 
 import '../../models/blog_post.dart';
+import '../../screens/navigation_bar_screens/profile_screen.dart';
 
 // ignore: must_be_immutable
 class BlogListItem extends StatefulWidget {
@@ -22,6 +24,48 @@ class _BlogListItemState extends State<BlogListItem>
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late bool _disposed;
+
+  void _toggleSaved(IconData iconData, UserDataProvider authData) async {
+    if (!authData.isAuth) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).cardColor,
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Вы не вошли в аккаунт!',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacementNamed(ProfileScreen.routeName);
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    Provider.of<BottomNavigationProvider>(context,
+                            listen: false)
+                        .setIndex(1);
+                  },
+                  child: Text(
+                    'Войти',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ))
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+    if (iconData == Icons.bookmark) {
+      await authData.removeSavedId(widget.post.id);
+      iconData = Icons.bookmark_outline;
+    } else {
+      await authData.addSavedId(widget.post.id);
+      iconData = Icons.bookmark;
+    }
+    setState(() {});
+  }
 
   @override
   void initState() {
@@ -78,16 +122,7 @@ class _BlogListItemState extends State<BlogListItem>
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: IconButton(
                   icon: Icon(iconData),
-                  onPressed: ()async {
-                    if (iconData == Icons.bookmark) {
-                      await authData.removeSavedId(widget.post.id);
-                      iconData = Icons.bookmark_outline;
-                    } else {
-                      await authData.addSavedId(widget.post.id);
-                      iconData = Icons.bookmark;
-                    }
-                    setState(() {});
-                  },
+                  onPressed: () => _toggleSaved(iconData, authData),
                 ),
               ),
               Flexible(

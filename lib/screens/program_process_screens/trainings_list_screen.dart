@@ -20,39 +20,49 @@ class _TrainingsListScreenState extends State<TrainingsListScreen> {
   Widget build(BuildContext context) {
     var progressData = Provider.of<UserDataProvider>(context).progress;
     var deviceSize = MediaQuery.of(context).size;
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            key: ValueKey('training_list'),
-            expandedHeight: 150,
-            flexibleSpace: FlexibleSpace(key: const ValueKey('training_list'),title: widget.program.title, children: [],lowSpace: true,),
-            stretch: false,
-            pinned: true,
+    return Stack(
+      children: [
+        Image.asset(
+            "assets/temp/app_bar.jpg",
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            fit: BoxFit.cover,
           ),
-          SliverToBoxAdapter(
-            child: UnconstrainedBox(
-              child: ConstrainedBox(
-                constraints:
-                    BoxConstraints.tight(Size(deviceSize.width * 0.9, MediaQuery.of(context).size.height)),
-                child: ListView.builder(
-                  itemCount: widget.program.trainings.length,
-                  itemBuilder: (context, index) => HorizontalListItem(
-                    title: 'Тренировка ${index + 1}',
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(SectionsListScreen.routeName,arguments: [widget.program.trainings[index],widget.program.id,index]);
-                    },
-                    goldenColor: progressData![widget.program.id]![index]==100,
-                    middleItem: Text('${progressData[widget.program.id]![index]}%'),
-                    //middleItem: SizedBox(width: 80,child: LinearProgressIndicator(backgroundColor: Colors.black,color: Colors.red,value: progressData![widget.program.id]![index].toDouble()/100,)),
-                    waitTimer: Duration(milliseconds: 200 + index * 300),
+        Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                key: ValueKey('training_list'),
+                expandedHeight: 150,
+                flexibleSpace: FlexibleSpace(key: const ValueKey('training_list'),title: widget.program.title,lowSpace: true, children: const [],),
+                stretch: false,
+                pinned: true,
+              ),
+              SliverToBoxAdapter(
+                child: UnconstrainedBox(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints.tight(Size(deviceSize.width * 0.9, MediaQuery.of(context).size.height)),
+                    child: ListView.builder(
+                      itemCount: widget.program.trainings.length,
+                      itemBuilder: (context, index) => HorizontalListItem(
+                        title: 'Тренировка ${index + 1}',
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(SectionsListScreen.routeName,arguments: [widget.program.trainings[index],widget.program.id,index]);
+                        },
+                        goldenColor: progressData![widget.program.id]![index]==100,
+                        middleItem: Text('${progressData[widget.program.id]![index]}%'),
+                        //middleItem: SizedBox(width: 80,child: LinearProgressIndicator(backgroundColor: Colors.black,color: Colors.red,value: progressData![widget.program.id]![index].toDouble()/100,)),
+                        waitTimer: Duration(milliseconds: 200 + index * 300),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

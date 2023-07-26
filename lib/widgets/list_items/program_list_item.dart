@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
+import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
 import '../../models/program.dart';
-import '../../screens/navigation_bar_screens/profile_screens/auth_screen.dart';
 import '../../screens/program_description_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_data_provider.dart';
@@ -23,7 +24,35 @@ class _ProgramListItemState extends State<ProgramListItem> {
     if (Provider.of<UserDataProvider>(context,listen: false).isAuth) {
       Navigator.of(context).pushNamed(TrainingsListScreen.routeName,arguments: [widget.program]);
     } else {
-      Navigator.of(context).pushNamed(AuthScreen.routeName);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).cardColor,
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Вы не вошли в аккаунт!',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacementNamed(ProfileScreen.routeName);
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    Provider.of<BottomNavigationProvider>(context,
+                            listen: false)
+                        .setIndex(1);
+                  },
+                  child: Text(
+                    'Войти',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ))
+            ],
+          ),
+        ),
+      );
+      return;
     }
   }
 
@@ -32,7 +61,8 @@ class _ProgramListItemState extends State<ProgramListItem> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
       decoration: BoxDecoration(
-          color: Colors.black12, borderRadius: BorderRadius.circular(40)),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(40)),
       padding: const EdgeInsets.only(bottom: 8),
       width: widget.width ?? double.infinity,
       child: Column(
@@ -73,12 +103,12 @@ class _ProgramListItemState extends State<ProgramListItem> {
           Flexible(
               flex: 3,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 18.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                      style: ButtonStyle(shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
+                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
                       onPressed: (){
                         Navigator.of(context).pushNamed(ProgramDescriptionScreen.routeName,arguments: [widget.program]);
                       },
@@ -88,7 +118,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
                       ),
                     ),
                     ElevatedButton(
-                      style: ButtonStyle(shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
+                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
                       onPressed: _tryStart,
                       child: Text(
                         'Начать',

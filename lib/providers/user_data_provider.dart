@@ -125,6 +125,24 @@ class UserDataProvider with ChangeNotifier{
     }
    }
 
+   Future<bool> logoutUser()async{
+    try{
+     await FirebaseAuth.instance.signOut();
+     isAuth = false;
+     userId = null;
+     userName = null;
+     progress = null;
+     email = null;
+     notifyListeners();
+     return true;
+
+    }catch(e){
+      print(e);
+      return false;
+    }
+
+   }
+
 
   
 }

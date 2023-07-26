@@ -81,27 +81,30 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       //appBar: AppBar(title: const Text('Саша ЧМООО'),elevation: 1,),
       body: _isLoading
-          ? Center(
-              child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/BlackLogo.png'),
-                const SizedBox(
-                  height: 20,
-                ),
-                const CircularProgressIndicator(
-                  color: Colors.black,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  _loadingText,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ))
+          ? Container(
+            color: Theme.of(context).colorScheme.primary,
+            child: Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/BlackLogo.png'),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const CircularProgressIndicator(
+                    color: Colors.black,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    _loadingText,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              )),
+          )
           : Navigator(
               key: _navigatorKey,
               onGenerateRoute: (settings) {

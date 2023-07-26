@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/models/program.dart';
-import 'package:lines_top_mobile/widgets/my_bottom_navigation_bar.dart';
 
 class ProgramDescriptionScreen extends StatelessWidget {
   final Program program;
@@ -11,7 +10,6 @@ class ProgramDescriptionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: MyBottomNavigationBar(navigatorKey: GlobalKey(),),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
