@@ -24,7 +24,6 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
     showDialog(
-      barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
         content: const UnconstrainedBox(child: CircularProgressIndicator()),

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/helpers/file_from_asset.dart';
+import 'package:path_provider/path_provider.dart';
 import '../helpers/file_from_url.dart';
 import '../models/program.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,7 @@ class ProgramsProvider with ChangeNotifier {
     _items = [];
     var trainings =
         Provider.of<TrainingsProvider>(context, listen: false).items;
+    var itemsDB = await DBHelper.getData('programs');
     var storage = FirebaseStorage.instance;
     var qSnapshot = await FirebaseFirestore.instance
         .collection('programs')
@@ -30,16 +33,46 @@ class ProgramsProvider with ChangeNotifier {
     var docs = qSnapshot.docs;
     for (QueryDocumentSnapshot doc in docs) {
       Program program = Program(
-          id: doc.id,
-          title: doc['title'],
-          subtext: doc['subtext'],
-          bodyText: doc['body_text']);
-      try {
-        var downloadURL = await storage.ref(doc['image_url']).getDownloadURL();
-        File file = await fileFromUrl(downloadURL, doc.id);
+        id: doc.id,
+        title: doc['title'],
+        subtext: doc['subtext'],
+        bodyText: doc['body_text'],
+        version: doc['version'],
+      );
+      if ((itemsDB.indexWhere((element) => element['id'] == program.id) ==
+              -1) ||
+          (itemsDB.firstWhere(
+                  (element) => element['id'] == program.id)['version'] !=
+              program.version)) {
+        print('start pr LOAD');
+
+        try {
+          var downloadURL =
+              await storage.ref(doc['image_url']).getDownloadURL();
+          File file = await fileFromUrl(downloadURL, doc.id);
+          program.image = file;
+        } catch (e) {
+          program.image = await fileFromAsset('assets/temp/bubbles1.jpeg');
+        }
+        var path = (await getApplicationDocumentsDirectory()).path;
+        program.image.copy('$path/${program.id}');
+        DBHelper.insert('programs', {
+          'id': program.id,
+          'title': program.title,
+          'subtext': program.subtext,
+          'body_text': program.bodyText,
+          'version': program.version,
+          'image': '$path/${program.id}',
+        });
+        print('end pr LOAD');
+      } else {
+        print('start pr EXIST');
+
+        var itemFromDB =
+            itemsDB.firstWhere((element) => element['id'] == program.id);
+        File file = File(itemFromDB['image']);
         program.image = file;
-      } catch (e) {
-        program.image = await fileFromAsset('assets/temp/bubbles1.jpeg');
+        print('end pr EXIST');
       }
 
       List<dynamic> listOfString1 = doc['trainings'];
@@ -74,6 +107,7 @@ class ProgramsProvider with ChangeNotifier {
       'body_text': newProgram.bodyText,
       'is_free': newProgram.isFree,
       'priority': newId,
+      'version': 1,
       'trainings': newProgram.trainings.map((training) => training.id),
       'image_url': 'null',
     };
@@ -91,18 +125,22 @@ class ProgramsProvider with ChangeNotifier {
     loadingText = 'Обновляем данные';
     notifyListeners();
     var usersData = await FirebaseFirestore.instance.collection('users').get();
-    for(var user in usersData.docs){
-      Map<String,List<int>> tempProgress = {};
-      var progressDynamic = user.data()['progress'] as Map<String,dynamic>;
-      for(String prName in progressDynamic.keys){
+    for (var user in usersData.docs) {
+      Map<String, List<int>> tempProgress = {};
+      var progressDynamic = user.data()['progress'] as Map<String, dynamic>;
+      for (String prName in progressDynamic.keys) {
         List<int> temp = [];
-        for(int i=0;i < progressDynamic[prName].length;i++){
+        for (int i = 0; i < progressDynamic[prName].length; i++) {
           temp.add(progressDynamic[prName][i]);
         }
         tempProgress.addAll({prName: temp});
       }
-      tempProgress.addAll({newId: List<int>.generate(newProgram.trainings.length, (index) => 0)});
-      await FirebaseFirestore.instance.doc('users/${user.id}').set({'progress': tempProgress});
+      tempProgress.addAll({
+        newId: List<int>.generate(newProgram.trainings.length, (index) => 0)
+      });
+      await FirebaseFirestore.instance
+          .doc('users/${user.id}')
+          .set({'progress': tempProgress});
     }
     loadingText = '';
     notifyListeners();
@@ -155,6 +193,7 @@ class ProgramsProvider with ChangeNotifier {
       newData['trainings'] =
           (newData['trainings'] as List<Training>).map((e) => e.id).toList();
     }
+    newData.addAll({'version': program.version+1});
     await docRef.update(newData);
     notifyListeners();
     return null;
@@ -169,20 +208,21 @@ class ProgramsProvider with ChangeNotifier {
     await docRef.delete();
     _items.removeWhere((element) => element.id == program.id);
 
-
     var usersData = await FirebaseFirestore.instance.collection('users').get();
-    for(var user in usersData.docs){
-      Map<String,List<int>> tempProgress = {};
-      var progressDynamic = user.data()['progress'] as Map<String,dynamic>;
-      for(String prName in progressDynamic.keys){
+    for (var user in usersData.docs) {
+      Map<String, List<int>> tempProgress = {};
+      var progressDynamic = user.data()['progress'] as Map<String, dynamic>;
+      for (String prName in progressDynamic.keys) {
         List<int> temp = [];
-        for(int i=0;i < progressDynamic[prName].length;i++){
+        for (int i = 0; i < progressDynamic[prName].length; i++) {
           temp.add(progressDynamic[prName][i]);
         }
         tempProgress.addAll({prName: temp});
       }
       tempProgress.remove(program.id);
-      await FirebaseFirestore.instance.doc('users/${user.id}').set({'progress': tempProgress});
+      await FirebaseFirestore.instance
+          .doc('users/${user.id}')
+          .set({'progress': tempProgress});
     }
     notifyListeners();
     loadingText = '';

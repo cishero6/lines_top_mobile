@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/helpers/file_from_asset.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/blog_post.dart';
 
@@ -19,6 +21,8 @@ class BlogProvider with ChangeNotifier {
   String loadingText = '';
 
   Future<List<BlogPost>> fetchAndSetItems([BuildContext? ctx]) async {
+    List<Map<String, dynamic>> itemsDB = await DBHelper.getData('blog_posts');
+
     _items = [];
     var storage = FirebaseStorage.instance;
     var qSnapshot =
@@ -31,18 +35,48 @@ class BlogProvider with ChangeNotifier {
           bodyText: doc['body_text'],
           shortDesc: doc['short_desc'],
           date: doc['date'],
+          version: doc['version'],
           );
-      String downloadURL;
-      for (String imageUrl in doc['images']) {
-        try {
-          downloadURL = await storage.ref(imageUrl).getDownloadURL();
-          File file = await fileFromUrl(downloadURL, imageUrl.replaceAll('/', '_'));
-          blogPost.images.add(file);
-        } catch (e){
-          blogPost.images.add(await fileFromAsset('assets/temp/bubbles1.jpeg'));
+      if ((itemsDB.indexWhere((element) => element['id'] == blogPost.id) == -1) || (itemsDB.firstWhere((element) => element['id'] == blogPost.id)['version'] != blogPost.version)){
+        String downloadURL;
+        for (String imageUrl in doc['images']) {
+          try {
+            downloadURL = await storage.ref(imageUrl).getDownloadURL();
+            File file = await fileFromUrl(downloadURL, imageUrl.replaceAll('/', '_'));
+            blogPost.images.add(file);
+          } catch (e){
+            blogPost.images.add(await fileFromAsset('assets/temp/bubbles1.jpeg'));
         }
       }
       _items.add(blogPost);
+      String pathsOfImages = '';
+      var path = (await getApplicationDocumentsDirectory()).path;
+      int index = 0;
+      for (var image in blogPost.images){
+        image.copy('$path/${blogPost.id}_$index');
+        pathsOfImages += '$path/${blogPost.id}_$index|';
+        index++;
+      }
+      DBHelper.insert('blog_posts', {
+        'id': blogPost.id,
+        'title': blogPost.title,
+        'short_desc': blogPost.shortDesc,
+        'body_text': blogPost.bodyText,
+        'version' : blogPost.version,
+        'date': blogPost.date,
+        'images': pathsOfImages,
+      });
+
+      } else {
+       var itemFromDB = itemsDB.firstWhere((element) => element['id'] == blogPost.id);
+       List<String> pathsOfImages = (itemFromDB['images'] as String).split('|');
+       pathsOfImages.removeLast();
+       List<File> tempImages = pathsOfImages.map((e) => File(e)).toList();
+       blogPost.images = [...tempImages];
+      _items.add(blogPost);
+
+      }
+      
     }
     _items.sort((a, b) {
       DateFormat aDF, bDF;
@@ -74,6 +108,7 @@ class BlogProvider with ChangeNotifier {
       'body_text': newPost.bodyText,
       'date': newPost.date,
       'images': ['null'],
+      'version': 0,
     };
     var docReference = collectionReference.doc(newId);
     await docReference.set(mapPost);
@@ -135,6 +170,7 @@ class BlogProvider with ChangeNotifier {
     if (newData.containsKey('body_text')) {
       item.bodyText = newData['body_text'];
     }
+    newData.addEntries({'version': item.version+1}.entries);
     await docRef.update(newData);
     notifyListeners();
     return null;

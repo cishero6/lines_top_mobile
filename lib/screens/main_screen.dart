@@ -21,6 +21,7 @@ import 'control_panel_screens/edit_screens/edit_blog_post_screen.dart';
 import 'control_panel_screens/edit_screens/edit_exercise_screen.dart';
 import 'control_panel_screens/edit_screens/edit_program_screen.dart';
 import 'control_panel_screens/edit_screens/edit_training_screen.dart';
+import 'details_screens/program_details_screen.dart';
 import 'navigation_bar_screens/profile_screens/auth_screen.dart';
 import 'navigation_bar_screens/profile_screens/control_screen.dart';
 import 'program_description_screen.dart';
@@ -122,6 +123,9 @@ class _MainScreenState extends State<MainScreen> {
             case ProgramDescriptionScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> ProgramDescriptionScreen(args[0]));
+            case ProgramDetailsScreen.routeName:
+              final List<dynamic> args = settings.arguments as List<dynamic>;
+              return MaterialPageRoute(builder: (ctx)=> ProgramDetailsScreen(args[0]));
             case TrainingsListScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> TrainingsListScreen(args[0]));

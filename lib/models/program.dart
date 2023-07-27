@@ -14,8 +14,9 @@ class Program extends LinesTopModel{
   bool isFree = true; //Переменная идентифицирует, является ли программа полносьтью бесплатной
   File image = File('assets/temp/bubbles1.jpeg');
   List<Training> trainings = []; //Список, содержащий id тренировок
+  int version = 0; //Версия программы
 
-  Program({this.id = '',this.title = '',this.subtext = '',this.bodyText = '',List<Training>? trainings,File? image,this.isFree = true}){
+  Program({this.id = '',this.title = '',this.subtext = '',this.bodyText = '',List<Training>? trainings,File? image,this.isFree = true,this.version = 0}){
     this.image = image ?? File('assets/temp/bubbles1.jpeg');
     this.trainings = trainings ?? [];
   }

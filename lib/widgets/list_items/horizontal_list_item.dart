@@ -29,8 +29,7 @@ class _HorizontalListItemState extends State<HorizontalListItem> with TickerProv
 
   @override
   void initState() {
-    widget.goldenColor ??= false;
-    _animationController = AnimationController(vsync: this,duration: const Duration(milliseconds: 400));
+    _animationController = AnimationController(vsync: this,duration: const Duration(milliseconds: 600));
     _offsetAnimation = Tween(begin: const Offset(3, 0),end: const Offset(0,0)).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
     _opacityAnimation = Tween(begin: 0.0,end:1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.linear));
     _startAnimations();
@@ -47,27 +46,32 @@ class _HorizontalListItemState extends State<HorizontalListItem> with TickerProv
 
   @override
   Widget build(BuildContext context) {
+        widget.goldenColor ??= false;
+
     return GestureDetector(
       onTap: widget.onPressed,
       child: FadeTransition(
         opacity: _opacityAnimation,
         child: SlideTransition(
           position: _offsetAnimation,
-          child: Card(
-            color: widget.goldenColor! ? const Color.fromARGB(255, 255, 255, 154):null,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  if (widget.middleItem != null) widget.middleItem!,
-                  const Icon(Icons.arrow_forward),
-                ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 5),
+            child: Card(
+              color: widget.goldenColor! ? const Color.fromARGB(255, 255, 255, 154): Theme.of(context).colorScheme.surface,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    if (widget.middleItem != null) widget.middleItem!,
+                    const Icon(Icons.arrow_forward),
+                  ],
+                ),
               ),
             ),
           ),

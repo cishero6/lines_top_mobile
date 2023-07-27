@@ -5,8 +5,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/helpers/file_from_asset.dart';
 import 'package:lines_top_mobile/models/exercise.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers/db_helper.dart';
 import '../helpers/file_from_url.dart';
 import 'trainings_provider.dart';
 
@@ -24,7 +26,7 @@ class ExercisesProvider with ChangeNotifier {
     var docs = qSnapshot.docs;
     for (QueryDocumentSnapshot doc in docs) {
       Exercise exercise = Exercise(
-          id: doc.id, title: doc['title'], description: doc['description']);
+          id: doc.id, title: doc['title'], description: doc['description'],version: doc['version']);
       // var downloadURL = await storage.ref(doc['video_url']).getDownloadURL();
       // File file = await fileFromUrl(downloadURL);
       // exercise.video = file;
@@ -49,10 +51,12 @@ class ExercisesProvider with ChangeNotifier {
     }
     var newId = 'ex_${max + 1}';
     newExercise.id = newId;
+    newExercise.version = 1;
     Map<String, dynamic> mapExercise = {
       'title': newExercise.title,
       'description': newExercise.description,
       'video_url': 'null',
+      'version': 1,
     };
     var docReference = collectionReference.doc(newId);
     await docReference.set(mapExercise);
@@ -72,7 +76,9 @@ class ExercisesProvider with ChangeNotifier {
     Exercise newExercise = Exercise(
         title: map['title'],
         description: map['description'],
-        video: map['video']);
+        video: map['video'],
+
+        );
     await addExercise(newExercise);
   }
 
@@ -116,6 +122,7 @@ class ExercisesProvider with ChangeNotifier {
     }
     loadingText = 'Обновляем данные';
     notifyListeners();
+    newData.addAll({'version': exercise.version+1});
     await docRef.update(newData);
     if (newData.containsKey('description')){
       item.description = newData['description'];
@@ -143,8 +150,24 @@ class ExercisesProvider with ChangeNotifier {
   }
 
   Future<void> fetchVideo(Exercise exercise) async {
-    var videoRef = FirebaseStorage.instance.ref('exercises/${exercise.id}');
-    var downloadURL = await videoRef.getDownloadURL();
-    exercise.video = await fileFromUrl(downloadURL,exercise.id);
+    List<Map<String, dynamic>> itemsDB = await DBHelper.getData('exercises');
+    if((itemsDB.indexWhere((element) => element['id'] == exercise.id) == -1) || (itemsDB.firstWhere((element) => element['id'] == exercise.id)['version'] != exercise.version)){
+      var videoRef = FirebaseStorage.instance.ref('exercises/${exercise.id}');
+      var downloadURL = await videoRef.getDownloadURL();
+      exercise.video = await fileFromUrl(downloadURL,exercise.id);
+      var path = (await getApplicationDocumentsDirectory()).path;
+      exercise.video!.copy('$path/${exercise.id}');
+      DBHelper.insert('programs', {
+        'id': exercise.id,
+        'title': exercise.title,
+        'description': exercise.description,
+        'video': '$path/${exercise.id}',
+      });
+    }else{
+      var itemFromDB =
+          itemsDB.firstWhere((element) => element['id'] == exercise.id);
+      File file = File(itemFromDB['video']);
+      exercise.video = file;
+    }
   }
 }

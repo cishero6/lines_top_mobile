@@ -60,7 +60,6 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
     }
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) => const AlertDialog(
         title: Text('Загружаем тренировку'),
         content: UnconstrainedBox(child: CircularProgressIndicator()),

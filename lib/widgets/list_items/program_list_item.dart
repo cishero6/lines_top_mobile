@@ -3,7 +3,7 @@ import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
 import '../../models/program.dart';
-import '../../screens/program_description_screen.dart';
+import '../../screens/details_screens/program_details_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_data_provider.dart';
 
@@ -110,7 +110,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
                     ElevatedButton(
                       style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
                       onPressed: (){
-                        Navigator.of(context).pushNamed(ProgramDescriptionScreen.routeName,arguments: [widget.program]);
+                        Navigator.of(context).pushNamed(ProgramDetailsScreen.routeName,arguments: [widget.program]);
                       },
                       child: Text(
                         'Подробнее',

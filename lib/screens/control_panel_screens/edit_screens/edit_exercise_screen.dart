@@ -32,7 +32,6 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
     }
     showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (context) => AlertDialog(
               title: const Text('Загрузка'),
               actions: [
