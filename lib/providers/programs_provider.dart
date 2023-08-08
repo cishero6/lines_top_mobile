@@ -45,7 +45,6 @@ class ProgramsProvider with ChangeNotifier {
                   (element) => element['id'] == program.id)['version'] !=
               program.version)) {
         print('start pr LOAD');
-
         try {
           var downloadURL =
               await storage.ref(doc['image_url']).getDownloadURL();
@@ -58,13 +57,9 @@ class ProgramsProvider with ChangeNotifier {
         program.image.copy('$path/${program.id}');
         DBHelper.insert('programs', {
           'id': program.id,
-          'title': program.title,
-          'subtext': program.subtext,
-          'body_text': program.bodyText,
           'version': program.version,
           'image': '$path/${program.id}',
         });
-        print('end pr LOAD');
       } else {
         print('start pr EXIST');
 
@@ -72,15 +67,13 @@ class ProgramsProvider with ChangeNotifier {
             itemsDB.firstWhere((element) => element['id'] == program.id);
         File file = File(itemFromDB['image']);
         program.image = file;
-        print('end pr EXIST');
       }
-
       List<dynamic> listOfString1 = doc['trainings'];
       List<String> listOfString2 = List<String>.generate(
           listOfString1.length, (index) => listOfString1[index]);
       program.trainings = listOfString2
-          .map((trainingId) =>
-              trainings.singleWhere((element) => element.id == trainingId))
+          .map((trainingId) {
+              return trainings.singleWhere((element) => element.id == trainingId);})
           .toList();
       _items.add(program);
     }
@@ -192,6 +185,13 @@ class ProgramsProvider with ChangeNotifier {
       item.trainings = newData['trainings'];
       newData['trainings'] =
           (newData['trainings'] as List<Training>).map((e) => e.id).toList();
+      var usersCollection = FirebaseFirestore.instance.collection('users');
+      var usersSnapshot = await usersCollection.get();
+      for(var user in usersSnapshot.docs){
+        Map<String,dynamic> userProgress = user.data()['progress'];
+        userProgress[program.id] = List.generate(newData['trainings'].length, (index) => 0);
+        usersCollection.doc(user.id).update({'progress': userProgress});
+      }
     }
     newData.addAll({'version': program.version+1});
     await docRef.update(newData);

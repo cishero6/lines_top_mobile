@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/screens/details_screens/blog_post_details_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
+import '../helpers/network_connectivity.dart';
 import '../providers/exercises_provider.dart';
 import '../widgets/my_bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
@@ -41,27 +42,35 @@ class _MainScreenState extends State<MainScreen> {
   bool _isLoading = true;
   String _loadingText = '';
 
+  bool _isOnline = false;
+  
 
   void _fetchEverything() async {
     setState(() {
       _loadingText = 'Загружаем блог';
     });
-    await Provider.of<BlogProvider>(context, listen: false).fetchAndSetItems();
+    _isOnline = await NetworkConnectivity.checkConnection();
+    // ignore: use_build_context_synchronously
+    await Provider.of<BlogProvider>(context, listen: false).fetchAndSetItems(_isOnline);
     setState(() {
       _loadingText = 'Загружаем упражнения';
     });
+    print('bl done');
     // ignore: use_build_context_synchronously
+    _isOnline = await NetworkConnectivity.checkConnection();
     await Provider.of<ExercisesProvider>(context, listen: false)
-        .fetchAndSetItems();
+        .fetchAndSetItems(_isOnline);
     setState(() {
       _loadingText = 'Загружаем тренировки';
     });
+        print('ex done');
     // ignore: use_build_context_synchronously
     await Provider.of<TrainingsProvider>(context, listen: false)
-        .fetchAndSetItems(context);
+        .fetchAndSetItems(_isOnline,context);
     setState(() {
       _loadingText = 'Загружаем программы';
     });
+            print('tr done');
     // ignore: use_build_context_synchronously
     await Provider.of<ProgramsProvider>(context, listen: false)
         .fetchAndSetItems(context);
@@ -75,6 +84,11 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     _fetchEverything();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -117,7 +131,7 @@ class _MainScreenState extends State<MainScreen> {
             case BlogScreen.routeName:
               return PageTransition(child: const BlogScreen(), type: PageTransitionType.fade);
             case ControlScreen.routeName:
-              return PageTransition(child: const ControlScreen(), type: PageTransitionType.fade);
+              return MaterialPageRoute(builder: (ctx)=> ControlScreen());
             case AuthScreen.routeName:
               return PageTransition(child: const AuthScreen(), type: PageTransitionType.fade);
             case ProgramDescriptionScreen.routeName:

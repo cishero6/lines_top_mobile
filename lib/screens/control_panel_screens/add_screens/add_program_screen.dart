@@ -27,6 +27,7 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
   Color _containerColor = Colors.white70;
+  late BuildContext _dialogContext;
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -61,12 +62,15 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
     }
 
     showDialog(
+      barrierDismissible: false,
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) { 
+        _dialogContext = ctx;
+        return AlertDialog(
         title: const Text('Загрузка'),
         actions: [Text(Provider.of<ProgramsProvider>(context).loadingText)],
         content: const UnconstrainedBox(child: CircularProgressIndicator()),
-      ),
+      );}
     );
     var newProgram = Program(
         title: _titleController.text,
@@ -78,7 +82,7 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
       await Provider.of<ProgramsProvider>(context, listen: false)
           .addProgram(newProgram);
       // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
+      Navigator.of(_dialogContext).pop();
       // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
       // ignore: use_build_context_synchronously

@@ -21,7 +21,10 @@ class ExerciseProcessScreen extends StatefulWidget {
 
 class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
   late ExercisesCarousel exCarousel;
+  late AppBar appBar;
   List<Map<String, Exercise>> _orderedExercises = [];
+
+
   
 
   Future<bool> _onWillPop() async {
@@ -41,31 +44,13 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
       _orderedExercises.addAll(widget.training.sections[orderedKeys[i]]!
           .map((e) => {orderedKeys[i]: e}));
     }
-    int initialIndex;
-    initialIndex = _orderedExercises.indexWhere((element) => element.keys.first == widget.initialSection);
-    exCarousel = ExercisesCarousel(
-      initialIndex: initialIndex,
-                onEndTraining: () {
-                  _onWillPop();Navigator.of(context).pop();Navigator.of(context).pop();
-                },
-                items: _orderedExercises
-                    .map((e) => ExerciseCarouselItem(e.values.first))
-                    .toList(),
-                sectionNames: _orderedExercises.map((e) => e.keys.first).toList(),
-              );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        body: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              pinned: true,
+        appBar = AppBar(
+              backgroundColor: Theme.of(context).primaryColor,
               title: Text(
                 Provider.of<SectionNameProvider>(context)
                     .sectionName
@@ -73,12 +58,26 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
                     .first,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ),
-            SliverToBoxAdapter(
-              child: exCarousel,
-            ),
-          ],
-        ),
+            );
+    int initialIndex;
+    int keyIndex = 0;
+    initialIndex = _orderedExercises.indexWhere((element) => element.keys.first == widget.initialSection);
+    exCarousel = ExercisesCarousel(
+      height: MediaQuery.of(context).size.height - kBottomNavigationBarHeight-appBar.preferredSize.height,
+      initialIndex: initialIndex,
+                onEndTraining: () {
+                  _onWillPop();Navigator.of(context).pop();Navigator.of(context).pop();
+                },
+                items: _orderedExercises
+                    .map((e) => ExerciseCarouselItem(e.values.first,key: ValueKey(keyIndex++),))
+                    .toList(),
+                sectionNames: _orderedExercises.map((e) => e.keys.first).toList(),
+              );
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: appBar,
+        body: exCarousel
       ),
     );
   }

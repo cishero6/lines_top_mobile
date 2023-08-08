@@ -21,6 +21,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   Color videoTextColor = Colors.black;
+  late BuildContext _dialogContext;
+
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -35,14 +37,17 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => AlertDialog(
+        builder: (ctx) {
+          _dialogContext = ctx;
+          return AlertDialog(
               title: const Text('Загрузка'),
               actions: [
                 Text(Provider.of<ExercisesProvider>(context).loadingText)
               ],
               content:
                   const UnconstrainedBox(child: CircularProgressIndicator()),
-            ));
+            );
+        });
     Exercise newExercise = Exercise(
         title: _titleController.text,
         description: _descriptionController.text,
@@ -51,7 +56,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
       await Provider.of<ExercisesProvider>(context, listen: false)
           .addExercise(newExercise);
       // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
+      Navigator.of(_dialogContext).pop();
       // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
       // ignore: use_build_context_synchronously

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/providers/user_data_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/program.dart';
+import '../../providers/bottom_navigation_provider.dart';
+import '../navigation_bar_screens/profile_screen.dart';
+import '../program_process_screens/trainings_list_screen.dart';
 
 class ProgramDetailsScreen extends StatefulWidget {
   static const routeName = '/programs/details';
@@ -33,6 +38,41 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
     if (!_disposed) {_secondController.forward();}
     await Future.delayed(const Duration(milliseconds: 400));
     if (!_disposed) {_thirdController.forward();}
+  }
+
+  void _tryStart() {
+    if (!Provider.of<UserDataProvider>(context,listen: false).isAuth) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).cardColor,
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Вы не вошли в аккаунт!',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacementNamed(ProfileScreen.routeName);
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    Provider.of<BottomNavigationProvider>(context,
+                            listen: false)
+                        .setIndex(1);
+                  },
+                  child: Text(
+                    'Войти',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+    Navigator.of(context).pushNamed(TrainingsListScreen.routeName,arguments: [widget.program]);
   }
 
   @override
@@ -148,7 +188,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
                 child: ScaleTransition(
                     scale: _buttonScaleAnimation,
                     child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed:_tryStart,
                         child: Text(
                           'Начать',
                           style: Theme.of(context).textTheme.bodyMedium,

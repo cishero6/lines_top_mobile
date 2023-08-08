@@ -25,21 +25,27 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
   final ImagePicker _picker = ImagePicker();
   Color videoTextColor = Colors.black;
   bool _anythingChanged = false;
+  late BuildContext _dialogContext;
+
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
     showDialog(
+      barrierDismissible: false,
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (ctx) {
+          _dialogContext = ctx;
+          return AlertDialog(
               title: const Text('Загрузка'),
               actions: [
                 Text(Provider.of<ExercisesProvider>(context).loadingText)
               ],
               content:
                   const UnconstrainedBox(child: CircularProgressIndicator()),
-            ));
+            );
+        });
     Map<String, dynamic> newData = {};
     if (_titleController.text != widget.exercise.title) {
       newData.addAll({'title': _titleController.text});
@@ -54,7 +60,7 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
       await Provider.of<ExercisesProvider>(context, listen: false)
           .editItem(widget.exercise, newData);
       // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
+      Navigator.of(_dialogContext).pop();
       // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
       // ignore: use_build_context_synchronously

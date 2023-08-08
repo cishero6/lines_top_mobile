@@ -20,63 +20,153 @@ class BlogProvider with ChangeNotifier {
 
   String loadingText = '';
 
-  Future<List<BlogPost>> fetchAndSetItems([BuildContext? ctx]) async {
-    List<Map<String, dynamic>> itemsDB = await DBHelper.getData('blog_posts');
-
+  Future<bool> fetchAndSetItems(bool internetConnected,[BuildContext? ctx]) async {
     _items = [];
-    var storage = FirebaseStorage.instance;
-    var qSnapshot =
-        await FirebaseFirestore.instance.collection('blog_posts').get();
-    var docs = qSnapshot.docs;
-    for (QueryDocumentSnapshot doc in docs) {
-      BlogPost blogPost = BlogPost(
-          id: doc.id,
+    //1 ЭТАП
+    List<Map<String, dynamic>> itemsDB = await DBHelper.getData('blog_posts');
+    if(itemsDB.isNotEmpty){
+      for (var item in itemsDB) {
+      _items.add(
+        BlogPost(
+          id: item['id'],
+          title: item['title'],
+          shortDesc: item['short_desc'],
+          bodyText: item['body_text'],
+          date: item['date'],
+          version: item['version'],
+        ),
+      );
+      List<String> pathOfImages = (item['images'] as String).split('|');
+      List<File> images = pathOfImages.map((e) => File(e)).toList();
+        _items.last.images = images;
+      }
+    }
+    //2
+    if(itemsDB.isNotEmpty && !internetConnected){
+      _items.sort((a, b) {
+        DateFormat aDF, bDF;
+        aDF = DateFormat('dd-MM-yyyy HH:mm');
+        bDF = DateFormat('dd-MM-yyyy HH:mm');
+        return bDF.parse(b.date).compareTo(aDF.parse(a.date));
+    });
+      return true;
+    }
+    if(itemsDB.isEmpty && !internetConnected){
+      //load assets
+      return true;
+    }
+    //3-4
+    try{
+      var path = (await getApplicationDocumentsDirectory()).path;
+      var qSnapshot =
+          await FirebaseFirestore.instance.collection('blog_posts').get();
+      var docs = qSnapshot.docs;
+      var storage = FirebaseStorage.instance;
+      List<BlogPost> firebaseItems = [];
+      for (var docSnapshot in docs) {
+        var doc = docSnapshot.data();
+        BlogPost blogPost = BlogPost(
+          id: docSnapshot.id,
           title: doc['title'],
-          bodyText: doc['body_text'],
           shortDesc: doc['short_desc'],
+          bodyText: doc['body_text'],
           date: doc['date'],
           version: doc['version'],
-          );
-      if ((itemsDB.indexWhere((element) => element['id'] == blogPost.id) == -1) || (itemsDB.firstWhere((element) => element['id'] == blogPost.id)['version'] != blogPost.version)){
-        String downloadURL;
-        for (String imageUrl in doc['images']) {
-          try {
-            downloadURL = await storage.ref(imageUrl).getDownloadURL();
-            File file = await fileFromUrl(downloadURL, imageUrl.replaceAll('/', '_'));
-            blogPost.images.add(file);
-          } catch (e){
-            blogPost.images.add(await fileFromAsset('assets/temp/bubbles1.jpeg'));
+        );
+        if((_items.indexWhere((element) => element.id == blogPost.id) == -1) || (_items.singleWhere((element) => element.id == blogPost.id)).version != blogPost.version){
+          //5
+          print('start post LOAD');
+          String downloadURL;
+          String pathsOfImages = '';
+          int index = 0;
+          
+          for (String imageUrl in doc['images']) {
+            try {
+              downloadURL = await storage.ref(imageUrl).getDownloadURL();
+              File tempFile =
+                  await fileFromUrl(downloadURL, imageUrl.replaceAll('/', '_'));
+              File file = await tempFile.copy('$path/${blogPost.id}_$index');
+              pathsOfImages += '$path/${blogPost.id}_$index|';
+              index++;
+              blogPost.images.add(file);
+            } catch (e) {
+              blogPost.images
+                  .add(await fileFromAsset('assets/temp/bubbles1.jpeg'));
+            }
+          }
+          pathsOfImages = pathsOfImages.substring(0,pathsOfImages.length-1);
+          firebaseItems.add(blogPost);
+          await DBHelper.insert('blog_posts', {
+            'id': blogPost.id,
+            'title': blogPost.title,
+            'short_desc': blogPost.shortDesc,
+            'body_text': blogPost.bodyText,
+            'date': blogPost.date,
+            'images': pathsOfImages,
+            'version': blogPost.version,
+          });
+        }else{
+          firebaseItems.add(_items.singleWhere((element) => element.id == blogPost.id));
         }
       }
-      _items.add(blogPost);
-      String pathsOfImages = '';
-      var path = (await getApplicationDocumentsDirectory()).path;
-      int index = 0;
-      for (var image in blogPost.images){
-        image.copy('$path/${blogPost.id}_$index');
-        pathsOfImages += '$path/${blogPost.id}_$index|';
-        index++;
-      }
-      DBHelper.insert('blog_posts', {
-        'id': blogPost.id,
-        'title': blogPost.title,
-        'short_desc': blogPost.shortDesc,
-        'body_text': blogPost.bodyText,
-        'version' : blogPost.version,
-        'date': blogPost.date,
-        'images': pathsOfImages,
+      _items = [...firebaseItems];
+      _items.sort((a, b) {
+        DateFormat aDF, bDF;
+        aDF = DateFormat('dd-MM-yyyy HH:mm');
+        bDF = DateFormat('dd-MM-yyyy HH:mm');
+        return bDF.parse(b.date).compareTo(aDF.parse(a.date));
       });
+    } on FirebaseException catch (error) {
+      print(error);
+      return false;
+    }
+    return true;
 
+
+
+
+/*
+    for (var doc in docs) {
+      BlogPost blogPost = BlogPost(
+        id: doc.id,
+        title: doc['title'],
+        bodyText: doc['body_text'],
+        shortDesc: doc['short_desc'],
+        date: doc['date'],
+        version: doc['version'],
+      );
+      if ((itemsDB.indexWhere((element) => element['id'] == blogPost.id) ==
+              -1) ||
+          (itemsDB.firstWhere(
+                  (element) => element['id'] == blogPost.id)['version'] !=
+              blogPost.version)) {
+        String downloadURL;
+        
+        _items.add(blogPost);
+        String pathsOfImages = '';
+        var path = (await getApplicationDocumentsDirectory()).path;
+        int index = 0;
+        for (var image in blogPost.images) {
+          image.copy('$path/${blogPost.id}_$index');
+          pathsOfImages += '$path/${blogPost.id}_$index|';
+          index++;
+        }
+        DBHelper.insert('blog_posts', {
+          'id': blogPost.id,
+          'version': blogPost.version,
+          'images': pathsOfImages,
+        });
       } else {
-       var itemFromDB = itemsDB.firstWhere((element) => element['id'] == blogPost.id);
-       List<String> pathsOfImages = (itemFromDB['images'] as String).split('|');
-       pathsOfImages.removeLast();
-       List<File> tempImages = pathsOfImages.map((e) => File(e)).toList();
-       blogPost.images = [...tempImages];
-      _items.add(blogPost);
-
+        print('start post exist');
+        var itemFromDB =
+            itemsDB.firstWhere((element) => element['id'] == blogPost.id);
+        List<String> pathsOfImages =
+            (itemFromDB['images'] as String).split('|');
+        pathsOfImages.removeLast();
+        List<File> tempImages = pathsOfImages.map((e) => File(e)).toList();
+        blogPost.images = [...tempImages];
+        _items.add(blogPost);
       }
-      
     }
     _items.sort((a, b) {
       DateFormat aDF, bDF;
@@ -84,7 +174,8 @@ class BlogProvider with ChangeNotifier {
       bDF = DateFormat('dd-MM-yyyy HH:mm');
       return bDF.parse(b.date).compareTo(aDF.parse(a.date));
     });
-    return [..._items];
+    return true;
+*/
   }
 
   Future<void> addPost(BlogPost newPost) async {
@@ -95,7 +186,9 @@ class BlogProvider with ChangeNotifier {
     var querySnapshot = await collectionReference.get();
     var docs = querySnapshot.docs;
     int max = 0;
-    for (var element in docs) {
+
+
+    for (var element in docs) { //MAKING NEW ID
       if (max < int.parse(element.id.split('_').last)) {
         max = int.parse(element.id.split('_').last);
       }
@@ -110,7 +203,9 @@ class BlogProvider with ChangeNotifier {
       'images': ['null'],
       'version': 0,
     };
-    var docReference = collectionReference.doc(newId);
+
+
+    var docReference = collectionReference.doc(newId); //LOADING IMAGES TO FIREBASE
     await docReference.set(mapPost);
     loadingText = 'Загружаем фото 1/${newPost.images.length}';
     notifyListeners();
@@ -124,15 +219,41 @@ class BlogProvider with ChangeNotifier {
           FirebaseStorage.instance.ref().child('blog').child(newId).child('$i');
       await ref.putFile(newPost.images[i]).whenComplete(() => {});
     }
+
+
     loadingText = 'Обновляем пост';
     notifyListeners();
-    await docReference.update({
+    await docReference.update({ //UPDATING IMAGES INFO
       'images': [
         'blog/$newId/main',
         ...List.generate(
             newPost.images.length - 1, (index) => 'blog/$newId/${index + 1}')
       ],
     });
+
+
+    var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
+    String pathsOfImages = '';
+    int index = 0;
+    for(var image in newPost.images){
+      image = await image.copy('$path/${newPost.id}_$index');
+      pathsOfImages += '$path/${newPost.id}_$index|';
+    }
+    pathsOfImages  = pathsOfImages.substring(0,pathsOfImages.length-1);
+
+
+
+    await DBHelper.insert('blog_posts', { //INSERT NEW POST IN DATABASE
+      'id': newPost.id,
+      'title': newPost.title,
+      'body_text': newPost.bodyText,
+      'short_desc': newPost.shortDesc,
+      'date': newPost.date,
+      'images': pathsOfImages,
+      'version': newPost.version
+    });
+
+
     loadingText = '';
     notifyListeners();
     _items.insert(0, newPost);
@@ -145,7 +266,8 @@ class BlogProvider with ChangeNotifier {
     notifyListeners();
     var item = _items.singleWhere((element) => element.id == blogPost.id);
     var docRef = FirebaseFirestore.instance.doc('blog_posts/${blogPost.id}');
-    if (newData.containsKey('id')) {
+
+    if (newData.containsKey('id')) { //ПРОВЕРКА СМЕНЫ ПОЛЕЙ
       return 'Невозможно изменить документ: нельзя изменять идентификатор';
     }
     if (newData.containsKey('title')) {
@@ -170,8 +292,54 @@ class BlogProvider with ChangeNotifier {
     if (newData.containsKey('body_text')) {
       item.bodyText = newData['body_text'];
     }
-    newData.addEntries({'version': item.version+1}.entries);
+    if (newData.containsKey('images')) {
+      item.images = [];
+      loadingText = 'Обновляем фотографии';
+      notifyListeners();
+      var mainRef = FirebaseStorage.instance.ref('blog/${item.id}/main');
+      Reference ref;
+      await mainRef.putFile(newData['images'][0]);
+      item.images.add(newData['images'][0]);
+      List<String> refImages = ['blog/${item.id}/main'];
+      for (int i = 1; i < newData['images'].length; i++) {
+        loadingText =
+            'Обновляем фотографии ${i + 1}/${newData['images'].length}';
+        notifyListeners();
+        ref = FirebaseStorage.instance.ref('blog/${item.id}/$i');
+        await ref.putFile(newData['images'][i]);
+        item.images.add(newData['images'][i]);
+        refImages.add('blog/${item.id}/$i');
+      }
+      newData['images'] = refImages;
+    }
+    newData.addEntries({'version': item.version + 1}.entries);
+    item.version++;
     await docRef.update(newData);
+    
+    
+    var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
+    String pathsOfImages = '';
+    int index = 0;
+    for(var image in item.images){
+      image = await image.copy('$path/${item.id}_$index');
+      pathsOfImages += '$path/${item.id}_$index|';
+    }
+    pathsOfImages  = pathsOfImages.substring(0,pathsOfImages.length-1);
+
+
+    newData['images'] = pathsOfImages;
+    await DBHelper.insert('blog_posts', { //INSERT EDITED POST IN DATABASE
+      'id': item.id,
+      'title': item.title,
+      'body_text': item.bodyText,
+      'short_desc': item.shortDesc,
+      'date': item.date,
+      'images': pathsOfImages,
+      'version': item.version
+    });
+
+
+    loadingText = '';
     notifyListeners();
     return null;
   }

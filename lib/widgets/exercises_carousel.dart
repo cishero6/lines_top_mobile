@@ -10,9 +10,16 @@ class ExercisesCarousel extends StatefulWidget {
   final List<Widget> items;
   final List<String> sectionNames;
   final int initialIndex;
-  final void Function() onEndTraining;
+  final double? height;
   int currentIndex = 0;
-  ExercisesCarousel({super.key, required this.items, this.initialIndex = 0,required this.onEndTraining,required this.sectionNames});
+  final void Function() onEndTraining;
+  ExercisesCarousel(
+      {super.key,
+      required this.items,
+      this.initialIndex = 0,
+      required this.onEndTraining,
+      required this.sectionNames,
+      this.height});
 
   @override
   State<ExercisesCarousel> createState() => _ExercisesCarouselState();
@@ -26,84 +33,166 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
   );
   Widget _primaryWidget = const SizedBox();
 
+  bool _secondIsPrimary = false;
+  int _currentIndex = 0;
+
   late AnimationController _animtaionController;
   late Animation<Offset> _primaryOffsetAnimation;
   late Animation<Offset> _secondOffsetAnimation;
 
+  void _finishTraining(){
+    if(_secondIsPrimary){
+      _secondWidget = const SizedBox(width: 1,height: 1,);
+    } else{
+      _primaryWidget = const SizedBox(width: 1,height: 1,);
+    }
+    setState(() {});
+    widget.onEndTraining();
+  }
+
+
   @override
   void initState() {
-    widget.currentIndex = widget.initialIndex;
-    _primaryWidget = widget.items[widget.currentIndex];
+    _currentIndex = widget.initialIndex;
+
+    _primaryWidget = widget.items[_currentIndex];
     _animtaionController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
+        vsync: this, duration: const Duration(milliseconds: 600));
     _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
     _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
     super.initState();
   }
 
   void _nextPage() async {
-    if(widget.currentIndex + 1 == widget.items.length){
-      _secondWidget = Column(
+    if(_animtaionController.isAnimating){
+      return;
+    }
+    _animtaionController.reset();
+    if (_currentIndex + 1 == widget.items.length) {
+      final finalWidget = Column(
+        //ПЕРЕДЕЛАТЬ (КОНЕЦ ТРЕНИРОВКИ!)
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-        Text('Тренировка выполнена!',style: Theme.of(context).textTheme.headlineMedium,textAlign: TextAlign.center,),
-        ElevatedButton(onPressed: widget.onEndTraining, child: Text('Завершить тренировку',style: Theme.of(context).textTheme.bodyMedium,))
-      ],);
-    }else{
-    _secondWidget = widget.items[widget.currentIndex + 1];
-    if(Provider.of<SectionNameProvider>(context,listen:false).sectionName != widget.sectionNames[widget.currentIndex+1]){
-      Provider.of<SectionNameProvider>(context,listen:false).setSectionName(widget.sectionNames[widget.currentIndex+1]);
+          Text(
+            'Тренировка выполнена!',
+            style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          ElevatedButton(
+              onPressed: _finishTraining,
+              child: Text(
+                'Завершить тренировку',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ))
+        ],
+      );
+      _secondIsPrimary ? _primaryWidget = finalWidget : _secondWidget = finalWidget;
+    } else {
+      if (!_secondIsPrimary) {
+        _secondWidget = widget.items[_currentIndex + 1];
+      } else {
+        _primaryWidget = widget.items[_currentIndex + 1];
+      }
+      if (Provider.of<SectionNameProvider>(context, listen: false)
+              .sectionName !=
+          widget.sectionNames[_currentIndex + 1]) {
+        Provider.of<SectionNameProvider>(context, listen: false)
+            .setSectionName(widget.sectionNames[_currentIndex + 1]);
+      }
     }
+    _currentIndex++;
+    setState(() {});
+
+    if (!_secondIsPrimary) {
+      _primaryOffsetAnimation =
+          Tween(begin: const Offset(0, 0), end: const Offset(-1.4, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      _secondOffsetAnimation =
+          Tween(begin: const Offset(1.4, 0), end: const Offset(0, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      await _animtaionController.forward();
+      _primaryWidget = const SizedBox();
+      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
+    } else {
+      _primaryOffsetAnimation =
+          Tween(begin: const Offset(1.4, 0.0), end: const Offset(0.0, 0.0))
+              .animate(CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      _secondOffsetAnimation =
+          Tween(begin: const Offset(0, 0), end: const Offset(-1.4, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      await _animtaionController.forward();
+      _secondWidget = const SizedBox(
+        width: 1,
+        height: 1,
+      );
+      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
+      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
     }
-    setState(() {});
-    _primaryOffsetAnimation =
-        Tween(begin: const Offset(0, 0), end: const Offset(-1.4, 0)).animate(
-            CurvedAnimation(
-                parent: _animtaionController,
-                curve: Curves.ease));
-    _secondOffsetAnimation =
-        Tween(begin: const Offset(1.4, 0), end: const Offset(0, 0)).animate(
-            CurvedAnimation(
-                parent: _animtaionController,
-                curve: Curves.ease));
-    await _animtaionController.forward();
-    _primaryWidget = _secondWidget;
-    _secondWidget = const SizedBox();
-    _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
-    _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
-    widget.currentIndex++;
-    setState(() {});
-    
-    _animtaionController.reset();
+
+    _secondIsPrimary = !_secondIsPrimary;
   }
 
   void _previousPage() async {
-    _secondWidget = widget.items[widget.currentIndex - 1];
-    if(Provider.of<SectionNameProvider>(context,listen:false).sectionName != widget.sectionNames[widget.currentIndex-1]){
-      Provider.of<SectionNameProvider>(context,listen:false).setSectionName(widget.sectionNames[widget.currentIndex-1]);
+        if(_animtaionController.isAnimating){
+      return;
     }
-    setState(() {});
-
-    _primaryOffsetAnimation =
-        Tween(begin: const Offset(0, 0), end: const Offset(1.4, 0)).animate(
-            CurvedAnimation(
-                parent: _animtaionController,
-                curve: Curves.ease));
-    _secondOffsetAnimation =
-        Tween(begin: const Offset(-1.4, 0), end: const Offset(0, 0)).animate(
-            CurvedAnimation(
-                parent: _animtaionController,
-                curve: Curves.ease));
-    await _animtaionController.forward();
-    _primaryWidget = _secondWidget;
-    _secondWidget = const SizedBox();
-    _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
-    _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
-    widget.currentIndex--;
-
-    setState(() {});
     _animtaionController.reset();
+    if (!_secondIsPrimary) {
+      _secondWidget = widget.items[_currentIndex - 1];
+    } else {
+      _primaryWidget = widget.items[_currentIndex - 1];
+    }
+    if (Provider.of<SectionNameProvider>(context, listen: false).sectionName !=
+        widget.sectionNames[_currentIndex - 1]) {
+      Provider.of<SectionNameProvider>(context, listen: false)
+          .setSectionName(widget.sectionNames[_currentIndex - 1]);
+    }
+    _currentIndex--;
+    setState(() {});
+    if (!_secondIsPrimary) {
+      _primaryOffsetAnimation =
+          Tween(begin: const Offset(0, 0), end: const Offset(1.4, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      _secondOffsetAnimation =
+          Tween(begin: const Offset(-1.4, 0), end: const Offset(0, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      await _animtaionController.forward();
+
+      _primaryWidget = const SizedBox(
+        width: 1,
+        height: 1,
+      );
+      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
+      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+    } else {
+      _primaryOffsetAnimation =
+          Tween(begin: const Offset(-1.4, 0), end: const Offset(0, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+      _secondOffsetAnimation =
+          Tween(begin: const Offset(0, 0), end: const Offset(1.4, 0)).animate(
+              CurvedAnimation(
+                  parent: _animtaionController, curve: Curves.ease));
+
+      await _animtaionController.forward();
+
+      _secondWidget = const SizedBox(
+        width: 1,
+        height: 1,
+      );
+      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
+    }
+
+    _secondIsPrimary = !_secondIsPrimary;
   }
 
   @override
@@ -117,43 +206,47 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
 
   @override
   Widget build(BuildContext context) {
+    widget.currentIndex = _currentIndex;
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: widget.height,
       child: Stack(children: [
         Column(
           children: [
             Flexible(
-                fit: FlexFit.tight,
-                flex: 6,
-                child: Stack(
-                  children: [
-                    SlideTransition(
-                        position: _secondOffsetAnimation,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: _secondWidget,
-                        )),
-                    SlideTransition(
-                        position: _primaryOffsetAnimation,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: _primaryWidget,
-                        )),
-                  ],
-                )),
+              fit: FlexFit.tight,
+              flex: 6,
+              child: Stack(
+                children: [
+                  SlideTransition(
+                      position: _primaryOffsetAnimation,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: _primaryWidget,
+                      )),
+                  SlideTransition(
+                    position: _secondOffsetAnimation,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: _secondWidget,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Flexible(
               fit: FlexFit.tight,
-              flex: 2,
+              flex: 1,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   IconButton(
-                      onPressed: widget.currentIndex == 0 ? null :_previousPage,
+                      onPressed: _currentIndex == 0 ? null : _previousPage,
                       icon: const Icon(
                         Icons.arrow_back_ios,
                       )),
                   IconButton(
-                    onPressed: widget.currentIndex == widget.items.length ? null : _nextPage,
+                    onPressed:
+                        _currentIndex == widget.items.length ? null : _nextPage,
                     icon: const Icon(
                       Icons.arrow_forward_ios,
                     ),
@@ -167,15 +260,14 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
             onHorizontalDragUpdate: (details) {
-              print('ddsw');
               // Swiping in right direction.
               if (details.delta.dx > 0) {
-                if(widget.currentIndex!=0) _previousPage();
+                if (_currentIndex != 0) _previousPage();
               }
 
               // Swiping in left direction.
               if (details.delta.dx < 0) {
-                if(widget.currentIndex!= widget.items.length) _nextPage();
+                if (_currentIndex != widget.items.length) _nextPage();
               }
             },
             child: SizedBox(

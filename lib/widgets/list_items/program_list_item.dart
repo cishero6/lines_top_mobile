@@ -104,28 +104,32 @@ class _ProgramListItemState extends State<ProgramListItem> {
               flex: 3,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ElevatedButton(
-                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
-                      onPressed: (){
-                        Navigator.of(context).pushNamed(ProgramDetailsScreen.routeName,arguments: [widget.program]);
-                      },
-                      child: Text(
-                        'Подробнее',
-                        style: Theme.of(context).textTheme.titleMedium,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
+                        onPressed: (){
+                          Navigator.of(context).pushNamed(ProgramDetailsScreen.routeName,arguments: [widget.program]);
+                        },
+                        child: Text(
+                          'Подробнее',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
-                    ),
-                    ElevatedButton(
-                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
-                      onPressed: _tryStart,
-                      child: Text(
-                        'Начать',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      const SizedBox(width: 12,),
+                      ElevatedButton(
+                        style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
+                        onPressed: _tryStart,
+                        child: Text(
+                          'Начать',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               )),
         ],

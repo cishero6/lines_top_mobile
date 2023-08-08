@@ -116,10 +116,10 @@ class _BlogListItemState extends State<BlogListItem>
                   fit: BoxFit.cover,
                   opacity: 0.2)),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: IconButton(
                   icon: Icon(iconData),
                   onPressed: () => _toggleSaved(iconData, authData),
@@ -127,26 +127,24 @@ class _BlogListItemState extends State<BlogListItem>
               ),
               Flexible(
                 fit: FlexFit.tight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: Text(
-                        widget.post.title,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 16.0),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Color.fromARGB(120, 0, 0, 0),
-                      ),
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: Text(
+                    widget.post.title,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.only(right: 16.0),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Color.fromARGB(120, 0, 0, 0),
+                ),
+              ),
+                
+              
             ],
           ),
         ),

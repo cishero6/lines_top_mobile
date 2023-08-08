@@ -27,6 +27,7 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
   Color _containerColor = Colors.white70;
   final ScrollController _scrollController = ScrollController();
   List<String> _sectionKeys = ['Разминка', 'Основная часть', 'Заминка'];
+  late BuildContext _dialogContext;
 
   void _submit() async {
     if (_sections.isEmpty) {
@@ -59,18 +60,21 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
       }
     }
     showDialog(
+      barrierDismissible: false,
       context: context,
-      builder: (context) => const AlertDialog(
+      builder: (ctx) { 
+        _dialogContext = ctx;
+        return const AlertDialog(
         title: Text('Загружаем тренировку'),
         content: UnconstrainedBox(child: CircularProgressIndicator()),
-      ),
+      );}
     );
     try {
       Training newTraining =
           Training(title: _titleEditingController.text, sections: _sections);
       await Provider.of<TrainingsProvider>(context, listen: false)
           .addTraining(newTraining, _sectionKeys);
-      Navigator.of(context).pop();
+      Navigator.of(_dialogContext).pop();
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
@@ -320,12 +324,17 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            e,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge,
-                                            overflow: TextOverflow.ellipsis,
+                                          Flexible(
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                e,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyLarge,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
                                           ),
                                           IconButton(
                                               onPressed: () => setState(() {
@@ -333,11 +342,8 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                         .remove(_selectedSection);
                                                     _sections
                                                         .remove(_selectedSection);
-                                                    _sections.isEmpty
-                                                        ? _selectedSection =
-                                                            '_notSelected'
-                                                        : _selectedSection =
-                                                            _sections.keys.first;
+                                                        _selectedSection =
+                                                            '_notSelected';
                                                   }),
                                               icon: const Icon(
                                                 Icons.delete,

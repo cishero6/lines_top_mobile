@@ -33,8 +33,10 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
   late Animation<double> _buttonScaleAnimation;
   final List<Map<String, Animation>> _widgetsAnimations = [];
 
-  bool _disposed = false;
+  
 
+  bool _disposed = false;
+  bool _isBuilt = false;
   @override
   void initState() {
     _firstController = AnimationController(
@@ -106,7 +108,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
   }
 
   void _constructWidgets(BuildContext ctx) {
-    int index = 0;
+    int index = 1;
     AnimationController tempController;
     Animation<double> tempFade;
     Animation<Offset> tempSlide;
@@ -219,64 +221,74 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
             .savedBlogPostIds!
             .contains(widget.blogPost.id);
     _formattedText = widget.blogPost.bodyText.split('|');
+    if(!_isBuilt){
     _constructWidgets(context);
     _animate();
+    }
+
+    _isBuilt= true;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            title: SlideTransition(
-              position: _titleSlideAnimation,
-              child: FadeTransition(
-                opacity: _titleFadeAnimation,
-                child: Text(
-                  widget.blogPost.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
+      body: Container(
+        decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/temp/app_bar.png'),fit: BoxFit.cover)),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar.large(
+              centerTitle: true,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              title: SlideTransition(
+                position: _titleSlideAnimation,
+                child: FadeTransition(
+                  opacity: _titleFadeAnimation,
+                  child: Text(
+                    widget.blogPost.title,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
               ),
+              pinned: true,
+              scrolledUnderElevation: 0,
             ),
-            pinned: true,
-            scrolledUnderElevation: 0,
-          ),
-          SliverToBoxAdapter(
-            child: UnconstrainedBox(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxHeight: 80, minHeight: 60, minWidth: 120,maxWidth: MediaQuery.of(context).size.width*0.9),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 30,bottom:13,left:13.0,right: 13),
-                  child: SlideTransition(
-                    position: _subtextSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _subtextFadeAnimation,
-                      child: Text(
-                        widget.blogPost.shortDesc,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
+            SliverToBoxAdapter(
+              child: UnconstrainedBox(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxHeight: 80, minHeight: 60, minWidth: 120,maxWidth: MediaQuery.of(context).size.width*0.9),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 30,bottom:13,left:13.0,right: 13),
+                    child: SlideTransition(
+                      position: _subtextSlideAnimation,
+                      child: FadeTransition(
+                        opacity: _subtextFadeAnimation,
+                        child: Text(
+                          widget.blogPost.shortDesc,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          SliverList.list(children: _widgets),
-           SliverToBoxAdapter(
-             child: UnconstrainedBox(
-               child: ScaleTransition(
-                scale: _buttonScaleAnimation,
-                 child: ElevatedButton.icon(
-                        label: Text(contains ? 'Сохранено' : 'Сохранить',style: Theme.of(context).textTheme.bodyMedium,),
-                        onPressed: () => _toggleSaved(contains),
-                        
-                        icon: contains
-                            ? const Icon(Icons.bookmark,color: Colors.black54,)
-                            : const Icon(Icons.bookmark_outline,color: Colors.black54)),
+            SliverList.list(children: _widgets),
+             SliverToBoxAdapter(
+               child: UnconstrainedBox(
+                 child: ScaleTransition(
+                  scale: _buttonScaleAnimation,
+                   child: ElevatedButton.icon(
+                          label: Text(contains ? 'Сохранено' : 'Сохранить',style: Theme.of(context).textTheme.bodyMedium,),
+                          onPressed: () => _toggleSaved(contains),
+                          
+                          icon: contains
+                              ? const Icon(Icons.bookmark,color: Colors.black54,)
+                              : const Icon(Icons.bookmark_outline,color: Colors.black54),
+                              ),
+                 ),
                ),
              ),
-           )
-        ],
+             const SliverToBoxAdapter(child: SizedBox(height: 50),),
+          ],
+        ),
       ),
     );
   }

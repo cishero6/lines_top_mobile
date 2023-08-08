@@ -16,7 +16,6 @@ class ControlScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            automaticallyImplyLeading: false,
             pinned: true,
             title: Text(
               'Управление',

@@ -38,7 +38,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
     setState(() {});
     if (_isReg) {
       await Provider.of<UserDataProvider>(context, listen: false).registerUser(
-          _usernameController.text,
+          _usernameController.text.trim(),
           _emailController.text,
           _passwordController.text,
           context: context);
@@ -211,7 +211,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(
                               Theme.of(context).colorScheme.background)),
-                      onPressed: _tryAuth,
+                      onPressed:_tryAuth,
                       child: Text(
                         _isReg ? 'Зарегистрироваться' : 'Войти',
                         style: Theme.of(context).textTheme.bodyMedium,

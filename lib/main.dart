@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
             fontFamily: 'SourceSerifPro'),
         darkTheme: ThemeData(
             useMaterial3: true,
-            colorScheme: darkColorScheme,
+            colorScheme: lightColorScheme,
             fontFamily: 'SourceSerifPro'),
         home: const MainScreen(),
       ),

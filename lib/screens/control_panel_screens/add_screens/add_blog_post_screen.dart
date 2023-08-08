@@ -22,6 +22,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
       TextEditingController();
   final TextEditingController _bodyTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  late BuildContext _dialogContext;
 
 
 
@@ -34,12 +35,16 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
       return;
     }
     showDialog(
+      barrierDismissible: false,
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) {
+        _dialogContext = ctx;
+        return AlertDialog(
         content: const UnconstrainedBox(child: CircularProgressIndicator()),
         title: const Text('Загрузка'),
         actions: [Text(Provider.of<BlogProvider>(context).loadingText)],
-      ),
+      );
+      },
     );
     BlogPost newPost = BlogPost(
         title: _titleController.text,
@@ -52,14 +57,14 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
     try {
       await Provider.of<BlogProvider>(context,listen: false).addPost(newPost);
       // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
+      Navigator.of(_dialogContext).pop();
       // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Успешно!')));
     } catch (e) {
-      Navigator.of(context).pop();
+      Navigator.of(_dialogContext).pop();
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Что-то пошло не так!')));

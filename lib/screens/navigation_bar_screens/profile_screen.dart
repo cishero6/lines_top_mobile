@@ -4,6 +4,7 @@ import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screens/
 import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screens/control_screen.dart';
 import 'package:provider/provider.dart';
 
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
   static const routeName = '/profile';
@@ -12,9 +13,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     final authData = Provider.of<UserDataProvider>(context);
+    
     if (!authData.isAuth) {
       return const AuthScreen();
     }
@@ -53,10 +60,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fit: FlexFit.tight,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          authData.userId!,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleLarge,
+                        child: FittedBox(
+                          child: Text(
+                            authData.userId!,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                         ),
                       ),
                     ),
@@ -82,9 +91,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fit: FlexFit.tight,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          authData.userName!,
-                          style: Theme.of(context).textTheme.titleLarge,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            authData.userName!,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                         ),
                       ),
                     ),
@@ -117,9 +130,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fit: FlexFit.tight,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          authData.email!,
-                          style: Theme.of(context).textTheme.titleLarge,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            authData.email!,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                         ),
                       ),
                     ),
@@ -146,6 +163,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const Icon(Icons.arrow_forward_ios,color: Colors.black87,),
                     ],),
                   ),
+                ),
+                const Divider(
+                  thickness: 4,
+                ),
+                UnconstrainedBox(
+                  child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await authData.changeAllVersions();
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Успешно',style: Theme.of(context).textTheme.bodyMedium,)));
+                      },
+                      icon: const Icon(Icons.logout,color: Colors.black87,),
+                      label: Text('Поменять все версиий',style: Theme.of(context).textTheme.bodyMedium,)),
                 ),
                 const Divider(
                   thickness: 4,

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/helpers/file_from_asset.dart';
 import 'package:lines_top_mobile/models/exercise.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -17,9 +16,66 @@ class ExercisesProvider with ChangeNotifier {
   List<Exercise> get items {
     return [..._items];
   }
+
   String loadingText = '';
 
-  Future<List<Exercise>> fetchAndSetItems([BuildContext? ctx]) async {
+  Future<bool> fetchAndSetItems(bool internetConnected,
+      [BuildContext? ctx]) async {
+    _items = [];
+    //1 ЭТАП
+    List<Map<String, dynamic>> itemsDB = await DBHelper.getData('exercises');
+    if (itemsDB.isNotEmpty) {
+      for (var item in itemsDB) {
+        _items.add(
+          Exercise(
+            id: item['id'],
+            title: item['title'],
+            description: item['description'],
+            video: item['video'] == 'null' ? null : File(item['video']),
+            version: item['version'],
+          ),
+        );
+      }
+    }
+    //2
+    if (itemsDB.isNotEmpty && !internetConnected) {
+      return true;
+    }
+    if (itemsDB.isEmpty && !internetConnected) {
+      //load assets
+      return true;
+    }
+    try {
+      var qSnapshot =
+          await FirebaseFirestore.instance.collection('exercises').get();
+      var docs = qSnapshot.docs;
+
+      List<Exercise> firebaseItems = [];
+      for (var docSnapshot in docs) {
+        var doc = docSnapshot.data();
+        Exercise exercise = Exercise(
+          id: docSnapshot.id,
+          title: doc['title'],
+          description: doc['description'],
+          version: doc['version'],
+        );
+        firebaseItems.add(exercise);
+        DBHelper.insert('exercises', {
+          'id': exercise.id,
+          'title': exercise.title,
+          'description': exercise.description,
+          'version': exercise.version,
+          'video': 'null',
+        });
+      }
+      _items = [...firebaseItems];
+    } on FirebaseException catch (error) {
+      print(error);
+      return false;
+    }
+    return true;
+
+/*
     _items = [];
     var qSnapshot =
         await FirebaseFirestore.instance.collection('exercises').get();
@@ -30,21 +86,23 @@ class ExercisesProvider with ChangeNotifier {
       // var downloadURL = await storage.ref(doc['video_url']).getDownloadURL();
       // File file = await fileFromUrl(downloadURL);
       // exercise.video = file;
-      exercise.video = await fileFromAsset('assets/temp/placeholder_video.mp4');
+      //exercise.video = await fileFromAsset('assets/temp/placeholder_video.mp4');
       _items.add(exercise);
     }
     return [..._items];
+    */
   }
 
   Future<void> addExercise(Exercise newExercise) async {
     loadingText = 'Создаём упражнение';
-    notifyListeners();
+    notifyListeners(); 
     var collectionReference =
         FirebaseFirestore.instance.collection('exercises');
     var querySnapshot = await collectionReference.get();
     var docs = querySnapshot.docs;
+
     int max = 0;
-    for (var element in docs) {
+    for (var element in docs) { //ОПРЕДЕЛИТЬ НОВЫЙ АЙДИ
       if (max < int.parse(element.id.split('_').last)) {
         max = int.parse(element.id.split('_').last);
       }
@@ -52,10 +110,11 @@ class ExercisesProvider with ChangeNotifier {
     var newId = 'ex_${max + 1}';
     newExercise.id = newId;
     newExercise.version = 1;
+
     Map<String, dynamic> mapExercise = {
       'title': newExercise.title,
       'description': newExercise.description,
-      'video_url': 'null',
+      'video': 'null',
       'version': 1,
     };
     var docReference = collectionReference.doc(newId);
@@ -67,75 +126,85 @@ class ExercisesProvider with ChangeNotifier {
     loadingText = 'Обновляем упражнение';
     notifyListeners();
     await docReference.update({'video_url': 'exercises/$newId'});
+
+    var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
+    newExercise.video = await newExercise.video!.copy('$path/${newExercise.id}');
+
+    DBHelper.insert('exercises', {
+      'id': newExercise.id,
+      'title': newExercise.title,
+      'description': newExercise.description,
+      'version': 1,
+      'video': '$path/${newExercise.id}',
+    });
+    
     _items.add(newExercise);
     loadingText = '';
     notifyListeners();
   }
 
-  Future<void> addExerciseFromMap(Map<String, dynamic> map) async {
-    Exercise newExercise = Exercise(
-        title: map['title'],
-        description: map['description'],
-        video: map['video'],
-
-        );
-    await addExercise(newExercise);
-  }
-
-  Future<void> addExerciseFromMapWithLink(Map<String, dynamic> map) async {
-    Exercise newExercise =
-        Exercise(title: map['title'], description: map['description']);
-    var videoRef = FirebaseStorage.instance.ref(map['video_url']);
-    var url = await videoRef.getDownloadURL();
-    newExercise.video = File.fromUri(Uri.parse(url));
-    await addExercise(newExercise);
-  }
-
-  Future<String?> editItem(Exercise exercise,Map<String,dynamic> newData) async {
-  loadingText = 'Обновляем упражнение';
-  notifyListeners();
-  var item = _items.singleWhere((element) => element.id == exercise.id);
+  Future<String?> editItem(
+      Exercise exercise, Map<String, dynamic> newData) async {
+    loadingText = 'Обновляем упражнение';
+    notifyListeners();
+    var path = (await getApplicationDocumentsDirectory()).path; 
+    var item = _items.singleWhere((element) => element.id == exercise.id);
     var docRef = FirebaseFirestore.instance.doc('exercises/${exercise.id}');
-    if(newData.containsKey('id')){
+    if (newData.containsKey('id')) {
       return 'Невозможно изменить документ: нельзя изменять идентификатор';
     }
-    if(newData.containsKey('title')){
-        loadingText = 'Проверяем названия';
-        notifyListeners();
-      var collectionReference = FirebaseFirestore.instance.collection('exercises');
+    if (newData.containsKey('title')) {
+      loadingText = 'Проверяем названия';
+      notifyListeners();
+      var collectionReference =
+          FirebaseFirestore.instance.collection('exercises');
       var qSnapshot1 = await collectionReference.get();
       var exercises = qSnapshot1.docs;
-       for(QueryDocumentSnapshot<Map<String, dynamic>> exMap in exercises){
-        if (exMap['title'] == newData['title']){
+      for (QueryDocumentSnapshot<Map<String, dynamic>> exMap in exercises) {
+        if (exMap['title'] == newData['title']) {
           return 'Невозможно изменить документ: документ с таким названием уже есть!';
         }
       }
       item.title = newData['title'];
     }
-    if(newData.containsKey('video')){
+    if (newData.containsKey('video')) {
       loadingText = 'Меняем видео';
-        notifyListeners();
+      notifyListeners();
       var docRef = FirebaseStorage.instance.ref('exercises/${exercise.id}');
       await docRef.putFile(newData['video']);
       item.video = newData['video'];
       newData.remove('video');
+
+      item.video = await item.video!.copy('$path/${item.id}');//COPY FILE IN DOCUMENTS
+
     }
     loadingText = 'Обновляем данные';
     notifyListeners();
-    newData.addAll({'version': exercise.version+1});
-    await docRef.update(newData);
-    if (newData.containsKey('description')){
+    if (newData.containsKey('description')) {
       item.description = newData['description'];
     }
+    newData.addAll({'version': exercise.version + 1});
+    await docRef.update(newData);
+
+
+    await DBHelper.insert('exercises', { //INSERT EDITED POST IN DATABASE
+      'id': item.id,
+      'title': item.title,
+      'description': item.description,
+      'video': '$path/${item.id}',
+      'version': item.version
+    });
     notifyListeners();
     return null;
   }
 
-  Future<String?> deleteItem(Exercise exercise,BuildContext context) async {
+  Future<String?> deleteItem(Exercise exercise, BuildContext context) async {
     loadingText = 'Обновляем тренировки';
     notifyListeners();
-    String? result = await Provider.of<TrainingsProvider>(context,listen: false).removeExercise(exercise);
-    if (result != null) return result; 
+    String? result =
+        await Provider.of<TrainingsProvider>(context, listen: false)
+            .removeExercise(exercise);
+    if (result != null) return result;
     loadingText = 'Удаляем упражнение';
     notifyListeners();
     var videoRef = FirebaseStorage.instance.ref('exercises/${exercise.id}');
@@ -151,19 +220,29 @@ class ExercisesProvider with ChangeNotifier {
 
   Future<void> fetchVideo(Exercise exercise) async {
     List<Map<String, dynamic>> itemsDB = await DBHelper.getData('exercises');
-    if((itemsDB.indexWhere((element) => element['id'] == exercise.id) == -1) || (itemsDB.firstWhere((element) => element['id'] == exercise.id)['version'] != exercise.version)){
+    if ((itemsDB.indexWhere((element) => element['id'] == exercise.id) == -1) ||
+        (itemsDB.singleWhere(
+                (element) => element['id'] == exercise.id)['version'] !=
+            exercise.version) || itemsDB.singleWhere(
+                (element) => element['id'] == exercise.id)['video'] == 'null') {
+      print('start ex LOAD');
+      var docRef = FirebaseFirestore.instance.doc('exercises/${exercise.id}');
+      var doc = await docRef.get();
       var videoRef = FirebaseStorage.instance.ref('exercises/${exercise.id}');
       var downloadURL = await videoRef.getDownloadURL();
-      exercise.video = await fileFromUrl(downloadURL,exercise.id);
+      exercise.video = await fileFromUrl(downloadURL, exercise.id);
       var path = (await getApplicationDocumentsDirectory()).path;
-      exercise.video!.copy('$path/${exercise.id}');
-      DBHelper.insert('programs', {
+      exercise.video = await exercise.video!.copy('$path/${exercise.id}.mov');
+      exercise.version = doc.data()!['version'];
+      DBHelper.insert('exercises', {
         'id': exercise.id,
         'title': exercise.title,
+        'video': '$path/${exercise.id}.mov',
         'description': exercise.description,
-        'video': '$path/${exercise.id}',
+        'version': exercise.version,
       });
-    }else{
+    } else {
+      print('start ex EXIST');
       var itemFromDB =
           itemsDB.firstWhere((element) => element['id'] == exercise.id);
       File file = File(itemFromDB['video']);

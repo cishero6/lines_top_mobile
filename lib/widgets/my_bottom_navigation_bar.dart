@@ -48,7 +48,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
           ],
           onTap: (value) {
             Provider.of<BottomNavigationProvider>(context,listen: false).setIndex(value);
-            widget.navigatorKey.currentState!.pushReplacementNamed(_routeNames[value]);
+            widget.navigatorKey.currentState!.pushNamedAndRemoveUntil(_routeNames[value], (route) => false);
           },
         ),
     );

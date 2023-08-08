@@ -4,6 +4,9 @@ PODS:
     - firebase_core
     - Flutter
     - nanopb (< 2.30910.0, >= 2.30908.0)
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - ReachabilitySwift
   - Firebase/Auth (10.10.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 10.10.0)
@@ -89,6 +92,7 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.2.0)
+  - ReachabilitySwift (5.0.0)
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
@@ -99,6 +103,7 @@ PODS:
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
@@ -126,10 +131,13 @@ SPEC REPOS:
     - GTMSessionFetcher
     - nanopb
     - PromisesObjC
+    - ReachabilitySwift
 
 EXTERNAL SOURCES:
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -161,6 +169,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   cloud_firestore: 818ebb1a8235177a0dcf7005c14aed5408b8342c
+  connectivity_plus: 07c49e96d7fc92bc9920617b83238c4d178b446a
   Firebase: facd334e557a979bd03a0b58d90fd56b52b8aba0
   firebase_auth: 9905bc3d82328b5050a8b7cb410a959f150b6549
   firebase_core: 85b6664038311940ad60584eaabc73103c61f5de
@@ -182,6 +191,7 @@ SPEC CHECKSUMS:
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
   video_player_avfoundation: 81e49bb3d9fb63dccf9fa0f6d877dc3ddbeac126
   wakelock_plus: 8b09852c8876491e4b6d179e17dfe2a0b5f60d47
