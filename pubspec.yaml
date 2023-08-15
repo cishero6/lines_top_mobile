@@ -87,6 +87,23 @@ flutter:
     - assets/theme/appainter_theme.json
     - assets/images/BlackLogo.png
     - assets/temp/placeholder_video.mp4
+    - assets/images/backgrounds/bg_1.jpg
+    - assets/images/backgrounds/bg_2.jpg
+    - assets/images/backgrounds/bg_3.jpg
+    - assets/images/backgrounds/bg_4.jpg
+    - assets/images/backgrounds/bg_5.jpg
+    - assets/images/backgrounds/bg_6.jpg
+    - assets/images/backgrounds/bg_7.jpg
+    - assets/images/backgrounds/bg_8.jpg
+    - assets/images/backgrounds/bg_9.jpg
+    - assets/images/backgrounds/bg_10.jpg
+    - assets/images/backgrounds/bg_11.jpg
+    - assets/images/backgrounds/bg_12.jpg
+    - assets/images/backgrounds/ex_1.jpg
+    - assets/images/backgrounds/ex_2.jpg
+    - assets/images/backgrounds/ex_3.jpg
+    - assets/images/backgrounds/ex_4.jpg
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

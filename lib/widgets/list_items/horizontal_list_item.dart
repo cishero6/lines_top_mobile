@@ -1,4 +1,5 @@
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
@@ -57,7 +58,7 @@ class _HorizontalListItemState extends State<HorizontalListItem> with TickerProv
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 5),
             child: Card(
-              color: widget.goldenColor! ? const Color.fromARGB(255, 255, 255, 154): Theme.of(context).colorScheme.surface,
+              color: widget.goldenColor! ? const Color.fromARGB(98, 255, 218, 6) : Theme.of(context).colorScheme.surface,
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),

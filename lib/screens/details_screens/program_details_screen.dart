@@ -131,72 +131,76 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
   Widget build(BuildContext context) {
     _animate();
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            backgroundColor: Theme.of(context).primaryColor,
-            title: SlideTransition(
-              position: _titleSlideAnimation,
-              child: FadeTransition(
-                opacity: _titleFadeAnimation,
-                child: Text(
-                  widget.program.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SlideTransition(
-              position: _subtextSlideAnimation,
-              child: FadeTransition(
-                opacity: _subtextFadeAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 40.0, vertical: 40),
+      body: Container(
+        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_1.jpg'),fit: BoxFit.cover,opacity: 0.4)),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar.large(
+              pinned: false,
+              backgroundColor: Colors.transparent,
+              title: SlideTransition(
+                position: _titleSlideAnimation,
+                child: FadeTransition(
+                  opacity: _titleFadeAnimation,
                   child: Text(
-                    widget.program.subtext,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
+                    widget.program.title,
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SlideTransition(
-              position: _bodySlideAnimation,
-              child: FadeTransition(
-                opacity: _bodyFadeAnimation,
+            SliverToBoxAdapter(
+              child: SlideTransition(
+                position: _subtextSlideAnimation,
+                child: FadeTransition(
+                  opacity: _subtextFadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40.0, vertical: 40),
+                    child: Text(
+                      widget.program.subtext,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SlideTransition(
+                position: _bodySlideAnimation,
+                child: FadeTransition(
+                  opacity: _bodyFadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                    ),
+                    child: Text(
+                      widget.program.bodyText,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: UnconstrainedBox(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                  ),
-                  child: Text(
-                    widget.program.bodyText,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: ScaleTransition(
+                      scale: _buttonScaleAnimation,
+                      child: ElevatedButton(
+                          onPressed:_tryStart,
+                          child: Text(
+                            'Начать',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ))),
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: UnconstrainedBox(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: ScaleTransition(
-                    scale: _buttonScaleAnimation,
-                    child: ElevatedButton(
-                        onPressed:_tryStart,
-                        child: Text(
-                          'Начать',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ))),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

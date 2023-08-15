@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lines_top_mobile/models/exercise.dart';
 import 'package:lines_top_mobile/models/training.dart';
 import 'package:lines_top_mobile/providers/trainings_provider.dart';
@@ -21,6 +24,7 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
   String _selectedSection = '_notSelected';
   final TextEditingController _titleEditingController = TextEditingController();
   final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   Map<String, List<Exercise>> _sections = {};
   Color _containerColor = Colors.white70;
   final ScrollController _scrollController = ScrollController();
@@ -28,9 +32,19 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
   late BuildContext _dialogContext;
 
 
+  late bool _isSet = false;
+  final ImagePicker _picker = ImagePicker();
+  late XFile? _pickedPhoto = null;
   bool _anythingChanged = false;
 
   void _submit() async {
+
+    if(_isSet && _descriptionController.text.isEmpty){
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Добавьте описание сету!')));
+      return;
+    }
     if (_sections.isEmpty) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
@@ -81,6 +95,17 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
     if (_sections != tempTraining.sections) {
       newData.addAll({'sections': _sections});
     }
+    if(_isSet){
+
+      if (_descriptionController.text != tempTraining.description) {
+        newData.addAll({'description': _descriptionController.text});
+      }
+      if (_pickedPhoto != null) {
+        newData.addAll({'image': File(_pickedPhoto!.path)});
+      }
+    }
+
+    
 
     try {
       await Provider.of<TrainingsProvider>(context, listen: false)
@@ -105,7 +130,7 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
 
   @override
   void initState() {
-    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items;
+    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items.where((element) => !element.isSet).toList();
     for (String sectionName in widget.training.sections.keys) {
       _sectionKeys.add(sectionName);
     }
@@ -121,10 +146,15 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
       title: widget.training.title,
       sections: widget.training.sections.map((sectionName, listOfEx) =>
           MapEntry(sectionName.split('_').first, listOfEx)),
+      isSet: widget.training.isSet,
+      description: widget.training.description,
+      image: widget.training.image,
     );
     _titleEditingController.text = tempTraining.title;
     _sections = {...tempTraining.sections};
     _exercises = Provider.of<ExercisesProvider>(context, listen: false).items;
+    _isSet = tempTraining.isSet;
+    _descriptionController.text = tempTraining.description ?? '';
     super.initState();
   }
 
@@ -132,7 +162,6 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
-        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar(
             pinned: true,
@@ -483,6 +512,87 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
                 ),
               ]),
             ),
+          ),
+           SliverToBoxAdapter(
+            child: Column(children: [
+              const Divider(
+                thickness: 7,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox.adaptive(
+                    value: _isSet,
+                    onChanged: null
+                  ),
+                  Text(
+                    'Является СЕТОМ',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ],
+              ),
+              if (_isSet)
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: TextField(
+                    onChanged: (value){
+                      if(value != tempTraining.description){
+                        setState(() {
+                          _anythingChanged = true;
+                        });
+                      }
+                    },
+                    controller: _descriptionController,
+                    decoration:
+                        const InputDecoration(labelText: 'Описание Сета'),
+                    maxLength: 40,
+                  ),
+                ),
+              if (_isSet) const Divider(
+                thickness: 7,
+              ),
+              if (_isSet) Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                      onPressed: () async {
+                        _pickedPhoto = await _picker.pickImage(
+                            source: ImageSource.gallery);
+                        setState(() {_anythingChanged = true;});
+                      },
+                      icon: const Icon(Icons.image),
+                      label: Text(
+                        'Выбрать фото',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      )),
+                  IconButton(
+                      onPressed: _pickedPhoto == null
+                          ? null
+                          : () => setState(() => _pickedPhoto = null),
+                      icon: Icon(
+                        Icons.delete,
+                        color: _pickedPhoto == null
+                            ? Colors.grey
+                            : Theme.of(context).colorScheme.error,
+                      )),
+                ],
+              ),
+              if (_isSet) Center(
+                  child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                  width: 0.5,
+                )),
+                width: 100,
+                height: 100,
+                child: _pickedPhoto == null
+                    ? null
+                    : Image.file(File(_pickedPhoto!.path)),
+              )),
+              const Divider(
+                thickness: 7,
+              ),
+            ]),
           ),
         ],
       ),

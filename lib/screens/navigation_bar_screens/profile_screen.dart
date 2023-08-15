@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
-import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screens/auth_screen.dart';
-import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screens/control_screen.dart';
+import 'package:lines_top_mobile/helpers/db_helper.dart';
+import 'package:lines_top_mobile/screens/profile_screens/control_screen.dart';
+import 'package:lines_top_mobile/widgets/auth_view.dart';
+import 'package:lines_top_mobile/widgets/list_items/profile_item.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/user_data_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,195 +16,106 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  late UserDataProvider authData;
 
+  @override
+  void initState() {
+    authData = Provider.of<UserDataProvider>(context,listen: false);
+    super.initState();
+  }
 
-
-
+  Widget _buildProfileView(BuildContext ctx) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+              backgroundColor: Colors.transparent,
+              expandedHeight: 150,
+              flexibleSpace: FlexibleSpaceBar(
+                expandedTitleScale: 1.2,
+                centerTitle: false,
+                title: Text(
+                'Профиль',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineLarge!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              ),
+            ),
+          SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: [
+            ProfileItem(
+              title: authData.userName!,
+              subtext: 'Изменить',
+              onTap: () {},
+              isGrid: true,
+            ),
+            ProfileItem(
+              title: authData.email!,
+              subtext: 'Изменить',
+              onTap: () {},
+              isGrid: true,
+            ),
+          ],),
+          SliverToBoxAdapter(child: 
+                      ProfileItem(
+              title: 'Мои параметры',
+              subtext: '',
+              onTap: () {},
+              isGrid: false,
+            ),
+          ),
+          SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: [
+            ProfileItem(
+              title: 'Прогресс программ',
+              subtext: '',
+              onTap: () {},
+              isGrid: true,
+            ),
+            ProfileItem(
+              title: 'Выйти',
+              subtext: '',
+              onTap: authData.logoutUser,
+              isGrid: true,
+            ),
+            ProfileItem(
+              title: 'Сменить все версии',
+              subtext: '',
+              onTap: authData.changeAllVersions,
+              isGrid: true,
+            ),
+            const ProfileItem(
+              title: 'Удалить таблицы',
+              subtext: '',
+              onTap: DBHelper.deleteTables,
+              isGrid: true,
+            ),
+            ProfileItem(
+              title: 'Панель',
+              subtext: '',
+              onTap: ()=>Navigator.of(ctx).pushNamed(ControlScreen.routeName),
+              isGrid: true,
+            ),
+          ],),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authData = Provider.of<UserDataProvider>(context);
-    
-    if (!authData.isAuth) {
-      return const AuthScreen();
-    }
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            automaticallyImplyLeading: false,
-            elevation: 10,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            title: Text(
-              'Профиль',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                const Divider(
-                  thickness: 4,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'ID пользователя',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: Colors.black54),
-                      ),
-                    ),
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: FittedBox(
-                          child: Text(
-                            authData.userId!,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const Divider(
-                  thickness: 4,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Имя пользователя',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: Colors.black54),
-                      ),
-                    ),
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            authData.userName!,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Изменить',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-                const Divider(
-                  thickness: 4,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Почта',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: Colors.black54),
-                      ),
-                    ),
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            authData.email!,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Изменить',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-                const Divider(
-                  thickness: 4,
-                ),
-                InkWell(
-                  onTap: () => Navigator.of(context).pushNamed(ControlScreen.routeName),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Панель управления',style: Theme.of(context).textTheme.titleLarge,),
-                        const Icon(Icons.arrow_forward_ios,color: Colors.black87,),
-                    ],),
-                  ),
-                ),
-                const Divider(
-                  thickness: 4,
-                ),
-                UnconstrainedBox(
-                  child: ElevatedButton.icon(
-                      onPressed: () async {
-                        await authData.changeAllVersions();
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Успешно',style: Theme.of(context).textTheme.bodyMedium,)));
-                      },
-                      icon: const Icon(Icons.logout,color: Colors.black87,),
-                      label: Text('Поменять все версиий',style: Theme.of(context).textTheme.bodyMedium,)),
-                ),
-                const Divider(
-                  thickness: 4,
-                ),
-                UnconstrainedBox(
-                  child: ElevatedButton.icon(
-                      onPressed: () async {
-                        bool result = await authData.logoutUser();
-                        if (!result) {
-                          // ignore: use_build_context_synchronously
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          // ignore: use_build_context_synchronously
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Что-то пошло не так!',style: Theme.of(context).textTheme.bodyMedium,)));
-                        }
-                      },
-                      icon: const Icon(Icons.logout,color: Colors.black87,),
-                      label: Text('Выйти',style: Theme.of(context).textTheme.bodyMedium,)),
-                ),
-                const Divider(
-                  thickness: 4,
-                ),
-              ],
-            ),
-          ),
-        ],
+    authData = Provider.of<UserDataProvider>(context);
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_9.jpg'),opacity: 0.5,fit: BoxFit.cover),
       ),
+      child: StreamBuilder(stream: FirebaseAuth.instance.authStateChanges(),builder: (_,snapshot) {
+        if(snapshot.connectionState == ConnectionState.waiting){
+          return const SizedBox();
+        }
+        if(!snapshot.hasData){
+          return const AuthView();
+        }
+        return _buildProfileView(context);
+      }),
     );
   }
 }

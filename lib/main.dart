@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             useMaterial3: true,
             colorScheme: lightColorScheme,
-            fontFamily: 'SourceSerifPro'),
+       fontFamily: 'SourceSerifPro'),
         darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: lightColorScheme,

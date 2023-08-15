@@ -70,7 +70,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
     if (!_disposed) {
       _progressController.forward();
     }
-   await Future.delayed(const Duration(milliseconds: 1300));
+   await Future.delayed(const Duration(milliseconds: 800));
     List<String> fetchedIds = [];
     for (var training in widget.program.trainings) {
       for (var section in training.sections.entries) {
@@ -131,91 +131,95 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
   Widget build(BuildContext context) {
     var progressData = Provider.of<UserDataProvider>(context).progress;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: SlideTransition(
-              position: _titleSlideAnimation,
-              child: FadeTransition(
-                opacity: _titleFadeAnimation,
-                child: Text(
-                  widget.program.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
+      body: Container(
+        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_5.jpg'),fit: BoxFit.cover,opacity: 0.5)),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar.large(
+              pinned: false,
+              title: SlideTransition(
+                position: _titleSlideAnimation,
+                child: FadeTransition(
+                  opacity: _titleFadeAnimation,
+                  child: Text(
+                    widget.program.title,
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
+              backgroundColor: Colors.transparent,
             ),
-            backgroundColor: Theme.of(context).primaryColor,
-          ),
-          _isLoadingProgram
-              ? SliverToBoxAdapter(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 40,
-                        ),
-                        ScaleTransition(
-                          scale: _progressScaleAnimation,
-                          child: AnimatedSwitcher(
-                              transitionBuilder: (child, animation) =>
-                                  FadeTransition(
-                                    opacity: animation,
-                                    child: ScaleTransition(
-                                      scale: animation,
-                                      child: RotationTransition(
-                                        turns: Tween(begin: 1.0,end: 0.0).animate(animation),
-                                        child: child,
+            _isLoadingProgram
+                ? SliverToBoxAdapter(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Column(
+                        children: [
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          ScaleTransition(
+                            scale: _progressScaleAnimation,
+                            child: AnimatedSwitcher(
+                                transitionBuilder: (child, animation) =>
+                                    FadeTransition(
+                                      opacity: animation,
+                                      child: ScaleTransition(
+                                        scale: animation,
+                                        child: RotationTransition(
+                                          turns: Tween(begin: 1.0,end: 0.0).animate(animation),
+                                          child: child,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                              duration: const Duration(milliseconds: 300),
-                              child: _doneLoading
-                                  ? const Icon(
-                                      Icons.done_rounded,
-                                      size: 70,
-                                      color: Color.fromARGB(255, 242, 70, 101),
-                                    )
-                                  : const CupertinoActivityIndicator(
-                                      radius: 30,
-                                      color: CupertinoColors.systemPink)),
-                        ),
-                        const SizedBox(height: 50,),
-                        SlideTransition(
-                          position: _waitTextSlideAnimation,
-                          child: FadeTransition(
-                            opacity: _waitTextFadeAnimation,
-                            child: Text(
-                              'Загружаем программу...',
-                              style: Theme.of(context).textTheme.headlineSmall,
+                                duration: const Duration(milliseconds: 300),
+                                child: _doneLoading
+                                    ? const Icon(
+                                        Icons.done_rounded,
+                                        size: 70,
+                                        color: Color.fromARGB(255, 242, 70, 101),
+                                      )
+                                    : const CupertinoActivityIndicator(
+                                        radius: 30,
+                                        color: CupertinoColors.systemPink)),
+                          ),
+                          const SizedBox(height: 50,),
+                          SlideTransition(
+                            position: _waitTextSlideAnimation,
+                            child: FadeTransition(
+                              opacity: _waitTextFadeAnimation,
+                              child: Text(
+                                'Загружаем программу...',
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                  )
+                : SliverList.builder(
+                    itemCount: widget.program.trainings.length,
+                    itemBuilder: (ctx, index) => HorizontalListItem(
+                      title: 'Тренировка ${index + 1}',
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed(SectionsListScreen.routeName, arguments: [
+                          widget.program.trainings[index],
+                          widget.program.id,
+                          index
+                        ]);
+                      },
+                      goldenColor:
+                          progressData![widget.program.id]![index] == 100,
+                      middleItem:
+                          Text('${progressData[widget.program.id]![index]}%'),
+                      //middleItem: SizedBox(width: 80,child: LinearProgressIndicator(backgroundColor: Colors.black,color: Colors.red,value: progressData![widget.program.id]![index].toDouble()/100,)),
+                      waitTimer: Duration(milliseconds: 200 + index * 300),
                     ),
                   ),
-                )
-              : SliverList.builder(
-                  itemCount: widget.program.trainings.length,
-                  itemBuilder: (ctx, index) => HorizontalListItem(
-                    title: 'Тренировка ${index + 1}',
-                    onPressed: () {
-                      Navigator.of(context)
-                          .pushNamed(SectionsListScreen.routeName, arguments: [
-                        widget.program.trainings[index],
-                        widget.program.id,
-                        index
-                      ]);
-                    },
-                    goldenColor:
-                        progressData![widget.program.id]![index] == 100,
-                    middleItem:
-                        Text('${progressData[widget.program.id]![index]}%'),
-                    //middleItem: SizedBox(width: 80,child: LinearProgressIndicator(backgroundColor: Colors.black,color: Colors.red,value: progressData![widget.program.id]![index].toDouble()/100,)),
-                    waitTimer: Duration(milliseconds: 200 + index * 300),
-                  ),
-                ),
-        ],
+          ],
+        ),
       ),
     );
   }

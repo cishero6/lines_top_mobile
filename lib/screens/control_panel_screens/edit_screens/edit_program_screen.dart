@@ -112,7 +112,7 @@ class _EditProgramScreenState extends State<EditProgramScreen> {
 
   @override
   void initState() {
-    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items;
+    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items.where((element) => !element.isSet).toList();
     _programs = Provider.of<ProgramsProvider>(context, listen: false).items;
     _titleController.text = widget.program.title;
     _bodyTextController.text = widget.program.bodyText;
@@ -129,7 +129,7 @@ class _EditProgramScreenState extends State<EditProgramScreen> {
           SliverAppBar(
             pinned: true,
             title: Text(
-              'Добавить программу',
+              'Изменить программу',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
@@ -274,7 +274,7 @@ class _EditProgramScreenState extends State<EditProgramScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'Упражнения',
+                          'Все тренировки',
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlign: TextAlign.center,
                         ),

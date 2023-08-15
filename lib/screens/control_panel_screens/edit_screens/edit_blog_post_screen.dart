@@ -30,6 +30,7 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
 
   bool _pickerUsed = false;
   bool _anythingChanged = false;
+  late bool _isPrimary;
 
 
   void _submit() async {
@@ -79,6 +80,9 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
     if (_bodyTextController.text != widget.blogPost.bodyText) {
       newData.addAll({'body_text': _bodyTextController.text});
     }
+    if (_isPrimary != widget.blogPost.isPrimary){
+      newData.addAll({'is_primary': _isPrimary});
+    }
 
     try {
       await Provider.of<BlogProvider>(context, listen: false)
@@ -101,6 +105,7 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
 
   @override
   void initState() {
+    _isPrimary = widget.blogPost.isPrimary;
     _titleController.text = widget.blogPost.title;
     _bodyTextController.text = widget.blogPost.bodyText;
     _shortDescriptionController.text = widget.blogPost.shortDesc;
@@ -299,6 +304,27 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
                   ),
                   const Divider(
                     thickness: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox.adaptive(
+                        value: _isPrimary,
+                        onChanged: (value) => setState(
+                          () {
+                            _anythingChanged=true;
+                            _isPrimary = value ?? false;
+                          },
+                        ),
+                      ),
+                      Text(
+                        'Главный пост',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    thickness: 6,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(

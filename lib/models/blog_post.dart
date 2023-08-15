@@ -12,13 +12,14 @@ class BlogPost extends LinesTopModel{
   String bodyText = '';
   List<File> images = [];
   String date = 'null';
+  bool isPrimary = false;
   int version = 0;
 
 
   BlogPost.empty(){
     date = DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now());
   }
-  BlogPost({this.id = '',this.title = '',this.shortDesc = '',this.bodyText = '',List<File>? images,String? date,this.version = 0}){
+  BlogPost({this.id = '',this.title = '',this.shortDesc = '',this.bodyText = '',List<File>? images,String? date,this.version = 0,this.isPrimary = false}){
     this.images = images ?? [];
     this.date = date ?? DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now());
   }

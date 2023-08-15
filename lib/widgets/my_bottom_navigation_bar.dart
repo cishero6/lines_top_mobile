@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/blog_screen.dart';
@@ -22,7 +23,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   Widget build(BuildContext context) {
     _currentIndex = Provider.of<BottomNavigationProvider>(context).index;
     return Theme(
-      data: ThemeData(canvasColor: Theme.of(context).colorScheme.primary),
+      data: ThemeData(canvasColor: Colors.white),
       child: BottomNavigationBar(
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.black54,

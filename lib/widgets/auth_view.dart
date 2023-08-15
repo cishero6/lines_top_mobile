@@ -5,16 +5,14 @@ import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:provider/provider.dart';
 
 
-class AuthScreen extends StatefulWidget {
-  static const routeName = '/profile/auth';
-
-  const AuthScreen({super.key});
+class AuthView extends StatefulWidget {
+  const AuthView({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<AuthView> createState() => _AuthViewState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
+class _AuthViewState extends State<AuthView> with TickerProviderStateMixin{
   final Key emailKey = const ValueKey('email');
   final Key usernameKey = const ValueKey('username');
   final Key passwordKey = const ValueKey('password');
@@ -53,25 +51,23 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        slivers: [
-          SliverAppBar.large(
-            backgroundColor: Theme.of(context).primaryColor,
-            automaticallyImplyLeading: false,
-            pinned: true,
-            title: Text(
-              'Профиль',
-              style: Theme.of(context).textTheme.headlineMedium,
+    return CustomScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar.large(
+              backgroundColor: Colors.transparent,
+              automaticallyImplyLeading: false,
+              pinned: true,
+              title: Text(
+                'Профиль',
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-          SliverToBoxAdapter(
-      child: AnimatedContainer(
-        margin: const EdgeInsets.all(12),
-        alignment: Alignment.center,
-        duration: const Duration(milliseconds: 900),
-        child: Card(
+            SliverToBoxAdapter(
+        child: AnimatedContainer(
+          margin: const EdgeInsets.all(12),
+          alignment: Alignment.center,
+          duration: const Duration(milliseconds: 900),
           child: Form(
               key: _formKey,
               child: Padding(
@@ -80,7 +76,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                   children: [
                     Text(
                       _isReg ? 'Регистрация' : 'Вход',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     if (_isReg)
                       Platform.isIOS
@@ -187,7 +183,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                         controller: _passwordRepeatController,
                         obscureText: true,
                       cursorColor: Theme.of(context).colorScheme.onSecondary,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
+                            errorStyle: Theme.of(context).textTheme.bodySmall,
                             hintText: 'Подтверждение пароля'),
                         validator: (value) {
                           if (value != _passwordController.text) {
@@ -221,14 +218,12 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin{
                 ),
               )),
         ),
-      ),
-    ),
-     if (_isLoading)  const SliverToBoxAdapter(child: UnconstrainedBox(child: Padding(
-       padding: EdgeInsets.only(top: 135.0),
-       child: CircularProgressIndicator(strokeWidth: 1,),
-     )),),
-        ],
-      ),
-    );
+          ),
+           if (_isLoading)  const SliverToBoxAdapter(child: UnconstrainedBox(child: Padding(
+         padding: EdgeInsets.only(top: 135.0),
+         child: CircularProgressIndicator(strokeWidth: 1,),
+           )),),
+          ],
+        );
   }
 }

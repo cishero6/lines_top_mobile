@@ -23,9 +23,9 @@ import 'control_panel_screens/edit_screens/edit_exercise_screen.dart';
 import 'control_panel_screens/edit_screens/edit_program_screen.dart';
 import 'control_panel_screens/edit_screens/edit_training_screen.dart';
 import 'details_screens/program_details_screen.dart';
-import 'navigation_bar_screens/profile_screens/auth_screen.dart';
-import 'navigation_bar_screens/profile_screens/control_screen.dart';
-import 'program_description_screen.dart';
+import 'more_screens.dart/all_posts_screen.dart';
+import 'more_screens.dart/all_sets_screen.dart';
+import 'profile_screens/control_screen.dart';
 import 'program_process_screens/exercise_process_screen.dart';
 import 'program_process_screens/sections_list_screen.dart';
 
@@ -41,7 +41,6 @@ class _MainScreenState extends State<MainScreen> {
 
   bool _isLoading = true;
   String _loadingText = '';
-
   bool _isOnline = false;
   
 
@@ -55,26 +54,24 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _loadingText = 'Загружаем упражнения';
     });
-    print('bl done');
-    // ignore: use_build_context_synchronously
     _isOnline = await NetworkConnectivity.checkConnection();
+    // ignore: use_build_context_synchronously
     await Provider.of<ExercisesProvider>(context, listen: false)
         .fetchAndSetItems(_isOnline);
     setState(() {
       _loadingText = 'Загружаем тренировки';
     });
-        print('ex done');
+    _isOnline = await NetworkConnectivity.checkConnection();
     // ignore: use_build_context_synchronously
     await Provider.of<TrainingsProvider>(context, listen: false)
         .fetchAndSetItems(_isOnline,context);
     setState(() {
       _loadingText = 'Загружаем программы';
     });
-            print('tr done');
+    _isOnline = await NetworkConnectivity.checkConnection();
     // ignore: use_build_context_synchronously
     await Provider.of<ProgramsProvider>(context, listen: false)
-        .fetchAndSetItems(context);
-
+        .fetchAndSetItems(_isOnline,context);
     setState(() {
       _isLoading = false;
     });
@@ -86,10 +83,6 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,12 +124,7 @@ class _MainScreenState extends State<MainScreen> {
             case BlogScreen.routeName:
               return PageTransition(child: const BlogScreen(), type: PageTransitionType.fade);
             case ControlScreen.routeName:
-              return MaterialPageRoute(builder: (ctx)=> ControlScreen());
-            case AuthScreen.routeName:
-              return PageTransition(child: const AuthScreen(), type: PageTransitionType.fade);
-            case ProgramDescriptionScreen.routeName:
-              final List<dynamic> args = settings.arguments as List<dynamic>;
-              return MaterialPageRoute(builder: (ctx)=> ProgramDescriptionScreen(args[0]));
+              return MaterialPageRoute(builder: (ctx)=> const ControlScreen());
             case ProgramDetailsScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> ProgramDetailsScreen(args[0]));
@@ -172,6 +160,10 @@ class _MainScreenState extends State<MainScreen> {
               return MaterialPageRoute(builder: (ctx)=> const AddTrainingScreen());
             case AddProgramScreen.routeName:
               return MaterialPageRoute(builder: (ctx)=> const AddProgramScreen());
+            case AllSetsScreen.routeName:
+              return MaterialPageRoute(builder: (ctx)=> const AllSetsScreen());
+            case AllPostsScreen.routeName:
+              return MaterialPageRoute(builder: (ctx)=> const AllPostsScreen());
             case BlogPostDetailsScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> BlogPostDetailsScreen(args[0]));

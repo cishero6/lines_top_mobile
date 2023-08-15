@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lines_top_mobile/models/exercise.dart';
 import 'package:lines_top_mobile/models/training.dart';
 import 'package:lines_top_mobile/providers/trainings_provider.dart';
@@ -19,6 +22,11 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
   String _selectedSection = '_notSelected';
   final TextEditingController _titleEditingController = TextEditingController();
   final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  late bool _isSet = false;
+  final ImagePicker _picker = ImagePicker();
+  late XFile? _pickedPhoto = null;
+
   Map<String, List<Exercise>> _sections = {
     'Разминка': [],
     'Основная часть': [],
@@ -30,6 +38,18 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
   late BuildContext _dialogContext;
 
   void _submit() async {
+    if(_isSet && _pickedPhoto == null){
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Добавьте фото!')));
+      return;
+    }
+    if(_isSet && _descriptionController.text.isEmpty){
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Добавьте описание сету!')));
+      return;
+    }
     if (_sections.isEmpty) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
@@ -60,18 +80,25 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
       }
     }
     showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (ctx) { 
-        _dialogContext = ctx;
-        return const AlertDialog(
-        title: Text('Загружаем тренировку'),
-        content: UnconstrainedBox(child: CircularProgressIndicator()),
-      );}
-    );
+        barrierDismissible: false,
+        context: context,
+        builder: (ctx) {
+          _dialogContext = ctx;
+          return const AlertDialog(
+            title: Text('Загружаем тренировку'),
+            content: UnconstrainedBox(child: CircularProgressIndicator()),
+          );
+        });
     try {
-      Training newTraining =
-          Training(title: _titleEditingController.text, sections: _sections);
+      Training newTraining = Training(
+        title: _titleEditingController.text,
+        sections: _sections,
+        isSet: _isSet,
+      );
+      if(_isSet){
+        newTraining.description = _descriptionController.text;
+        newTraining.image = File(_pickedPhoto!.path);
+      }
       await Provider.of<TrainingsProvider>(context, listen: false)
           .addTraining(newTraining, _sectionKeys);
       Navigator.of(_dialogContext).pop();
@@ -94,7 +121,6 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
     _exercises = Provider.of<ExercisesProvider>(context, listen: false).items;
     return Scaffold(
       body: CustomScrollView(
-        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar(
             pinned: true,
@@ -242,10 +268,11 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                   padding:
                                                       const EdgeInsets.all(8),
                                                   decoration: BoxDecoration(
-                                                      border:
-                                                          Border.all(width: 0.5)),
+                                                      border: Border.all(
+                                                          width: 0.5)),
                                                   height: 50,
-                                                  alignment: Alignment.centerLeft,
+                                                  alignment:
+                                                      Alignment.centerLeft,
                                                   child: Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
@@ -256,9 +283,10 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                           ex.title,
                                                           overflow: TextOverflow
                                                               .ellipsis,
-                                                          style: Theme.of(context)
-                                                              .textTheme
-                                                              .bodyMedium,
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyMedium,
                                                         ),
                                                       ),
                                                       IconButton(
@@ -310,7 +338,8 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                       child: Column(
                         children: [
                           ..._sections.keys.map((e) => GestureDetector(
-                                onTap: () => setState(() => _selectedSection = e),
+                                onTap: () =>
+                                    setState(() => _selectedSection = e),
                                 child: Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
@@ -338,12 +367,12 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                           ),
                                           IconButton(
                                               onPressed: () => setState(() {
-                                                    _sectionKeys
-                                                        .remove(_selectedSection);
-                                                    _sections
-                                                        .remove(_selectedSection);
-                                                        _selectedSection =
-                                                            '_notSelected';
+                                                    _sectionKeys.remove(
+                                                        _selectedSection);
+                                                    _sections.remove(
+                                                        _selectedSection);
+                                                    _selectedSection =
+                                                        '_notSelected';
                                                   }),
                                               icon: const Icon(
                                                 Icons.delete,
@@ -384,7 +413,8 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                       _textEditingController
                                                           .text);
                                                   _selectedSection =
-                                                      _textEditingController.text;
+                                                      _textEditingController
+                                                          .text;
                                                   Navigator.of(context).pop();
                                                   setState(() {});
                                                 } else {
@@ -412,7 +442,8 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                   ),
                                   label: Text(
                                     'Добавить секцию',
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
                                   ))),
                         ],
                       ),
@@ -433,6 +464,84 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                 ),
               ]),
             ),
+          ),
+          SliverToBoxAdapter(
+            child: Column(children: [
+              const Divider(
+                thickness: 7,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox.adaptive(
+                    value: _isSet,
+                    onChanged: (value) => setState(
+                      () {
+                        _isSet = value ?? false;
+                      },
+                    ),
+                  ),
+                  Text(
+                    'Является СЕТОМ',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ],
+              ),
+              if (_isSet)
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: TextField(
+                    controller: _descriptionController,
+                    decoration:
+                        const InputDecoration(labelText: 'Описание Сета'),
+                    maxLength: 40,
+                  ),
+                ),
+              if (_isSet) const Divider(
+                thickness: 7,
+              ),
+              if (_isSet) Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                      onPressed: () async {
+                        _pickedPhoto = await _picker.pickImage(
+                            source: ImageSource.gallery);
+                        setState(() {});
+                      },
+                      icon: Icon(Icons.image),
+                      label: Text(
+                        'Выбрать фото',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      )),
+                  IconButton(
+                      onPressed: _pickedPhoto == null
+                          ? null
+                          : () => setState(() => _pickedPhoto = null),
+                      icon: Icon(
+                        Icons.delete,
+                        color: _pickedPhoto == null
+                            ? Colors.grey
+                            : Theme.of(context).colorScheme.error,
+                      )),
+                ],
+              ),
+              if (_isSet) Center(
+                  child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                  width: 0.5,
+                )),
+                width: 100,
+                height: 100,
+                child: _pickedPhoto == null
+                    ? null
+                    : Image.file(File(_pickedPhoto!.path)),
+              )),
+              const Divider(
+                thickness: 7,
+              ),
+            ]),
           ),
         ],
       ),

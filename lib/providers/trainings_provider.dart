@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,7 +31,7 @@ class TrainingsProvider with ChangeNotifier {
       for (var item in itemsDB) {
         //REFORMATTING LIST<DYNAMIC> TO LIST<EXERCISE>
         Map<String, List<Exercise>> doneSections = {};
-        Map<String, dynamic> dynamicSections = item['sections'];
+        Map<String, dynamic> dynamicSections = jsonDecode(item['sections']);
         Map<String, List<String>> stringSections = dynamicSections.map((key, value) => MapEntry(key,List<String>.generate(value.length, (index) => value[index])));
         doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
         //ADDING ITEM
@@ -41,12 +42,11 @@ class TrainingsProvider with ChangeNotifier {
             isSet: item['is_set'] == 1,
             description: item['description'] == 'null' ? null : item['description'],
             image: item['image'] == 'null' ? null : File(item['image']),
+            version: item['version'],
           )
         );
       }
     }
-    print(_items);
-    print('ddd');
     //2
     if (itemsDB.isNotEmpty && !internetConnected) {
       return true;
@@ -96,7 +96,8 @@ class TrainingsProvider with ChangeNotifier {
             'title': training.title,
             'description': training.description ?? 'null',
             'image': '$path/${training.id}',
-            'sections': dbMapSections,
+            'sections': jsonEncode(dbMapSections),
+            'is_set': training.isSet ? 1:0,
             'version': training.version,
           });
         }else{
@@ -150,7 +151,7 @@ class TrainingsProvider with ChangeNotifier {
         'description': newTraining.description ?? 'null',
         'is_set': newTraining.isSet,
         'version': 1,
-        'image_url': 'null'
+        'image': 'null'
     },
     );
     Map<String,List<Exercise>> tempMap = {};
@@ -161,7 +162,7 @@ class TrainingsProvider with ChangeNotifier {
     if(newTraining.isSet){
       final imageRef = FirebaseStorage.instance.ref('trainings/$newId');
       await imageRef.putFile(newTraining.image!).whenComplete(() {});
-      await collectionReference.doc(newId).update({'image_url':'trainings/$newId'});
+      await collectionReference.doc(newId).update({'image':'trainings/$newId'});
     }
     _items.add(newTraining);
     notifyListeners();
@@ -196,10 +197,10 @@ class TrainingsProvider with ChangeNotifier {
       loadingText = 'Меняем фото';
       notifyListeners();
       var docRef = FirebaseStorage.instance.ref('trainings/${item.id}');
-      await docRef.putFile(newData['video']);
+      await docRef.putFile(newData['image']);
       item.image = newData['image'];
       newData.remove('image');
-
+      newData['image'] = 'trainings/${item.id}';
       item.image = await item.image!.copy('$path/${item.id}');//COPY FILE IN DOCUMENTS
 
     }
@@ -217,12 +218,12 @@ class TrainingsProvider with ChangeNotifier {
     }
     await docRef.update(newData);
 
-    await DBHelper.insert('exercises', { //INSERT EDITED TRAININGS IN DATABASE
+    await DBHelper.insert('trainings', { //INSERT EDITED TRAININGS IN DATABASE
       'id': item.id,
       'title': item.title,
       'description': item.description ?? 'null',
-      'sections': newData['sections'],
-      'is_set': item.isSet,
+      'sections': jsonEncode(newData['sections']),
+      'is_set': item.isSet? 1:0,
       'image': item.image == null ? 'null' : '$path/${item.id}',
       'version': item.version
     });
@@ -241,6 +242,12 @@ class TrainingsProvider with ChangeNotifier {
     var docRef = FirebaseFirestore.instance.doc('trainings/${training.id}');
     await docRef.delete();
     _items.removeWhere((element) => element.id == training.id);
+    if(training.isSet){
+    var refFile = FirebaseStorage.instance.ref('trainings/${training.id}');
+    await refFile.delete();
+    }
+
+
     // ignore: use_build_context_synchronously
     notifyListeners();
     loadingText = '';

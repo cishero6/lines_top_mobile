@@ -23,6 +23,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
   final TextEditingController _bodyTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   late BuildContext _dialogContext;
+  bool _isPrimary = false;
 
 
 
@@ -50,6 +51,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
         title: _titleController.text,
         bodyText: _bodyTextController.text,
         shortDesc: _shortDescriptionController.text,
+        isPrimary: _isPrimary,
         images: [
           File(_mainImage!.path),
           ..._otherImages.map((image) => File(image!.path)),
@@ -251,6 +253,19 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
                       const Divider(
                         thickness: 6,
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Checkbox.adaptive(value: _isPrimary, onChanged: (value)=>setState(() {
+                            _isPrimary = value ?? false;
+                          })),
+                          Text('Главный пост',style: Theme.of(context).textTheme.labelMedium,),
+                        ],
+                      ),
+                      const Divider(
+                        thickness: 6,
+                      ),
+
                       const SizedBox(height: 20),
                       ElevatedButton(
                           onPressed: _submit, child: const Text('Подтвердить'))

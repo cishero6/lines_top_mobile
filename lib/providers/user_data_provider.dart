@@ -13,14 +13,33 @@ class UserDataProvider with ChangeNotifier{
   bool? paidAccount;
   Map<String,List<int>>? progress;
   List<String>? savedBlogPostIds;
+  final Stream<User?> _authStateStream = FirebaseAuth.instance.authStateChanges();
+
+
+  void setListener(){
+    _authStateStream.listen((event) {
+      if(event == null){
+        userName = null;
+        userId = null;
+        email = null;
+        paidAccount = null;
+        progress = null;
+        savedBlogPostIds = null;
+        return;
+      }
+      if(event.uid != ''){
+        loadData(event.uid);
+      }
+    });
+  }
 
 
 
-  Future<bool> checkAuth() async {
-    if(FirebaseAuth.instance.currentUser == null){
-      return Future.value(true);
-    }
+
+
+  Future<bool> loadData(String uid) async {
     var userData = await DBHelper.getData('user_data');
+    if (userData.isNotEmpty){
     userId = userData.first['id'];
     userName = userData.first['username'];
     email = userData.first['email'];
@@ -28,6 +47,35 @@ class UserDataProvider with ChangeNotifier{
     progress = jsonDecode(userData.first['progress']);
     savedBlogPostIds = jsonDecode(userData.first['saved_posts']);
     isAuth = true;
+    notifyListeners();
+    return true;
+    }
+    var docRef = FirebaseFirestore.instance.doc('users/$uid');
+    var doc = await docRef.get();
+    if(!doc.exists){
+      return false;
+    }
+    userId = doc.id;
+    userName = doc['username'];
+    email = doc['email'];
+    paidAccount = doc['paid_account'];
+    var savedDynamic = doc['saved_posts'] as List<dynamic>;
+    savedBlogPostIds = [];
+    for (String el in savedDynamic) {
+      savedBlogPostIds!.add(el);
+    }
+    Map<String, List<int>> tempProgress = {};
+    var progressDynamic = doc['progress'] as Map<String, dynamic>;
+    for (String prName in progressDynamic.keys) {
+      List<int> temp = [];
+      for (int i = 0; i < progressDynamic[prName].length; i++) {
+        temp.add(progressDynamic[prName][i]);
+      }
+      tempProgress.addAll({prName: temp});
+    }
+    progress = tempProgress;
+    isAuth = true;
+    notifyListeners();
     return true;
   }
 
@@ -79,15 +127,6 @@ class UserDataProvider with ChangeNotifier{
 
   Future<bool> registerUser(String userName,String email,String password,{required BuildContext context}) async {
       try {
-      var usersListRef = FirebaseFirestore.instance.doc('dev_collection/usernames');
-      List<dynamic> usersList = (await usersListRef.get()).data()!['list'];
-      if(usersList.contains(userName.trim())){
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).clearSnackBars();
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Такое имя пользователя уже используется')));
-        return false;
-      }
       var userCredentials = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
       this.userName = userName.trim();
       this.email = email.trim();
@@ -108,8 +147,6 @@ class UserDataProvider with ChangeNotifier{
         'progress': progress,
         'saved_posts': [],
       });
-      usersList.add(this.userName);
-      usersListRef.update({'list': usersList});
       isAuth = true;
       savedBlogPostIds = [];
       notifyListeners();
@@ -198,10 +235,13 @@ class UserDataProvider with ChangeNotifier{
   }
 
 
+
+
   Future<void> changeAllVersions() async {
     var exRef = FirebaseFirestore.instance.collection('exercises');
     var blogRef = FirebaseFirestore.instance.collection('blog_posts');
     var prRef = FirebaseFirestore.instance.collection('programs');
+    var trRef = FirebaseFirestore.instance.collection('trainings');
     var exercises = (await exRef.get()).docs;
     for(var ex in exercises){
       var ref = exRef.doc(ex.id);
@@ -216,6 +256,11 @@ class UserDataProvider with ChangeNotifier{
     for(var pr in programs){
       var ref = prRef.doc(pr.id);
       await ref.update({'version': pr['version']+1});
+    }
+    var trainings = (await trRef.get()).docs;
+    for(var tr in trainings){
+      var ref = trRef.doc(tr.id);
+      await ref.update({'version': tr['version']+1});
     }
   }
   

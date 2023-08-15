@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
-import 'package:lines_top_mobile/helpers/file_from_asset.dart';
 import 'package:path_provider/path_provider.dart';
 import '../helpers/file_from_url.dart';
 import '../models/program.dart';
@@ -20,11 +19,115 @@ class ProgramsProvider with ChangeNotifier {
 
   String loadingText = '';
 
-  Future<List<Program>> fetchAndSetItems(BuildContext context) async {
-    _items = [];
+  Future<bool> fetchAndSetItems(bool internetConnected,BuildContext context) async {
     var trainings =
         Provider.of<TrainingsProvider>(context, listen: false).items;
-    var itemsDB = await DBHelper.getData('programs');
+    _items = [];
+    //1 ЭТАП
+    List<Map<String, dynamic>> itemsDB = await DBHelper.getData('programs');
+    if (itemsDB.isNotEmpty) {
+      for (var item in itemsDB) {
+        List<String> listOfString = item['trainings'].split('|');
+        List<Training> listOfTrainings = listOfString.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList(); //ИНОГДА ВЫЛЕТ
+        _items.add(
+          Program(
+            id: item['id'],
+            title: item['title'],
+            subtext: item['subtext'],
+            bodyText: item['body_text'],
+            image: File(item['image']),
+            trainings: listOfTrainings,
+            isFree: item['is_free']==1,
+            version: item['version'],
+          ),
+        );
+      }
+    }
+    //2
+    if (itemsDB.isNotEmpty && !internetConnected) {
+      return true;
+    }
+    if (itemsDB.isEmpty && !internetConnected) {
+      //load assets
+      return true;
+    }
+    try{
+      var path = (await getApplicationDocumentsDirectory()).path;
+      var qSnapshot =
+        await FirebaseFirestore.instance.collection('programs')
+        .orderBy('priority')
+        .get();
+      var docs = qSnapshot.docs;
+      List<Program> firebaseItems = [];
+      for(var docSnapshot in docs){
+        var doc = docSnapshot.data();
+        List<dynamic> listOfString1 = doc['trainings'];
+        List<String> listOfString2 = List<String>.generate(listOfString1.length, (index) => listOfString1[index]);
+        List<Training> listOfTrainings = listOfString2.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList();
+        Program program = Program(
+          id: docSnapshot.id,
+          title: doc['title'],
+          subtext: doc['subtext'],
+          bodyText: doc['body_text'],
+          trainings: listOfTrainings,
+          isFree: doc['is_free'],
+          version: doc['version'],
+        );
+        if((_items.indexWhere((element) => element.id == program.id) == -1) || (_items.singleWhere((element) => element.id == program.id)).version != program.version){
+          print('start pr LOAD');
+          var imageRef = FirebaseStorage.instance.ref('programs/${program.id}');
+          var downloadURL = await imageRef.getDownloadURL();
+          File tempFile = await fileFromUrl(downloadURL, program.id);
+          File file = await tempFile.copy('$path/${program.id}');
+          program.image = file;
+          firebaseItems.add(program);
+
+
+          String trainingsArr = '';
+          for(var tr in program.trainings){
+            trainingsArr += '${tr.id}|';
+          }
+          trainingsArr = trainingsArr.substring(0,trainingsArr.length-1);
+          DBHelper.insert('programs', {
+            'id': program.id,
+            'title': program.title,
+            'subtext': program.subtext,
+            'body_text': program.bodyText,
+            'is_free': program.isFree ? 1:0,
+            'image': '$path/${program.id}',
+            'trainings': trainingsArr,
+            'version': program.version
+          });
+        }else{
+          print('start pr EXIST');
+          firebaseItems.add(_items.singleWhere((element) => element.id == program.id));
+        }
+      }
+      _items = [...firebaseItems];
+    } on FirebaseException catch(e){
+      print(e);
+      return false;
+    }
+    return true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+/*
     var storage = FirebaseStorage.instance;
     var qSnapshot = await FirebaseFirestore.instance
         .collection('programs')
@@ -77,7 +180,7 @@ class ProgramsProvider with ChangeNotifier {
           .toList();
       _items.add(program);
     }
-    return [..._items];
+    */
   }
 
   Future<void> addProgram(Program newProgram) async {
@@ -139,8 +242,7 @@ class ProgramsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addProgramFromMap(Map<String, dynamic> map) async {}
-  Future<void> addProgramFromMapWithLink(Map<String, dynamic> map) async {}
+
 
   Future<String?> editItem(
       Program program, Map<String, dynamic> newData) async {

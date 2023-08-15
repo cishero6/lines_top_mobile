@@ -229,23 +229,23 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
     _isBuilt= true;
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/temp/app_bar.png'),fit: BoxFit.cover)),
+        decoration: BoxDecoration(image: DecorationImage(image: FileImage(widget.blogPost.images.first),fit: BoxFit.cover,opacity: 0.5)),
         child: CustomScrollView(
           slivers: [
-            SliverAppBar.large(
+            SliverAppBar.medium(
+              pinned:false,
               centerTitle: true,
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Colors.transparent,
               title: SlideTransition(
                 position: _titleSlideAnimation,
                 child: FadeTransition(
                   opacity: _titleFadeAnimation,
                   child: Text(
                     widget.blogPost.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-              pinned: true,
               scrolledUnderElevation: 0,
             ),
             SliverToBoxAdapter(

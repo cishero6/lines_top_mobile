@@ -20,11 +20,12 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
   late List<Program> _programs;
   List<Training> _chosenTrainings = [];
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();  
   late XFile? _pickedPhoto = null;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _bodyTextController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
+
   final ScrollController _scrollController = ScrollController();
   Color _containerColor = Colors.white70;
   late BuildContext _dialogContext;
@@ -102,7 +103,7 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
 
   @override
   void initState() {
-    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items;
+    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items.where((element) => !element.isSet).toList();
     _programs = Provider.of<ProgramsProvider>(context, listen: false).items;
     super.initState();
   }
@@ -253,7 +254,7 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
                           child: Column(
                             children: [
                               Text(
-                                'Упражнения',
+                                'Все тренировки',
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 textAlign: TextAlign.center,
                               ),

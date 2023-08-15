@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
-import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screen.dart';
-import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
-import '../../models/program.dart';
-import '../../screens/details_screens/program_details_screen.dart';
+import 'package:lines_top_mobile/models/program.dart';
 import 'package:provider/provider.dart';
+
+import '../../helpers/parallax_flow_delegate.dart';
+import '../../providers/bottom_navigation_provider.dart';
 import '../../providers/user_data_provider.dart';
+import '../../screens/details_screens/program_details_screen.dart';
+import '../../screens/navigation_bar_screens/profile_screen.dart';
+import '../../screens/program_process_screens/trainings_list_screen.dart';
 
 class ProgramListItem extends StatefulWidget {
-  final double? width;
   final Program program;
+  const ProgramListItem(this.program, {super.key});
 
-  ProgramListItem(
-      this.program,
-      {this.width});
   @override
   State<ProgramListItem> createState() => _ProgramListItemState();
 }
 
-class _ProgramListItemState extends State<ProgramListItem> {  
+class _ProgramListItemState extends State<ProgramListItem> {
+  final GlobalKey _backgroundImageKey = GlobalKey();
 
-  void _tryStart(){
-    if (Provider.of<UserDataProvider>(context,listen: false).isAuth) {
-      Navigator.of(context).pushNamed(TrainingsListScreen.routeName,arguments: [widget.program]);
+
+
+
+  void _tryStart() {
+    if (Provider.of<UserDataProvider>(context, listen: false).isAuth) {
+      Navigator.of(context).pushNamed(TrainingsListScreen.routeName,
+          arguments: [widget.program]);
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Theme.of(context).cardColor,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -47,7 +51,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
                   child: Text(
                     'Войти',
                     style: Theme.of(context).textTheme.bodyMedium,
-                  ))
+                  ),),
             ],
           ),
         ),
@@ -56,83 +60,125 @@ class _ProgramListItemState extends State<ProgramListItem> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
-      decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(40)),
-      padding: const EdgeInsets.only(bottom: 8),
-      width: widget.width ?? double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+
+
+
+  Widget _buildParallaxBackground(BuildContext context) {
+    return Flow(
+        delegate: ParallaxFlowDelegate(
+          scrollable: Scrollable.of(context),
+          listItemContext: context,
+          backgroundImageKey: _backgroundImageKey,
+          isHorizontal: true,
+        ),
         children: [
-          //Flexible(flex: 6,child: Image.network(widget.imageUrl,width: double.infinity,),),
-            Flexible(
-            flex: 5,
-            fit: FlexFit.tight,
-            child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40)),
-                child: Image.file(widget.program.image,fit: BoxFit.cover,width: double.infinity,) ),
+          Image.file(
+            widget.program.image,
+            key: _backgroundImageKey,
+            fit: BoxFit.cover,
           ),
-          Flexible(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text(
-                  widget.program.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              )),
-          Flexible(
-            flex: 2,
-            fit: FlexFit.tight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        ]);
+  }
+
+  Widget _buildGradient() {
+    return Positioned.fill(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: const [0.6, 0.95],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleAndSubtitle() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.program.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.6,
               child: Text(
                 widget.program.subtext,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall,
-                maxLines: 6,
+                maxLines: 4,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
               ),
             ),
-          ),
-          Flexible(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
-                        onPressed: (){
-                          Navigator.of(context).pushNamed(ProgramDetailsScreen.routeName,arguments: [widget.program]);
-                        },
-                        child: Text(
-                          'Подробнее',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
-                      const SizedBox(width: 12,),
-                      ElevatedButton(
-                        style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.background),shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)))),
-                        onPressed: _tryStart,
-                        child: Text(
-                          'Начать',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
-                    ],
+            const SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          const MaterialStatePropertyAll(Colors.white60),
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40)))),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(
+                        ProgramDetailsScreen.routeName,
+                        arguments: [widget.program]);
+                  },
+                  child: Text(
+                    'Подробнее',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-              )),
-        ],
+                const SizedBox(
+                  width: 12,
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          const MaterialStatePropertyAll(Colors.white60),
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40)))),
+                  onPressed: _tryStart,
+                  child: Text(
+                    'Начать',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 26),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Stack(children: [
+          _buildParallaxBackground(context),
+          _buildGradient(),
+          _buildTitleAndSubtitle(),
+        ]),
       ),
     );
   }

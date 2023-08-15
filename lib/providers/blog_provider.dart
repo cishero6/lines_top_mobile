@@ -33,6 +33,7 @@ class BlogProvider with ChangeNotifier {
           shortDesc: item['short_desc'],
           bodyText: item['body_text'],
           date: item['date'],
+          isPrimary: item['is_primary'] == 1,
           version: item['version'],
         ),
       );
@@ -68,6 +69,7 @@ class BlogProvider with ChangeNotifier {
         BlogPost blogPost = BlogPost(
           id: docSnapshot.id,
           title: doc['title'],
+          isPrimary: doc['is_primary'],
           shortDesc: doc['short_desc'],
           bodyText: doc['body_text'],
           date: doc['date'],
@@ -90,6 +92,7 @@ class BlogProvider with ChangeNotifier {
               index++;
               blogPost.images.add(file);
             } catch (e) {
+              print('error loading $e');
               blogPost.images
                   .add(await fileFromAsset('assets/temp/bubbles1.jpeg'));
             }
@@ -103,6 +106,7 @@ class BlogProvider with ChangeNotifier {
             'body_text': blogPost.bodyText,
             'date': blogPost.date,
             'images': pathsOfImages,
+            'is_primary': blogPost.isPrimary ? 1:0,
             'version': blogPost.version,
           });
         }else{
@@ -117,7 +121,7 @@ class BlogProvider with ChangeNotifier {
         return bDF.parse(b.date).compareTo(aDF.parse(a.date));
       });
     } on FirebaseException catch (error) {
-      print(error);
+      print('blog fetch error $error');
       return false;
     }
     return true;
@@ -200,6 +204,7 @@ class BlogProvider with ChangeNotifier {
       'short_desc': newPost.shortDesc,
       'body_text': newPost.bodyText,
       'date': newPost.date,
+      'is_primary': newPost.isPrimary,
       'images': ['null'],
       'version': 0,
     };
@@ -207,12 +212,9 @@ class BlogProvider with ChangeNotifier {
 
     var docReference = collectionReference.doc(newId); //LOADING IMAGES TO FIREBASE
     await docReference.set(mapPost);
-    loadingText = 'Загружаем фото 1/${newPost.images.length}';
-    notifyListeners();
     var ref =
-        FirebaseStorage.instance.ref().child('blog').child(newId).child('main');
-    await ref.putFile(newPost.images[0]).whenComplete(() {});
-    for (int i = 1; i < newPost.images.length; i++) {
+        FirebaseStorage.instance.ref().child('blog').child(newId).child('0');
+    for (int i = 0; i < newPost.images.length; i++) {
       loadingText = 'Загружаем фото ${i + 1}/${newPost.images.length}';
       notifyListeners();
       ref =
@@ -225,9 +227,8 @@ class BlogProvider with ChangeNotifier {
     notifyListeners();
     await docReference.update({ //UPDATING IMAGES INFO
       'images': [
-        'blog/$newId/main',
         ...List.generate(
-            newPost.images.length - 1, (index) => 'blog/$newId/${index + 1}')
+            newPost.images.length, (index) => 'blog/$newId/$index')
       ],
     });
 
@@ -238,6 +239,7 @@ class BlogProvider with ChangeNotifier {
     for(var image in newPost.images){
       image = await image.copy('$path/${newPost.id}_$index');
       pathsOfImages += '$path/${newPost.id}_$index|';
+      index++;
     }
     pathsOfImages  = pathsOfImages.substring(0,pathsOfImages.length-1);
 
@@ -248,6 +250,7 @@ class BlogProvider with ChangeNotifier {
       'title': newPost.title,
       'body_text': newPost.bodyText,
       'short_desc': newPost.shortDesc,
+      'is_primary': newPost.isPrimary ?1:0,
       'date': newPost.date,
       'images': pathsOfImages,
       'version': newPost.version
@@ -292,16 +295,17 @@ class BlogProvider with ChangeNotifier {
     if (newData.containsKey('body_text')) {
       item.bodyText = newData['body_text'];
     }
+    if(newData.containsKey('is_primary')){
+      item.isPrimary = newData['is_primary'];
+    }
+        String pathsOfImages = '';
     if (newData.containsKey('images')) {
       item.images = [];
       loadingText = 'Обновляем фотографии';
       notifyListeners();
-      var mainRef = FirebaseStorage.instance.ref('blog/${item.id}/main');
       Reference ref;
-      await mainRef.putFile(newData['images'][0]);
-      item.images.add(newData['images'][0]);
-      List<String> refImages = ['blog/${item.id}/main'];
-      for (int i = 1; i < newData['images'].length; i++) {
+      List<String> refImages = [];
+      for (int i = 0; i < newData['images'].length; i++) {
         loadingText =
             'Обновляем фотографии ${i + 1}/${newData['images'].length}';
         notifyListeners();
@@ -311,14 +315,7 @@ class BlogProvider with ChangeNotifier {
         refImages.add('blog/${item.id}/$i');
       }
       newData['images'] = refImages;
-    }
-    newData.addEntries({'version': item.version + 1}.entries);
-    item.version++;
-    await docRef.update(newData);
-    
-    
-    var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
-    String pathsOfImages = '';
+      var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
     int index = 0;
     for(var image in item.images){
       image = await image.copy('$path/${item.id}_$index');
@@ -327,12 +324,20 @@ class BlogProvider with ChangeNotifier {
     pathsOfImages  = pathsOfImages.substring(0,pathsOfImages.length-1);
 
 
+    }
+    newData.addEntries({'version': item.version + 1}.entries);
+    item.version++;
+    await docRef.update(newData);
+    
+
     newData['images'] = pathsOfImages;
+
     await DBHelper.insert('blog_posts', { //INSERT EDITED POST IN DATABASE
       'id': item.id,
       'title': item.title,
       'body_text': item.bodyText,
       'short_desc': item.shortDesc,
+      'is_primary': item.isPrimary ? 1:0,
       'date': item.date,
       'images': pathsOfImages,
       'version': item.version
@@ -347,9 +352,8 @@ class BlogProvider with ChangeNotifier {
   Future<void> deleteItem(BlogPost blogPost, [BuildContext? context]) async {
     loadingText = 'Удаляем пост';
     notifyListeners();
-    var photoRef = FirebaseStorage.instance.ref('blog/${blogPost.id}/main');
-    await photoRef.delete();
-    for (int i = 1; i <= blogPost.images.length - 1; i++) {
+    var photoRef = FirebaseStorage.instance.ref('blog/${blogPost.id}/0');
+    for (int i = 0; i <= blogPost.images.length - 1; i++) {
       photoRef = FirebaseStorage.instance.ref('blog/${blogPost.id}/$i');
       await photoRef.delete();
     }

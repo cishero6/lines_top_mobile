@@ -136,6 +136,7 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
     }
 
     _secondIsPrimary = !_secondIsPrimary;
+    setState(() {});
   }
 
   void _previousPage() async {
