@@ -26,6 +26,9 @@ class Training extends LinesTopModel{
       description = null;
     }
   }
-
+  @override
+  String toString() {
+    return 'Training - $id';
+  }
 
 }

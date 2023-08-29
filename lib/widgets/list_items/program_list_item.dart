@@ -97,72 +97,75 @@ class _ProgramListItemState extends State<ProgramListItem> {
   }
 
   Widget _buildTitleAndSubtitle() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.program.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.6,
-              child: Text(
-                widget.program.subtext,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 4,
+    return InkWell(
+      onTap: _tryStart,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.program.title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            const SizedBox(height: 10,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor:
-                          const MaterialStatePropertyAll(Colors.white60),
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(40)))),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(
-                        ProgramDetailsScreen.routeName,
-                        arguments: [widget.program]);
-                  },
-                  child: Text(
-                    'Подробнее',
-                    style: Theme.of(context).textTheme.titleMedium,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.6,
+                child: Text(
+                  widget.program.subtext,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 4,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
                   ),
                 ),
-                const SizedBox(
-                  width: 12,
-                ),
-                ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor:
-                          const MaterialStatePropertyAll(Colors.white60),
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(40)))),
-                  onPressed: _tryStart,
-                  child: Text(
-                    'Начать',
-                    style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            const MaterialStatePropertyAll(Colors.white60),
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40)))),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                          ProgramDetailsScreen.routeName,
+                          arguments: [widget.program]);
+                    },
+                    child: Text(
+                      'Подробнее',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            const MaterialStatePropertyAll(Colors.white60),
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40)))),
+                    onPressed: _tryStart,
+                    child: Text(
+                      'Начать',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

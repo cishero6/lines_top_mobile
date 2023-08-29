@@ -32,20 +32,26 @@ class _AuthViewState extends State<AuthView> with TickerProviderStateMixin{
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    FocusManager.instance.primaryFocus!.unfocus();
     _isLoading = true;
     setState(() {});
+String result;
     if (_isReg) {
-      await Provider.of<UserDataProvider>(context, listen: false).registerUser(
+      result = await Provider.of<UserDataProvider>(context, listen: false).registerUser(
           _usernameController.text.trim(),
           _emailController.text,
           _passwordController.text,
           context: context);
     } else {
-      await Provider.of<UserDataProvider>(context, listen: false).loginUser(
+      result =await Provider.of<UserDataProvider>(context, listen: false).loginUser(
           _emailController.text, _passwordController.text,
           context: context);
     }
     _isLoading = false;
+    if(result != 'Успешно!'){
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result,style:Theme.of(context).textTheme.titleMedium),backgroundColor: Colors.white70,));
+    }
     setState(() {});
   }
 

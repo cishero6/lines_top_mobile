@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:path_provider/path_provider.dart';
 import '../helpers/file_from_url.dart';
+import '../helpers/network_connectivity.dart';
 import '../models/program.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +20,7 @@ class ProgramsProvider with ChangeNotifier {
 
   String loadingText = '';
 
-  Future<bool> fetchAndSetItems(bool internetConnected,BuildContext context) async {
+  Future<bool> fetchAndSetItems(BuildContext context) async {
     var trainings =
         Provider.of<TrainingsProvider>(context, listen: false).items;
     _items = [];
@@ -44,10 +45,11 @@ class ProgramsProvider with ChangeNotifier {
       }
     }
     //2
-    if (itemsDB.isNotEmpty && !internetConnected) {
+    var isOnline = await NetworkConnectivity.checkConnection();
+    if (itemsDB.isNotEmpty && !isOnline) {
       return true;
     }
-    if (itemsDB.isEmpty && !internetConnected) {
+    if (itemsDB.isEmpty && !isOnline) {
       //load assets
       return true;
     }
@@ -340,16 +342,35 @@ class ProgramsProvider with ChangeNotifier {
         return 'Невозможно удалить: Тренировка является есдинственной в программе ${program['title']}';
       }
     }
+    List<String> programsIdsNeedReset = [];
     for (QueryDocumentSnapshot<Map<String, dynamic>> program in programs) {
       var doc = program.data();
       if (doc['trainings'].contains(training.id)) {
         doc['trainings'].remove(training.id);
+        programsIdsNeedReset.add(program.id);
       }
       await programsRef.doc(program.id).update({'trainings': doc['trainings']});
     }
     for (Program item in _items) {
       item.trainings.removeWhere((element) => element == training);
     }
+
+      await _resetProgramsProgressForEveryone(programsIdsNeedReset);
     return null;
+  }
+
+
+
+  Future<void> _resetProgramsProgressForEveryone(List<String> programIds)async{
+    var usersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+    var usersData = usersSnapshot.docs; 
+    for(var userSnapshot in usersData){
+      var newProgress = userSnapshot.data()['progress'];
+      for(var prId in programIds){
+        newProgress['progress'][prId] = List.generate(items.singleWhere((element) => element.id == prId).trainings.length, (index) => 0);
+      }
+      await FirebaseFirestore.instance.doc('users/${userSnapshot.id}').update(newProgress);
+    }
+    return;
   }
 }

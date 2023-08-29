@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/models/blog_post.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
-import 'package:provider/provider.dart';
-
-import '../../providers/bottom_navigation_provider.dart';
-import '../navigation_bar_screens/profile_screen.dart';
 
 // ignore: must_be_immutable
 class BlogPostDetailsScreen extends StatefulWidget {
@@ -30,7 +25,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
   late Animation<double> _titleFadeAnimation;
   late Animation<Offset> _subtextSlideAnimation;
   late Animation<double> _subtextFadeAnimation;
-  late Animation<double> _buttonScaleAnimation;
+  //late Animation<double> _buttonScaleAnimation;
   final List<Map<String, Animation>> _widgetsAnimations = [];
 
   
@@ -59,11 +54,13 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
             .animate(CurvedAnimation(
                 parent: _secondController,
                 curve: Curves.fastLinearToSlowEaseIn));
-    _buttonScaleAnimation = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: _thirdController, curve: Curves.fastLinearToSlowEaseIn));
+    //_buttonScaleAnimation = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+     //   parent: _thirdController, curve: Curves.fastLinearToSlowEaseIn));
     super.initState();
   }
 
+
+/*
   void _toggleSaved(bool contains) async {
     if (!Provider.of<UserDataProvider>(context, listen: false).isAuth) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -106,6 +103,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
       setState(() {});
     }
   }
+  */
 
   void _constructWidgets(BuildContext ctx) {
     int index = 1;
@@ -213,6 +211,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
+    /*
     bool contains = Provider.of<UserDataProvider>(context, listen: false)
                 .savedBlogPostIds ==
             null
@@ -220,6 +219,8 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
         : Provider.of<UserDataProvider>(context, listen: false)
             .savedBlogPostIds!
             .contains(widget.blogPost.id);
+
+    */
     _formattedText = widget.blogPost.bodyText.split('|');
     if(!_isBuilt){
     _constructWidgets(context);
@@ -242,7 +243,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
                   opacity: _titleFadeAnimation,
                   child: Text(
                     widget.blogPost.title,
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color:Colors.white),
                   ),
                 ),
               ),
@@ -271,6 +272,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
               ),
             ),
             SliverList.list(children: _widgets),
+            /*
              SliverToBoxAdapter(
                child: UnconstrainedBox(
                  child: ScaleTransition(
@@ -286,6 +288,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
                  ),
                ),
              ),
+             */
              const SliverToBoxAdapter(child: SizedBox(height: 50),),
           ],
         ),

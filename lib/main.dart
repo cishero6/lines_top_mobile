@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/screens/intro_screen.dart';
+import 'package:path_provider/path_provider.dart';
 import './providers/blog_provider.dart';
-import 'package:flutter/services.dart'; // For rootBundle
 import './providers/trainings_provider.dart';
-import 'dart:convert'; // For jsonDecode
 import './screens/main_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -10,7 +12,6 @@ import 'package:provider/provider.dart';
 import './providers/programs_provider.dart';
 import 'providers/bottom_navigation_provider.dart';
 import 'providers/exercises_provider.dart';
-import 'package:json_theme/json_theme.dart';
 import './helpers/color_schemes.g.dart';
 
 import 'providers/section_name_provider.dart';
@@ -21,19 +22,15 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  final themeStr =
-      await rootBundle.loadString('assets/theme/appainter_theme.json');
-  final themeJson = jsonDecode(themeStr);
-  var theme = ThemeDecoder.decodeThemeData(themeJson)!;
-  runApp(MyApp(
-    theme: theme,
-  ));
+  var path = await getApplicationDocumentsDirectory();
+  File fileFirstBuild = File('$path/firstBuild.txt');
+  bool isFirst = !(await fileFirstBuild.exists());
+  runApp(MyApp(isFirstBuild: isFirst,));
 }
 
 class MyApp extends StatelessWidget {
-  final ThemeData theme;
-  const MyApp({super.key, required this.theme});
-  // This widget is the root of your application.
+  final bool isFirstBuild;
+  const MyApp({required this.isFirstBuild ,super.key});
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -70,7 +67,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: lightColorScheme,
             fontFamily: 'SourceSerifPro'),
-        home: const MainScreen(),
+        home: (isFirstBuild ? const IntroScreen() : const MainScreen(didFetch: false)),
       ),
     );
   }

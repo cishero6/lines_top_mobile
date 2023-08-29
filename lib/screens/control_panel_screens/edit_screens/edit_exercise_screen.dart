@@ -54,7 +54,7 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
       newData.addAll({'title': _titleController.text});
     }
     if (_descriptionController.text != widget.exercise.description) {
-      newData.addAll({'description': _titleController.text});
+      newData.addAll({'description': _descriptionController.text});
     }
     if (_pickedVideo != null) {
       newData.addAll({'video': File(_pickedVideo!.path)});

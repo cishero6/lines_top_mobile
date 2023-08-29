@@ -6,6 +6,7 @@ import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/helpers/file_from_asset.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../helpers/network_connectivity.dart';
 import '../models/blog_post.dart';
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class BlogProvider with ChangeNotifier {
 
   String loadingText = '';
 
-  Future<bool> fetchAndSetItems(bool internetConnected,[BuildContext? ctx]) async {
+  Future<bool> fetchAndSetItems([BuildContext? ctx]) async {
     _items = [];
     //1 ЭТАП
     List<Map<String, dynamic>> itemsDB = await DBHelper.getData('blog_posts');
@@ -43,7 +44,8 @@ class BlogProvider with ChangeNotifier {
       }
     }
     //2
-    if(itemsDB.isNotEmpty && !internetConnected){
+    var isOnline = await NetworkConnectivity.checkConnection();
+    if(itemsDB.isNotEmpty && !isOnline){
       _items.sort((a, b) {
         DateFormat aDF, bDF;
         aDF = DateFormat('dd-MM-yyyy HH:mm');
@@ -52,7 +54,7 @@ class BlogProvider with ChangeNotifier {
     });
       return true;
     }
-    if(itemsDB.isEmpty && !internetConnected){
+    if(itemsDB.isEmpty && !isOnline){
       //load assets
       return true;
     }

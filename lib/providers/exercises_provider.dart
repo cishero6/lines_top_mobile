@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../helpers/db_helper.dart';
 import '../helpers/file_from_url.dart';
+import '../helpers/network_connectivity.dart';
 import 'trainings_provider.dart';
 
 class ExercisesProvider with ChangeNotifier {
@@ -19,7 +20,7 @@ class ExercisesProvider with ChangeNotifier {
 
   String loadingText = '';
 
-  Future<bool> fetchAndSetItems(bool internetConnected,
+  Future<bool> fetchAndSetItems(
       [BuildContext? ctx]) async {
     _items = [];
     //1 ЭТАП
@@ -38,10 +39,11 @@ class ExercisesProvider with ChangeNotifier {
       }
     }
     //2
-    if (itemsDB.isNotEmpty && !internetConnected) {
+    var isOnline = await NetworkConnectivity.checkConnection();
+    if (itemsDB.isNotEmpty && !isOnline) {
       return true;
     }
-    if (itemsDB.isEmpty && !internetConnected) {
+    if (itemsDB.isEmpty && !isOnline) {
       //load assets
       return true;
     }
@@ -59,6 +61,12 @@ class ExercisesProvider with ChangeNotifier {
           description: doc['description'],
           version: doc['version'],
         );
+        if(_items.indexWhere((element) => element.id == exercise.id) != -1){
+          var dbEx = _items.singleWhere((element) => element.id == exercise.id);
+          if ((dbEx.version == exercise.version) && (dbEx.video != null)){
+            exercise.video = dbEx.video;
+          }
+        }
         firebaseItems.add(exercise);
         DBHelper.insert('exercises', {
           'id': exercise.id,
@@ -67,6 +75,7 @@ class ExercisesProvider with ChangeNotifier {
           'version': exercise.version,
           'video': 'null',
         });
+
       }
       _items = [...firebaseItems];
     } on FirebaseException catch (error) {

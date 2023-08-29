@@ -1,13 +1,22 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:lines_top_mobile/screens/details_screens/blog_post_details_screen.dart';
+import 'package:lines_top_mobile/screens/profile_screens/add_parameters_screen.dart';
+import 'package:lines_top_mobile/screens/profile_screens/change_data_screen.dart';
+import 'package:lines_top_mobile/screens/profile_screens/parameters_screen.dart';
+import 'package:lines_top_mobile/screens/profile_screens/programs_progress_screen.dart';
+import 'package:lines_top_mobile/screens/profile_screens/register_parameters_screen.dart';
+import 'package:lines_top_mobile/screens/program_process_screens/load_set_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
-import '../helpers/network_connectivity.dart';
 import '../providers/exercises_provider.dart';
 import '../widgets/my_bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import './navigation_bar_screens/blog_screen.dart';
 import './navigation_bar_screens/profile_screen.dart';
 import './navigation_bar_screens/programs_screen.dart';
+import './navigation_bar_screens/info_screen.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../providers/blog_provider.dart';
@@ -30,7 +39,8 @@ import 'program_process_screens/exercise_process_screen.dart';
 import 'program_process_screens/sections_list_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final bool didFetch;
+  const MainScreen({required this.didFetch,super.key});
   static const routeName = '/';
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -41,37 +51,29 @@ class _MainScreenState extends State<MainScreen> {
 
   bool _isLoading = true;
   String _loadingText = '';
-  bool _isOnline = false;
   
 
   void _fetchEverything() async {
+    Provider.of<UserDataProvider>(context,listen:false).setListener();
     setState(() {
       _loadingText = 'Загружаем блог';
     });
-    _isOnline = await NetworkConnectivity.checkConnection();
-    // ignore: use_build_context_synchronously
-    await Provider.of<BlogProvider>(context, listen: false).fetchAndSetItems(_isOnline);
+    await Provider.of<BlogProvider>(context, listen: false).fetchAndSetItems();
     setState(() {
       _loadingText = 'Загружаем упражнения';
     });
-    _isOnline = await NetworkConnectivity.checkConnection();
-    // ignore: use_build_context_synchronously
     await Provider.of<ExercisesProvider>(context, listen: false)
-        .fetchAndSetItems(_isOnline);
+        .fetchAndSetItems();
     setState(() {
       _loadingText = 'Загружаем тренировки';
     });
-    _isOnline = await NetworkConnectivity.checkConnection();
-    // ignore: use_build_context_synchronously
     await Provider.of<TrainingsProvider>(context, listen: false)
-        .fetchAndSetItems(_isOnline,context);
+        .fetchAndSetItems(context);
     setState(() {
       _loadingText = 'Загружаем программы';
     });
-    _isOnline = await NetworkConnectivity.checkConnection();
-    // ignore: use_build_context_synchronously
     await Provider.of<ProgramsProvider>(context, listen: false)
-        .fetchAndSetItems(_isOnline,context);
+        .fetchAndSetItems(context);
     setState(() {
       _isLoading = false;
     });
@@ -79,7 +81,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    _fetchEverything();
+    if(!widget.didFetch){
+      _fetchEverything();
+    } else{
+      _isLoading = false;
+    }
     super.initState();
   }
 
@@ -123,20 +129,37 @@ class _MainScreenState extends State<MainScreen> {
               return PageTransition(child: const ProgramsScreen(), type: PageTransitionType.fade);
             case BlogScreen.routeName:
               return PageTransition(child: const BlogScreen(), type: PageTransitionType.fade);
+            case InfoScreen.routeName:
+              return PageTransition(child: const InfoScreen(), type: PageTransitionType.fade);
+            case ParametersScreen.routeName:
+                final List<dynamic> args = settings.arguments as List<dynamic>;
+                if(args[0]){
+              return PageTransition(child: const ParametersScreen(), type: PageTransitionType.bottomToTopJoined,childCurrent: args[1],curve: Curves.fastLinearToSlowEaseIn,duration: const Duration(seconds: 2));
+                }
+                return MaterialPageRoute(builder: (ctx)=> const ParametersScreen());
+            case ExerciseProcessScreen.routeName:
+              final List<dynamic> args = settings.arguments as List<dynamic>;
+              return PageTransition(child: ExerciseProcessScreen(args[0],args[1],programId: args[2],trainingIndex: args[3],), type: PageTransitionType.rightToLeft);
             case ControlScreen.routeName:
               return MaterialPageRoute(builder: (ctx)=> const ControlScreen());
+            case RegisterParametersScreen.routeName:
+              final List<dynamic> args = settings.arguments as List<dynamic>;
+              if(args[0]){
+              return PageTransition(child: const RegisterParametersScreen(), type: PageTransitionType.size,alignment: Alignment.center,curve: Curves.fastEaseInToSlowEaseOut,duration: const Duration(seconds: 1),reverseDuration: const Duration(seconds: 1));
+                }
+                return MaterialPageRoute(builder: (ctx)=> const RegisterParametersScreen());
             case ProgramDetailsScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> ProgramDetailsScreen(args[0]));
             case TrainingsListScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> TrainingsListScreen(args[0]));
+            case LoadSetScreen.routeName:
+              final List<dynamic> args = settings.arguments as List<dynamic>;
+              return MaterialPageRoute(builder: (ctx)=> LoadSetScreen(args[0],args[1]));
             case SectionsListScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> SectionsListScreen(args[0],programId: args[1],trainingIndex: args[2],));
-            case ExerciseProcessScreen.routeName:
-              final List<dynamic> args = settings.arguments as List<dynamic>;
-              return MaterialPageRoute(builder: (ctx)=> ExerciseProcessScreen(args[0],args[1],programId: args[2],trainingIndex: args[3],));
             case ControlPanelScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> ControlPanelScreen(args[0]));
@@ -164,6 +187,12 @@ class _MainScreenState extends State<MainScreen> {
               return MaterialPageRoute(builder: (ctx)=> const AllSetsScreen());
             case AllPostsScreen.routeName:
               return MaterialPageRoute(builder: (ctx)=> const AllPostsScreen());
+            case AddParametersScreen.routeName:
+              return MaterialPageRoute(builder: (ctx)=> const AddParametersScreen());
+            case ProgramsProgressScreen.routeName:
+              return MaterialPageRoute(builder: (ctx)=> const ProgramsProgressScreen());
+            case ChangeDataScreen.routeName:
+              return MaterialPageRoute(builder: (ctx)=> const ChangeDataScreen());
             case BlogPostDetailsScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> BlogPostDetailsScreen(args[0]));

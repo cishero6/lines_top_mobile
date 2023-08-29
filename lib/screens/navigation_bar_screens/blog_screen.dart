@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/blog_provider.dart';
-import 'package:lines_top_mobile/providers/trainings_provider.dart';
-import 'package:lines_top_mobile/widgets/list_items/primary_blog_item.dart';
-import 'package:lines_top_mobile/widgets/list_items/set_blog_item.dart';
+import '../../providers/blog_provider.dart';
+import '../../providers/trainings_provider.dart';
+import '../../widgets/list_items/primary_blog_item.dart';
+import '../../widgets/list_items/set_blog_item.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/blog_post.dart';
@@ -17,7 +17,7 @@ class BlogScreen extends StatefulWidget {
 }
 
 class _BlogScreenState extends State<BlogScreen> {
-  GlobalKey _key = GlobalKey();
+  final GlobalKey _key = GlobalKey();
 
   late List<BlogPost> _primaryPosts;
   late List<BlogPost> _secondaryPosts;
@@ -56,6 +56,7 @@ class _BlogScreenState extends State<BlogScreen> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
+              automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               centerTitle: false,
               title: Text(
@@ -72,7 +73,7 @@ class _BlogScreenState extends State<BlogScreen> {
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium!
-                    .copyWith(fontWeight: FontWeight.bold),
+                    .copyWith(fontWeight: FontWeight.bold,color:Colors.white),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -102,7 +103,7 @@ class _BlogScreenState extends State<BlogScreen> {
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium!
-                    .copyWith(fontWeight: FontWeight.bold),
+                    .copyWith(fontWeight: FontWeight.bold,color:Colors.white),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -128,7 +129,7 @@ class _BlogScreenState extends State<BlogScreen> {
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium!
-                    .copyWith(fontWeight: FontWeight.bold),
+                    .copyWith(fontWeight: FontWeight.bold,color:Colors.white),
                 textAlign: TextAlign.center,
               ),
             ),

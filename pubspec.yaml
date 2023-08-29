@@ -54,6 +54,9 @@ dependencies:
   path: ^1.8.3
   sqflite: ^2.3.0
   connectivity_plus: ^4.0.2
+  syncfusion_flutter_charts: ^22.2.9
+  flutter_launcher_icons: ^0.13.1
+  purchases_flutter: ^5.6.2
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +87,7 @@ flutter:
     - assets/temp/bubbles3.jpeg
     - assets/temp/app_bar.png
     - assets/temp/app_bar.jpg
+    - assets/icon/icon.png
     - assets/theme/appainter_theme.json
     - assets/images/BlackLogo.png
     - assets/temp/placeholder_video.mp4
@@ -99,6 +103,8 @@ flutter:
     - assets/images/backgrounds/bg_10.jpg
     - assets/images/backgrounds/bg_11.jpg
     - assets/images/backgrounds/bg_12.jpg
+    - assets/images/backgrounds/bg_13.jpg
+    - assets/images/backgrounds/bg_14.jpg
     - assets/images/backgrounds/ex_1.jpg
     - assets/images/backgrounds/ex_2.jpg
     - assets/images/backgrounds/ex_3.jpg

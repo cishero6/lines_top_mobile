@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -73,14 +74,6 @@ class _ProfileItemState extends State<ProfileItem> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            _title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.8,
             child: Text(
@@ -90,6 +83,18 @@ class _ProfileItemState extends State<ProfileItem> {
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: !_isGrid ? MediaQuery.of(context).size.width * 0.8 : min(160, MediaQuery.of(context).size.width * 0.3),
+            child: Text(
+              _title,
+              maxLines: 3,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

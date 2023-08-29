@@ -57,28 +57,33 @@ class _SectionsListScreenState extends State<SectionsListScreen> with TickerProv
     _animate();
     List<String> orderedKeys = widget.training.sections.keys.toList()..sort((a,b)=> a.split('_').last.compareTo(b.split('_').last));
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-backgroundColor: Theme.of(context).primaryColor,
-            title: SlideTransition(
-                position: _titleSlideAnimation,
-                child: FadeTransition(
-                  opacity: _titleFadeAnimation,
-                  child: Text(
-                    'Выбор секции',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),),
-          ),
-          SliverList.builder(itemCount: widget.training.sections.length,itemBuilder: (ctx,index)=>HorizontalListItem(
-                    title: orderedKeys[index].split('_').first,
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(ExerciseProcessScreen.routeName,arguments: [widget.training,orderedKeys[index],widget.programId,widget.trainingIndex]);
-                    },
-                    waitTimer: Duration(milliseconds: 200 + index * 300),
+      body: Container(
+        decoration:const BoxDecoration(
+          image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_3.jpg'),opacity: 0.8,fit: BoxFit.cover)
+        ),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar.large(
+      backgroundColor: Colors.transparent,
+              title: SlideTransition(
+                  position: _titleSlideAnimation,
+                  child: FadeTransition(
+                    opacity: _titleFadeAnimation,
+                    child: Text(
+                      'Выбор секции',
+                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color: Colors.white),
+                    ),
                   ),),
-        ],
+            ),
+            SliverList.builder(itemCount: widget.training.sections.length,itemBuilder: (ctx,index)=>HorizontalListItem(
+                      title: orderedKeys[index].split('_').first,
+                      onPressed: () {
+                        Navigator.of(context).pushNamed(ExerciseProcessScreen.routeName,arguments: [widget.training,orderedKeys[index],widget.programId,widget.trainingIndex]);
+                      },
+                      waitTimer: Duration(milliseconds: 200 + index * 300),
+                    ),),
+          ],
+        ),
       ),
     );
   }

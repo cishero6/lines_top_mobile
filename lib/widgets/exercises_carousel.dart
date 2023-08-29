@@ -10,7 +10,7 @@ class ExercisesCarousel extends StatefulWidget {
   final List<Widget> items;
   final List<String> sectionNames;
   final int initialIndex;
-  final double? height;
+  final double? skipHeight;
   int currentIndex = 0;
   final void Function() onEndTraining;
   ExercisesCarousel(
@@ -19,7 +19,7 @@ class ExercisesCarousel extends StatefulWidget {
       this.initialIndex = 0,
       required this.onEndTraining,
       required this.sectionNames,
-      this.height});
+      this.skipHeight});
 
   @override
   State<ExercisesCarousel> createState() => _ExercisesCarouselState();
@@ -54,7 +54,6 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
   @override
   void initState() {
     _currentIndex = widget.initialIndex;
-
     _primaryWidget = widget.items[_currentIndex];
     _animtaionController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 600));
@@ -209,10 +208,12 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
   Widget build(BuildContext context) {
     widget.currentIndex = _currentIndex;
     return SizedBox(
-      height: widget.height,
+      height: MediaQuery.of(context).size.height-kBottomNavigationBarHeight,
+      width: MediaQuery.of(context).size.width,
       child: Stack(children: [
         Column(
           children: [
+            SizedBox(height: widget.skipHeight,),
             Flexible(
               fit: FlexFit.tight,
               flex: 6,
@@ -257,6 +258,7 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
             ),
           ],
         ),
+        /*
         Align(
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
@@ -277,6 +279,7 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
             ),
           ),
         ),
+        */
       ]),
     );
   }

@@ -70,7 +70,6 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
     if (!_disposed) {
       _progressController.forward();
     }
-   await Future.delayed(const Duration(milliseconds: 800));
     List<String> fetchedIds = [];
     for (var training in widget.program.trainings) {
       for (var section in training.sections.entries) {
@@ -132,7 +131,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
     var progressData = Provider.of<UserDataProvider>(context).progress;
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_5.jpg'),fit: BoxFit.cover,opacity: 0.5)),
+        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_5.jpg'),fit: BoxFit.cover,opacity: 0.8)),
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(
@@ -143,7 +142,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
                   opacity: _titleFadeAnimation,
                   child: Text(
                     widget.program.title,
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color: Colors.white),
                   ),
                 ),
               ),
@@ -213,7 +212,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
                       goldenColor:
                           progressData![widget.program.id]![index] == 100,
                       middleItem:
-                          Text('${progressData[widget.program.id]![index]}%'),
+                          Text('${progressData[widget.program.id]![index]}%',style: Theme.of(context).textTheme.titleMedium!.copyWith(color: const Color.fromARGB(173, 255, 255, 255)),),
                       //middleItem: SizedBox(width: 80,child: LinearProgressIndicator(backgroundColor: Colors.black,color: Colors.red,value: progressData![widget.program.id]![index].toDouble()/100,)),
                       waitTimer: Duration(milliseconds: 200 + index * 300),
                     ),

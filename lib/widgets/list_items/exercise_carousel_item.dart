@@ -27,8 +27,8 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
 
     _videoController = VideoPlayerController.file(widget.exercise.video!,videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true));
     _chewieController = ChewieController(
-      customControls: const CupertinoControls(backgroundColor: CupertinoColors.systemGrey, iconColor: Colors.black),
-      placeholder: Container(color: Colors.black87),
+      customControls: const CupertinoControls(backgroundColor: Color.fromARGB(117, 142, 142, 147), iconColor: Colors.black),
+      placeholder: Container(color: Colors.white60),
       allowedScreenSleep: false,
       allowFullScreen: true,
       deviceOrientationsAfterFullScreen: [
@@ -71,7 +71,6 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
  
   @override
   void initState() {
-    
     _animationController = AnimationController(vsync: this,duration:const Duration(milliseconds: 600));
     _opacityAnimation = Tween(begin: 0.0,end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
     _slideAnimation = Tween(begin:const Offset(0.0,1.0),end: const Offset(0.0,0.0)).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
@@ -99,12 +98,12 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
           child: FittedBox(fit: BoxFit.scaleDown,child: Text(widget.exercise.title,style: Theme.of(context).textTheme.headlineMedium,)),
         ),),
         Flexible(flex:10,fit: FlexFit.loose,child: Container(color: Colors.black,child: AspectRatio(aspectRatio: _chewieController.aspectRatio!,child: Chewie(controller: _chewieController),),),),
-        const Divider(thickness: 2,),
+        const Divider(thickness: 2,color: CupertinoColors.systemGrey),
         Flexible(flex: 6,fit: FlexFit.tight,child: SlideTransition(position: _slideAnimation,child: FadeTransition(opacity: _opacityAnimation,child: Padding(
           padding: const EdgeInsets.only(top: 0,left: 20,right: 20),
           child: SingleChildScrollView(child: Text(widget.exercise.description,style: Theme.of(context).textTheme.titleLarge,)),
         ),),),),
-        const Divider(thickness: 2,),
+        const Divider(thickness: 2,color: CupertinoColors.systemGrey,),
       ],),
     );
   }

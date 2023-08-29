@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/screens/more_screens.dart/all_sets_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/exercise_process_screen.dart';
+import 'package:lines_top_mobile/screens/program_process_screens/load_set_screen.dart';
 
 import '../../helpers/parallax_flow_delegate.dart';
 import '../../models/training.dart';
@@ -28,14 +29,38 @@ class _SetBlogItemState extends State<SetBlogItem> {
 
     @override
   void initState() {
-    if(widget.set != null){
+    if (widget.set != null) {
       title = widget.set!.title;
       subtext = widget.set!.description!;
-      onTap = ()=> Navigator.of(context).pushNamed(ExerciseProcessScreen.routeName,arguments: [widget.set,widget.set!.sections.keys.first,null,null]);
+      onTap = () {
+        bool shouldLoad = false;
+        for (var sectionName in widget.set!.sections.keys) {
+          for (var ex in widget.set!.sections[sectionName]!) {
+            if (ex.video == null) {
+              shouldLoad = true;
+              break;
+            }
+          }
+        }
+        shouldLoad
+            ? Navigator.of(context).pushNamed(
+                LoadSetScreen.routeName,
+                arguments: [widget.set, widget.set!.sections.keys.first],
+              )
+            : Navigator.of(context).pushNamed(
+                ExerciseProcessScreen.routeName,
+                arguments: [
+                  widget.set,
+                  widget.set!.sections.keys.first,
+                  null,
+                  null,
+                ],
+              );
+      };
     } else {
       title = widget.title!;
       subtext = widget.subtext!;
-      onTap = ()=> Navigator.of(context).pushNamed(AllSetsScreen.routeName);
+      onTap = () => Navigator.of(context).pushNamed(AllSetsScreen.routeName);
     }
     super.initState();
   }

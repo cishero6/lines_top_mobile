@@ -58,8 +58,8 @@ class _HorizontalListItemState extends State<HorizontalListItem> with TickerProv
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 5),
             child: Card(
-              color: widget.goldenColor! ? const Color.fromARGB(98, 255, 218, 6) : Theme.of(context).colorScheme.surface,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              color: widget.goldenColor! ? Color.fromARGB(116, 28, 74, 92) : Color.fromARGB(60, 0, 0, 0),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
                 child: Row(
@@ -67,10 +67,10 @@ class _HorizontalListItemState extends State<HorizontalListItem> with TickerProv
                   children: [
                     Text(
                       widget.title,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),
                     ),
                     if (widget.middleItem != null) widget.middleItem!,
-                    const Icon(Icons.arrow_forward),
+                    const Icon(Icons.arrow_forward_ios,color: Colors.white,),
                   ],
                 ),
               ),

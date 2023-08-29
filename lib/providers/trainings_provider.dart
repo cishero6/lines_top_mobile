@@ -8,6 +8,7 @@ import 'package:lines_top_mobile/helpers/file_from_url.dart';
 import 'package:lines_top_mobile/providers/programs_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import '../helpers/db_helper.dart';
+import '../helpers/network_connectivity.dart';
 import '../models/exercise.dart';
 import './exercises_provider.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,7 @@ class TrainingsProvider with ChangeNotifier {
   }
   String loadingText = '';
 
-  Future<bool> fetchAndSetItems(bool internetConnected,
+  Future<bool> fetchAndSetItems(
       BuildContext ctx) async {
      _items = [];
     //1 ЭТАП
@@ -48,10 +49,12 @@ class TrainingsProvider with ChangeNotifier {
       }
     }
     //2
-    if (itemsDB.isNotEmpty && !internetConnected) {
+    var isOnline = await NetworkConnectivity.checkConnection();
+    if (itemsDB.isNotEmpty && !isOnline) {
+      print(_items);
       return true;
     }
-    if (itemsDB.isEmpty && !internetConnected) {
+    if (itemsDB.isEmpty && !isOnline) {
       //load assets
       return true;
     }
@@ -76,6 +79,19 @@ class TrainingsProvider with ChangeNotifier {
           sections: doneSections,
         );
         if(!training.isSet){ //IF SET DONT EVEN CHECK TO DOWNLOAD
+          Map<String,List<String>> dbMapSections = {};
+          for(var section in training.sections.keys){
+            dbMapSections.addAll({section: training.sections[section]!.map((e) => e.id).toList()});
+          }
+          await DBHelper.insert('trainings', {
+            'id': training.id,
+            'title': training.title,
+            'description': 'null',
+            'image': 'null',
+            'sections': jsonEncode(dbMapSections),
+            'is_set': training.isSet ? 1:0,
+            'version': training.version,
+          });
           firebaseItems.add(training);
           continue;
         }
