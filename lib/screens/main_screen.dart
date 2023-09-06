@@ -33,7 +33,7 @@ import 'control_panel_screens/edit_screens/edit_program_screen.dart';
 import 'control_panel_screens/edit_screens/edit_training_screen.dart';
 import 'details_screens/program_details_screen.dart';
 import 'more_screens.dart/all_posts_screen.dart';
-import 'more_screens.dart/all_sets_screen.dart';
+import 'navigation_bar_screens/all_sets_screen.dart';
 import 'profile_screens/control_screen.dart';
 import 'program_process_screens/exercise_process_screen.dart';
 import 'program_process_screens/sections_list_screen.dart';
@@ -184,7 +184,7 @@ class _MainScreenState extends State<MainScreen> {
             case AddProgramScreen.routeName:
               return MaterialPageRoute(builder: (ctx)=> const AddProgramScreen());
             case AllSetsScreen.routeName:
-              return MaterialPageRoute(builder: (ctx)=> const AllSetsScreen());
+              return PageTransition(child: const AllSetsScreen(), type: PageTransitionType.fade);
             case AllPostsScreen.routeName:
               return MaterialPageRoute(builder: (ctx)=> const AllPostsScreen());
             case AddParametersScreen.routeName:

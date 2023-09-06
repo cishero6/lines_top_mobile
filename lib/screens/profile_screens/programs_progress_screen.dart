@@ -38,15 +38,23 @@ class _ProgramsProgressScreenState extends State<ProgramsProgressScreen> with Ti
           slivers: [
             SliverAppBar.large(
               backgroundColor: Colors.transparent,
-              title: Text('Мой прогресс',style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),),
+              title: Text('Мой прогресс',style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color: Colors.white),),
             ),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 500,
                 child: SfCircularChart(
+                                        palette: const [
+                        Color.fromARGB(255, 249, 119, 162),
+                        Color.fromARGB(255, 254, 155, 188),
+                        Color.fromARGB(255, 255, 169, 198),
+                        Color.fromARGB(255, 255, 123, 165),
+                        Color(0xFFFF8FB5),
+                      ],
                         margin: const EdgeInsets.all(0),
                         series: [
                           RadialBarSeries(
+                            
                             maximumValue: 100,
                             enableTooltip: true,
                             animationDuration: 400,
@@ -56,7 +64,7 @@ class _ProgramsProgressScreenState extends State<ProgramsProgressScreen> with Ti
                             dataLabelSettings:const DataLabelSettings(isVisible : true),
                           ),
                         ],
-                        legend: Legend(isVisible: true,overflowMode: LegendItemOverflowMode.wrap),
+                        legend: Legend(isVisible: true,overflowMode: LegendItemOverflowMode.wrap,textStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white)),
                       ),
                       
               ),

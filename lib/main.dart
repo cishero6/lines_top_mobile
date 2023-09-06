@@ -1,8 +1,8 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/helpers/db_helper.dart';
+import 'package:lines_top_mobile/providers/verification_id_provider.dart';
 import 'package:lines_top_mobile/screens/intro_screen.dart';
-import 'package:path_provider/path_provider.dart';
 import './providers/blog_provider.dart';
 import './providers/trainings_provider.dart';
 import './screens/main_screen.dart';
@@ -22,9 +22,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  var path = await getApplicationDocumentsDirectory();
-  File fileFirstBuild = File('$path/firstBuild.txt');
-  bool isFirst = !(await fileFirstBuild.exists());
+  bool isFirst =await DBHelper.exists();
   runApp(MyApp(isFirstBuild: isFirst,));
 }
 
@@ -56,14 +54,19 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<BottomNavigationProvider>(
           create: (_) => BottomNavigationProvider(),
         ),
+        ChangeNotifierProvider<VerificationIdProvider>(
+          create: (_) => VerificationIdProvider(),
+        ),
       ],
       child: MaterialApp(
         title: 'Lines.top',
         theme: ThemeData(
+          appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
             useMaterial3: true,
             colorScheme: lightColorScheme,
        fontFamily: 'SourceSerifPro'),
         darkTheme: ThemeData(
+          appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
             useMaterial3: true,
             colorScheme: lightColorScheme,
             fontFamily: 'SourceSerifPro'),

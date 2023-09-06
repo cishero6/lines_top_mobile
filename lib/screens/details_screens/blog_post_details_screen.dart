@@ -161,7 +161,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
                 opacity: _widgetsAnimations.last['fade'] as Animation<double>,
                 child: Text(
                   element,
-                  style: Theme.of(ctx).textTheme.bodyLarge,
+                  style: Theme.of(ctx).textTheme.bodyLarge!.copyWith(color: Colors.white),
                   textAlign: TextAlign.start,
                 ),
               ),
@@ -230,10 +230,10 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
     _isBuilt= true;
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(image: DecorationImage(image: FileImage(widget.blogPost.images.first),fit: BoxFit.cover,opacity: 0.5)),
+        decoration: BoxDecoration(image: DecorationImage(image: FileImage(widget.blogPost.images.first),fit: BoxFit.cover,opacity: 0.9)),
         child: CustomScrollView(
           slivers: [
-            SliverAppBar.medium(
+            SliverAppBar.large(
               pinned:false,
               centerTitle: true,
               backgroundColor: Colors.transparent,
@@ -253,7 +253,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
               child: UnconstrainedBox(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                      maxHeight: 80, minHeight: 60, minWidth: 120,maxWidth: MediaQuery.of(context).size.width*0.9),
+                      maxHeight: 200, minHeight: 60, minWidth: 120,maxWidth: MediaQuery.of(context).size.width*0.9),
                   child: Padding(
                     padding: const EdgeInsets.only(top: 30,bottom:13,left:13.0,right: 13),
                     child: SlideTransition(
@@ -263,7 +263,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
                         child: Text(
                           widget.blogPost.shortDesc,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                         ),
                       ),
                     ),

@@ -8,18 +8,21 @@ import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/helpers/network_connectivity.dart';
 import 'package:lines_top_mobile/providers/programs_provider.dart';
+import 'package:lines_top_mobile/providers/verification_id_provider.dart';
 import 'package:provider/provider.dart';
 
 class UserDataProvider with ChangeNotifier{
   bool isAuth = false;
   String? username;
   String? userId;
-  String? email;
+  String? phoneNumber;
   bool? paidAccount;
   Map<String,List<int>>? progress;
   List<String>? statsDates;
-  Map<String,List<num>>? statisticts;
+  Map<String,List<num>>? statistics;
   final Stream<User?> _authStateStream = FirebaseAuth.instance.authStateChanges();
+
+
 
 
   Future<void> setListener()async{
@@ -27,10 +30,10 @@ class UserDataProvider with ChangeNotifier{
       if(event == null){
         username = null;
         userId = null;
-        email = null;
+        phoneNumber = null;
         paidAccount = null;
         progress = null;
-        statisticts = null;
+        statistics = null;
         statsDates = null;
         isAuth = false;
         return;
@@ -76,19 +79,22 @@ class UserDataProvider with ChangeNotifier{
 
     var docRef = FirebaseFirestore.instance.doc('users/$uid');
     var docSnapshot = await docRef.get();
+    if(!docSnapshot.exists){
+      return false;
+    }
     var doc = docSnapshot.data()!;
     userId = uid;
     username = doc['username'];
-    email = doc['email'];
+    phoneNumber = doc['phone_number'];
     paidAccount = doc['paid_account'];
-    statisticts = {};
+    statistics = {};
     Map<String,dynamic> statsDynamic = doc['statistics'] as Map<String,dynamic>;
     for(String statName in statsDynamic.keys){
       List<num> temp = [];
       for(int i = 0;i< statsDynamic[statName].length;i++){
         temp.add(statsDynamic[statName][i]);
       }
-      statisticts!.addAll({statName: temp});
+      statistics!.addAll({statName: temp});
     }
     statsDates = [];
     var datesDynamic = doc['stats_dates'] as List<dynamic>;
@@ -111,6 +117,7 @@ class UserDataProvider with ChangeNotifier{
     return true;
   }
 
+  @Deprecated('no longer using email') 
   Future<String> registerUser(String username,String email,String password,{required BuildContext context}) async {
     bool internetConnected = await NetworkConnectivity.checkConnection();
     if(!internetConnected){
@@ -136,7 +143,7 @@ class UserDataProvider with ChangeNotifier{
     userId = userCredential.user!.uid;
     username = username;
     email = email;
-    statisticts = {};
+    statistics = {};
     statsDates = [];
     paidAccount = false;
 
@@ -153,15 +160,109 @@ class UserDataProvider with ChangeNotifier{
       'username' : username,
       'email' : email,
       'progress' : {},
-      'statisticts' : {},
+      'statistics' : {},
       'stats_dates' : [],
       'paid_account' : false,
     });
     isAuth = true;
     notifyListeners();
-    return 'Успешно';
+    return 'Успешно!';
   }
 
+
+  Future<String> verifyPhoneNumber(String phoneNumber,{required BuildContext ctx})async{
+    bool internetConnected = await NetworkConnectivity.checkConnection();
+    String result = '';
+    if(!internetConnected){
+      return 'Отсутвует подключение к интернету!';
+    }
+    await FirebaseAuth.instance.verifyPhoneNumber(phoneNumber: phoneNumber,verificationCompleted: (_){}, verificationFailed: (error){
+      print(error);
+      result = 'Что-то пошло не так!';
+      return;
+    }, codeSent: (verificationId,_){
+      Provider.of<VerificationIdProvider>(ctx,listen: false).setVerificationId(verificationId);
+      return;
+    }, codeAutoRetrievalTimeout:(_){});
+    return result;
+  }
+
+
+  Future<String> phoneSignInUser(String verificationId,String code,String username,{required BuildContext context})async{
+    bool internetConnected = await NetworkConnectivity.checkConnection();
+    if(!internetConnected){
+      return 'Отсутвует подключение к интернету!';
+    }
+    UserCredential userCredential;
+    try{
+      userCredential = await FirebaseAuth.instance.signInWithCredential(PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code));
+    } on FirebaseAuthException catch (error) {
+      switch (error.code) {
+        case 'invalid-verification-code':
+          return 'Неверный код!';
+        default:
+          return 'Что-то пошло не так!';
+      }
+    }
+    var docSnapshot = await FirebaseFirestore.instance
+        .doc('users/${userCredential.user!.uid}')
+        .get();
+    if (!docSnapshot.exists) {
+      await _initializeData(context: context, userId: userCredential.user!.uid, username: username,phoneNumber: userCredential.user!.phoneNumber);
+    } 
+
+    isAuth = true;
+    notifyListeners();
+    return 'Успешно!';
+  }
+
+  Future<String> _initializeData({required BuildContext context,required String userId,required String username,String? phoneNumber}) async {
+    var programs = Provider.of<ProgramsProvider>(context,listen: false).items;
+
+    this.userId = userId;
+    this.username = username;
+    this.phoneNumber = phoneNumber;
+    statistics = {
+      'age':[],
+      'height':[],
+      'weight':[],
+      'chest':[],
+      'thighs':[],
+      'waist':[],
+      'activity':[],
+    };
+    statsDates = [];
+    paidAccount = false;
+
+    progress = {};
+    for(var program in programs){
+      Map<String,List<int>> temp = {program.id :List.generate(program.trainings.length, (index) => 0)};
+      progress!.addAll(temp);
+    }
+
+    var docRef = FirebaseFirestore.instance.doc('users/$userId');
+    try{
+    await docRef.set({
+      'username' : username,
+      'phone_number' : phoneNumber,
+      'progress' : {},
+      'statistics' : statistics,
+      'stats_dates' : [],
+      'paid_account' : false,
+    });
+    } on FirebaseException catch(e){
+      print(e);
+      return 'Что-то пошло не так!';
+    }
+
+    return 'Успешно!';
+  }
+
+
+
+
+
+  @Deprecated('no longer using email') 
   Future<String> loginUser(String email,String password,{required BuildContext context}) async {
     bool internetConnected = await NetworkConnectivity.checkConnection();
     if(!internetConnected){
@@ -212,10 +313,10 @@ class UserDataProvider with ChangeNotifier{
     }
     userId = null;
     username = null;
-    email = null;
+    phoneNumber = null;
     paidAccount = null;
     progress = null;
-    statisticts = null;
+    statistics = null;
     statsDates = null;
     isAuth = false;
 
@@ -229,11 +330,11 @@ class UserDataProvider with ChangeNotifier{
       return 'Отсутвует подключение к интернету!';
     }
     newUsername = newUsername.trim();
-    if(newUsername.length < 4) {
-      return 'Имя пользователя слишком короткое!';
-    }
     if(newUsername == username){
       return 'Нельзя изменить имя пользователя на текущее!';
+    }
+    if(newUsername.length < 4) {
+      return 'Имя пользователя слишком короткое!';
     }
     try {
       var userRef = FirebaseFirestore.instance.doc('users/$userId');
@@ -245,13 +346,14 @@ class UserDataProvider with ChangeNotifier{
     return 'Успешно!';
   }
 
+  @Deprecated('no longer using email') 
   Future<String> changeEmail({required String newEmail,required String password}) async {
     bool internetConnected = await NetworkConnectivity.checkConnection();
     if(!internetConnected){
       return 'Отсутвует подключение к интернету!';
     }
     try{
-      AuthCredential authCredential = EmailAuthProvider.credential(email: email!, password: password);
+      AuthCredential authCredential = EmailAuthProvider.credential(email: '', password: password);
       await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(authCredential);
       await FirebaseAuth.instance.currentUser!.updateEmail(newEmail);
     } on FirebaseAuthException catch (error) {
@@ -266,10 +368,10 @@ class UserDataProvider with ChangeNotifier{
           return 'Что-то пошло не так!';
       }
     }
-    email = newEmail;
+    phoneNumber = newEmail;
     try{
     var userRef = FirebaseFirestore.instance.doc('users/$userId');
-    await userRef.update({'email' : email});
+    await userRef.update({'email' : 'null'});
     } on FirebaseException catch (error){
       print(error);
       return 'Что-то пошло не так!';
@@ -278,6 +380,7 @@ class UserDataProvider with ChangeNotifier{
     return 'Успешно!';
   }
 
+  @Deprecated('no longer using email') 
   Future<String> changePassword(String oldPassword,String newPassword)async {
     bool internetConnected = await NetworkConnectivity.checkConnection();
     if(!internetConnected){
@@ -285,7 +388,7 @@ class UserDataProvider with ChangeNotifier{
     }
     try{
       AuthCredential authCredential = EmailAuthProvider.credential(
-        email: email!,
+        email: '',
         password: oldPassword,
       );
       await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(authCredential);
@@ -301,7 +404,7 @@ class UserDataProvider with ChangeNotifier{
   Future<String> _uploadNewStats()async{
     try{
     var userRef = FirebaseFirestore.instance.doc('users/$userId');
-    await userRef.update({'statistics' : statisticts});
+    await userRef.update({'statistics' : statistics,'stats_dates':statsDates});
     } on FirebaseException catch (error){
       print(error);
       return 'Что-то пошло не так!';
@@ -319,20 +422,20 @@ class UserDataProvider with ChangeNotifier{
     var now = DateTime.now();
     if(statsDates!.isNotEmpty){
       if(statsDates!.last == '${now.day}.${now.month}.${now.year}'){
-        for(var statName in statisticts!.keys){
+        for(var statName in statistics!.keys){
           if(newStats.containsKey(statName)){
-            statisticts![statName]!.last = newStats[statName]!.last;
+            statistics![statName]!.last = newStats[statName]!.last;
           }
         }
+        return await _uploadNewStats();
       }
-      return await _uploadNewStats();
     }
     statsDates!.add('${now.day}.${now.month}.${now.year}');
-    for(var statName in statisticts!.keys){
+    for(var statName in statistics!.keys){
       if(newStats.containsKey(statName)){
-        statisticts![statName]!.add(newStats[statName]!.last);
+        statistics![statName]!.add(newStats[statName]!.last);
       }else{
-        statisticts![statName]!.add(statisticts![statName]!.last);
+        statistics![statName]!.add(statistics![statName]!.last);
       }
     }
     return await _uploadNewStats();
@@ -388,17 +491,8 @@ class UserDataProvider with ChangeNotifier{
 
 
   Future<void> deleteStats()async{
-    statisticts = {};
+    statistics = {};
     statsDates = [];
-    await DBHelper.insert('user_data', {
-      'id': userId!,
-      'username': username!,
-      'email': email!,
-      'paid_account': paidAccount! ? 1: 0,
-      'progress': jsonEncode(progress),
-      'statistics': jsonEncode({}),
-      'stats_dates': jsonEncode([]),
-    }); 
     var userData = FirebaseFirestore.instance.doc('users/$userId');
     await userData.update({'statistics': {},
           'stats_dates': [],
@@ -413,7 +507,7 @@ class UserDataProvider with ChangeNotifier{
   @override 
   String toString() {
     return isAuth ? 
-    'AUTH - \n id - $userId \n name - $username \n email - $email \n  progress - $progress \n stats - $statisticts \n dates $statsDates'
+    'AUTH - \n id - $userId \n name - $username \n phone - $phoneNumber \n  progress - $progress \n stats - $statistics \n dates $statsDates'
     :
     'NOT AUTH';
   }

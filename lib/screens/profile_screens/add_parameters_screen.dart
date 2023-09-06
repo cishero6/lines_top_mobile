@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:lines_top_mobile/widgets/list_items/new_parameters_list_item.dart';
@@ -84,7 +86,7 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
     if(_waistController.text != ''){
       newData.addAll({'waist': [int.parse(_waistController.text)]});
     }
-    if(_activityCoefficient != authData.statisticts!['activity']!.last){
+    if(_activityCoefficient != authData.statistics!['activity']!.last){
       newData.addAll({'activity': [_activityCoefficient]});
     }
     if(newData.isEmpty){
@@ -101,7 +103,7 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
   @override
   void initState() {
     authData = Provider.of<UserDataProvider>(context,listen: false);
-    _dropDownValue =_activityOptions.keys.toList()[_activityOptions.values.toList().indexOf(authData.statisticts!['activity']!.last)];
+    _dropDownValue =_activityOptions.keys.toList()[_activityOptions.values.toList().indexOf(authData.statistics!['activity']!.last)];
         _activityCoefficient = _activityOptions[_dropDownValue]!;
     super.initState();
   }
@@ -111,21 +113,21 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_14.jpg'),fit: BoxFit.cover)),
+        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_15.jpg'),fit: BoxFit.cover)),
         child: CustomScrollView(
           slivers: [
               SliverAppBar.large(
-                title: Text('Новые параметры',style: Theme.of(context).textTheme.headlineMedium,),
+                title: Text('Новые параметры',style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),),
                 backgroundColor: Colors.transparent,
                 surfaceTintColor: Colors.white12,
               ),
               SliverList.list(children: [
-                NewParametersListItem.fixed(leadingText: 'Возраст:', textEditingController: _ageController, initialValue: authData.statisticts!['age']!.last.toString()),
-                NewParametersListItem.fixed(leadingText: 'Рост (см):', textEditingController: _heightController, initialValue: authData.statisticts!['height']!.last.toString()),
-                NewParametersListItem(leadingText: 'Вес (кг):', textEditingController: _weightController,initialValue: authData.statisticts!['weight']!.last.toString()),
-                NewParametersListItem(leadingText: 'Обхват груди (см):', textEditingController: _chestController,initialValue: authData.statisticts!['chest']!.last.toString(),isRightAligned: true,),
-                NewParametersListItem(leadingText: 'Обхват бедра (см):', textEditingController: _thighsController,initialValue: authData.statisticts!['thighs']!.last.toString(),isRightAligned: true),
-                NewParametersListItem(leadingText: 'Обхват талии (см):', textEditingController: _waistController,initialValue: authData.statisticts!['waist']!.last.toString(),isRightAligned: true),
+                NewParametersListItem.fixed(leadingText: 'Возраст:', textEditingController: _ageController, initialValue: authData.statistics!['age']!.last.toString()),
+                NewParametersListItem.fixed(leadingText: 'Рост (см):', textEditingController: _heightController, initialValue: authData.statistics!['height']!.last.toString()),
+                NewParametersListItem(leadingText: 'Вес (кг):', textEditingController: _weightController,initialValue: authData.statistics!['weight']!.last.toString()),
+                NewParametersListItem(leadingText: 'Обхват груди (см):', textEditingController: _chestController,initialValue: authData.statistics!['chest']!.last.toString(),isRightAligned: true,),
+                NewParametersListItem(leadingText: 'Обхват бедра (см):', textEditingController: _thighsController,initialValue: authData.statistics!['thighs']!.last.toString(),isRightAligned: true),
+                NewParametersListItem(leadingText: 'Обхват талии (см):', textEditingController: _waistController,initialValue: authData.statistics!['waist']!.last.toString(),isRightAligned: true),
                 Row(children: [
                   Flexible(
               fit: FlexFit.tight,
@@ -133,11 +135,11 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'Моя активность',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white),
                 ),
               )),
                   Flexible(
-                    child: DropdownButton(isExpanded: true,value: _dropDownValue,items: _activityOptions.keys.map((e) => DropdownMenuItem(value: e,child: Text(e,overflow: TextOverflow.ellipsis,),),).toList() , onChanged: (value){
+                    child: DropdownButton(dropdownColor: Colors.black54,isExpanded: true,value: _dropDownValue,items: _activityOptions.keys.map((e) => DropdownMenuItem(value: e,child: Text(e,overflow: TextOverflow.ellipsis,style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),),),).toList() , onChanged: (value){
                       setState(() {
                         _dropDownValue =value!;
                         _activityCoefficient = _activityOptions[value]!;

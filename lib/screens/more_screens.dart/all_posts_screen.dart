@@ -47,7 +47,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge!
-                    .copyWith(fontWeight: FontWeight.bold),
+                    .copyWith(fontWeight: FontWeight.bold,color: Colors.white),
               ),
               ),
             ),

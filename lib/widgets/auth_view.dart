@@ -66,7 +66,7 @@ String result;
               pinned: true,
               title: Text(
                 'Профиль',
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),
               ),
             ),
             SliverToBoxAdapter(
@@ -89,7 +89,7 @@ String result;
                           ? CupertinoTextFormFieldRow(
                             key: usernameKey,
                       cursorColor: Theme.of(context).colorScheme.onSecondary,
-                              prefix: Text('Имя пользователя',style: Theme.of(context).textTheme.bodySmall,),
+                              prefix: Text('Имя пользователя',style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white),),
                               controller: _usernameController,
                               validator: (value) {
                                 if (value == null) {
@@ -120,7 +120,7 @@ String result;
                     Platform.isIOS ? CupertinoTextFormFieldRow(
                       key: emailKey,
                       cursorColor: Theme.of(context).colorScheme.onSecondary,
-                      prefix: Text('Электронная почта',style: Theme.of(context).textTheme.bodySmall,),
+                      prefix: Text('Электронная почта',style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white),),
                       controller: _emailController,
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Введите почту';
@@ -144,7 +144,7 @@ String result;
                     Platform.isIOS ? CupertinoTextFormFieldRow(
                       key: passwordKey,
                       cursorColor: Theme.of(context).colorScheme.onSecondary,
-                      prefix: Text('Пароль',style: Theme.of(context).textTheme.bodySmall,),
+                      prefix: Text('Пароль',style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white),),
                       controller: _passwordController,
                       obscureText: true,
                       validator: (value) {
@@ -172,7 +172,7 @@ String result;
                       Platform.isIOS ? CupertinoTextFormFieldRow(
                         key: passwordRepeatKey,
                       cursorColor: Theme.of(context).colorScheme.onSecondary,
-                        prefix: Text('Повтор пароля',style: Theme.of(context).textTheme.bodySmall,),
+                        prefix: Text('Повтор пароля',style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white),),
                         controller: _passwordRepeatController,
                         obscureText: true,
                         validator: (value) {
@@ -208,7 +208,7 @@ String result;
                           onPressed: () => setState(() => _isReg = !_isReg),
                           child: Text(_isReg
                               ? 'У меня уже есть аккаунт'
-                              : 'У меня нет аккаунта',style: Theme.of(context).textTheme.bodyMedium,)),
+                              : 'У меня нет аккаунта',style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),)),
                     ),
                     ElevatedButton(
                       style: ButtonStyle(
@@ -217,7 +217,7 @@ String result;
                       onPressed:_tryAuth,
                       child: Text(
                         _isReg ? 'Зарегистрироваться' : 'Войти',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
                       ),
                     ),
                   ],

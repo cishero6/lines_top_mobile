@@ -43,17 +43,20 @@ class _SecondaryBlogItemState extends State<SecondaryBlogItem> {
 
 
 Widget _buildParallaxBackground(BuildContext context) {
-    return Flow(
+  return widget.blogPost != null ? ConstrainedBox(constraints: const BoxConstraints.tightFor(width: double.infinity),child: FadeInImage(placeholder: const AssetImage('assets/images/placeholders/grey_gradient.jpeg'), image: FileImage(widget.blogPost!.images.first),key: _backgroundImageKey,fit: BoxFit.cover)) : Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,);
+    /*return Flow(
       delegate: ParallaxFlowDelegate(
         scrollable: Scrollable.of(context),
         listItemContext: context,
-        backgroundImageKey: _backgroundImageKey
+        backgroundImageKey: _backgroundImageKey,
+        isHorizontal: true
       ),
       children: [
-        if(widget.blogPost != null) Image.file(widget.blogPost!.images.first,key: _backgroundImageKey,fit: BoxFit.cover,),
+        if(widget.blogPost != null) FadeInImage(placeholder: const AssetImage('assets/images/placeholders/grey_gradient.jpeg'), image: FileImage(widget.blogPost!.images.first),key: _backgroundImageKey,fit: BoxFit.cover,),
+        //if(widget.blogPost != null) Image.file(widget.blogPost!.images.first,key: _backgroundImageKey,fit: BoxFit.cover,),
         if(widget.blogPost == null) Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,),
       ],
-    );
+    );*/
   }
 
   Widget _buildGradient() {

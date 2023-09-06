@@ -132,7 +132,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
     _animate();
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_1.jpg'),fit: BoxFit.cover,opacity: 0.4)),
+        decoration: const BoxDecoration(color: Colors.black,image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_1.jpg'),fit: BoxFit.cover,opacity: 0.7)),
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(
@@ -144,7 +144,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
                   opacity: _titleFadeAnimation,
                   child: Text(
                     widget.program.title,
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color: Colors.white),
                   ),
                 ),
               ),
@@ -159,7 +159,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
                         horizontal: 40.0, vertical: 40),
                     child: Text(
                       widget.program.subtext,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -177,7 +177,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
                     ),
                     child: Text(
                       widget.program.bodyText,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -194,7 +194,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
                           onPressed:_tryStart,
                           child: Text(
                             'Начать',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
                           ))),
                 ),
               ),

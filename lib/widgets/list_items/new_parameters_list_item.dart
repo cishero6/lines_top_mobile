@@ -53,7 +53,7 @@ class _NewParametersListItemState extends State<NewParametersListItem> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     widget.leadingText,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white),
                   ),
                 ),
               )),
@@ -77,10 +77,11 @@ class _NewParametersListItemState extends State<NewParametersListItem> {
                         _focusNode.unfocus();
                       },
                       placeholder: _placeholderText,
-                      placeholderStyle: Theme.of(context).textTheme.titleMedium,
+                      placeholderStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white),
                       readOnly: _readOnly,
                       focusNode: _focusNode,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      cursorColor: Colors.white70,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white),
                     ))),
           if (widget.isFixed)
             Flexible(
@@ -96,7 +97,7 @@ class _NewParametersListItemState extends State<NewParametersListItem> {
                     },
                     child: Text(
                       'Изменить',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
                     )),
               ),
             ),
@@ -119,8 +120,8 @@ class _NewParametersListItemState extends State<NewParametersListItem> {
                             keyboardType: widget.isNum?const  TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
                           ))),
           if (!widget.isFixed)
-            const SizedBox(
-              width: 100,
+            SizedBox(
+              width: widget.isRightAligned ? 20: 100,
             ),
         ],
       ),

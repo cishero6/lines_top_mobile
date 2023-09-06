@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/screens/more_screens.dart/all_sets_screen.dart';
+import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
+import 'package:lines_top_mobile/screens/navigation_bar_screens/all_sets_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/exercise_process_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/load_set_screen.dart';
+import 'package:provider/provider.dart';
 
 import '../../helpers/parallax_flow_delegate.dart';
 import '../../models/training.dart';
@@ -60,7 +62,7 @@ class _SetBlogItemState extends State<SetBlogItem> {
     } else {
       title = widget.title!;
       subtext = widget.subtext!;
-      onTap = () => Navigator.of(context).pushNamed(AllSetsScreen.routeName);
+      onTap = () {Provider.of<BottomNavigationProvider>(context,listen:false).setIndex(3);Navigator.of(context).pushNamed(AllSetsScreen.routeName);};
     }
     super.initState();
   }
@@ -75,7 +77,15 @@ Widget _buildParallaxBackground(BuildContext context) {
         backgroundImageKey: _backgroundImageKey
       ),
       children: [
-        if(widget.set != null) Image.file(widget.set!.image!,key: _backgroundImageKey,fit: BoxFit.cover,),
+        if(widget.set != null) FadeInImage(
+            placeholder: const AssetImage(
+                'assets/images/placeholders/grey_gradient.jpeg'),
+            image: FileImage(widget.set!.image!),
+            key: _backgroundImageKey,
+            fit: BoxFit.cover,
+            placeholderFit: BoxFit.cover,
+            fadeInDuration: const Duration(milliseconds: 500),
+          ),
         if(widget.set == null) Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,),
       ],
     );

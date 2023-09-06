@@ -112,6 +112,7 @@ class BlogProvider with ChangeNotifier {
             'version': blogPost.version,
           });
         }else{
+          print('start post EXIST');
           firebaseItems.add(_items.singleWhere((element) => element.id == blogPost.id));
         }
       }

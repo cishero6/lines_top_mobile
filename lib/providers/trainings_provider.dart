@@ -117,6 +117,7 @@ class TrainingsProvider with ChangeNotifier {
             'version': training.version,
           });
         }else{
+          print('start training EXIST');
           firebaseItems.add(_items.singleWhere((element) => element.id == training.id));
         }
       }

@@ -73,11 +73,17 @@ class _ProgramListItemState extends State<ProgramListItem> {
           isHorizontal: true,
         ),
         children: [
-          Image.file(
-            widget.program.image,
+          /*FadeInImage(
+            placeholder: const AssetImage(
+                'assets/images/placeholders/grey_gradient.jpeg'),
+            image: FileImage(widget.program.image),
             key: _backgroundImageKey,
             fit: BoxFit.cover,
-          ),
+            placeholderFit: BoxFit.cover,
+            fadeInDuration: const Duration(milliseconds: 500),
+          ),*/
+          Image.file(widget.program.image, key: _backgroundImageKey,
+            fit: BoxFit.cover,),
         ]);
   }
 

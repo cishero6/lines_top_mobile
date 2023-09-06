@@ -1,11 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/blog_provider.dart';
 import '../providers/exercises_provider.dart';
@@ -134,9 +132,6 @@ class _IntroScreenState extends State<IntroScreen>
   }
 
   void _navigate() async{
-    var path = await getApplicationDocumentsDirectory();
-    File _firstLoad = File('$path/firstBuild.txt');
-    _firstLoad.writeAsString('did load once');
     Navigator.pushReplacement(
       context,
       PageTransition(

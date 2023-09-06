@@ -137,7 +137,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
                           decoration:
                               const InputDecoration(hintText: 'Текст поста'),
                           controller: _bodyTextController,
-                          maxLength: 500,
+                          maxLength: 1500,
                         ),
                       ),
                       ElevatedButton(

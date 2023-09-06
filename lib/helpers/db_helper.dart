@@ -15,6 +15,11 @@ class DBHelper {
     }, version: 1);
   }
 
+  static Future<bool> exists() async {
+    final dbPath = await sql.getDatabasesPath();
+    return sql.databaseExists(path.join(dbPath, 'lines_top.db'));
+  }
+
   static Future<void> insert(String table, Map<String, Object> data) async {
     final db = await DBHelper.database();
     db.insert(

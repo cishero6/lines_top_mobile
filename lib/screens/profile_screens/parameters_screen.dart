@@ -109,17 +109,17 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
 
   Widget _buildCaloriesStats(){
     var calories = CalculateGeneralCalories(
-        age: userData.statisticts!.containsKey('age')
-            ? userData.statisticts!['age']!.last
+        age: userData.statistics!['age']!.isNotEmpty
+            ? userData.statistics!['age']!.last
             : 20,
-        height: userData.statisticts!.containsKey('height')
-            ? userData.statisticts!['height']!.last
+        height: userData.statistics!['height']!.isNotEmpty
+            ? userData.statistics!['height']!.last
             : 170,
-        weight: userData.statisticts!.containsKey('weight')
-            ? userData.statisticts!['weight']!.last
+        weight: userData.statistics!['weight']!.isNotEmpty
+            ? userData.statistics!['weight']!.last
             : 55,
-        coefficient: userData.statisticts!.containsKey('activity')
-            ? userData.statisticts!['activity']!.last
+        coefficient: userData.statistics!['activity']!.isNotEmpty
+            ? userData.statistics!['activity']!.last
             : 1.2);
     var bzu = CalculateBZU(calories: calories);
     var bzuStrings = CalculateBZUStrings(calories: calories);
@@ -204,7 +204,7 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
                     xValueMapper: (data, _) => data.x,
                     yValueMapper: (data, _) => data.y,
                     dataLabelSettings:DataLabelSettings(textStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),isVisible : true,),                ),
-                ],//TEXT COLOR
+                ],
                 legend: Legend(textStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),isVisible: true,position: LegendPosition.bottom,overflowMode: LegendItemOverflowMode.wrap,height: '50%'), 
                           ),
                         ),
@@ -263,33 +263,33 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
       weightChartData.add(
         ChartData(
           date,
-          userData.statisticts!['weight']![i] == -1
+          userData.statistics!['weight']![i] == -1
               ? null
-              : userData.statisticts!['weight']![i],
+              : userData.statistics!['weight']![i],
         ),
       );
       waistChartData.add(
         ChartData(
           date,
-          userData.statisticts!['waist']![i] == -1
+          userData.statistics!['waist']![i] == -1
               ? null
-              : userData.statisticts!['waist']![i],
+              : userData.statistics!['waist']![i],
         ),
       );
       chestChartData.add(
         ChartData(
           date,
-          userData.statisticts!['chest']![i] == -1
+          userData.statistics!['chest']![i] == -1
               ? null
-              : userData.statisticts!['chest']![i],
+              : userData.statistics!['chest']![i],
         ),
       );
       thighsChartData.add(
         ChartData(
           date,
-          userData.statisticts!['thighs']![i] == -1
+          userData.statistics!['thighs']![i] == -1
               ? null
-              : userData.statisticts!['thighs']![i],
+              : userData.statistics!['thighs']![i],
         ),
       );
     }
@@ -393,8 +393,8 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: userData.statisticts!.containsKey('age') ? _buildCaloriesStats() : _blurredChild(blurredChild: _buildCaloriesStats(), child: ElevatedButton(onPressed: ()=>Navigator.of(context).pushNamed(RegisterParametersScreen.routeName,arguments: [true,widget]),child: Text('Заполнить данные, чтобы узнать статистику',style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),),),),),
-              if(userData.statisticts!.isNotEmpty) SliverToBoxAdapter(child: userData.statsDates!.length > 1 ? _buildRest() : FadeTransition(opacity: _restOpacityAnimation,child: UnconstrainedBox(child: Container(padding: const EdgeInsets.all(12),width: 250,decoration: BoxDecoration(color: Colors.black26,borderRadius: BorderRadius.circular(32)),child: Text('Графики появляются после 2-ух заполнений статистики',textAlign: TextAlign.center,style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),),))),),
+              SliverToBoxAdapter(child: userData.statsDates!.isNotEmpty ? _buildCaloriesStats() : _blurredChild(blurredChild: _buildCaloriesStats(), child: ElevatedButton(onPressed: ()=>Navigator.of(context).pushNamed(RegisterParametersScreen.routeName,arguments: [true,widget]),child: Text('Заполнить данные, чтобы узнать статистику',style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),),),),),
+              if(userData.statsDates!.isNotEmpty) SliverToBoxAdapter(child: userData.statsDates!.length > 1 ? _buildRest() : FadeTransition(opacity: _restOpacityAnimation,child: UnconstrainedBox(child: Container(padding: const EdgeInsets.all(12),width: 250,decoration: BoxDecoration(color: Colors.black26,borderRadius: BorderRadius.circular(32)),child: Text('Графики появляются после 2-ух заполнений статистики',textAlign: TextAlign.center,style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),),))),),
               SliverToBoxAdapter(child: UnconstrainedBox(child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(onPressed: ()=> Navigator.of(context).pushNamed(AddParametersScreen.routeName), child: Text('Обновить данные',style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),)),

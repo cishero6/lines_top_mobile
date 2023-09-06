@@ -109,9 +109,10 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
+          color: Colors.black,
             image: DecorationImage(
                 image: AssetImage('assets/images/backgrounds/bg_2.jpg'),
-                opacity: 0.5,
+                opacity: 0.8,
                 fit: BoxFit.cover)),
         child: CustomScrollView(
           physics: const NeverScrollableScrollPhysics(),
@@ -124,7 +125,7 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
                   opacity: _titleFadeAnimation,
                   child: Text(
                     'Пару секунд',
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color: Colors.white),
                   ),
                 ),
               ),
@@ -170,7 +171,7 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
                               opacity: _waitTextFadeAnimation,
                               child: Text(
                                 'Загружаем сет...',
-                                style: Theme.of(context).textTheme.headlineSmall,
+                                style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white),
                               ),
                             ),
                           ),

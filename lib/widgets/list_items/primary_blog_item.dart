@@ -26,11 +26,22 @@ Widget _buildParallaxBackground(BuildContext context) {
         listItemContext: context,
         backgroundImageKey: _backgroundImageKey
       ),
-      children: [Image.file(
+      children: [
+        FadeInImage(
+            placeholder: const AssetImage(
+                'assets/images/placeholders/grey_gradient.jpeg'),
+            image: FileImage(widget.blogPost.images.first),
+            key: _backgroundImageKey,
+            fit: BoxFit.cover,
+            placeholderFit: BoxFit.fill,
+            fadeInDuration: const Duration(milliseconds: 500),
+          ),
+        /*Image.file(
         widget.blogPost.images.first,
         key: _backgroundImageKey,
         fit: BoxFit.cover,
-      ),]
+        ),*/
+        ]
     );
   }
 

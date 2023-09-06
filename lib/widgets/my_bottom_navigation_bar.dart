@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
+import 'package:lines_top_mobile/screens/navigation_bar_screens/all_sets_screen.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/blog_screen.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screen.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/programs_screen.dart';
@@ -16,7 +17,7 @@ class MyBottomNavigationBar extends StatefulWidget {
 }
 
 class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
-  final List<String> _routeNames = [BlogScreen.routeName,ProgramsScreen.routeName,ProfileScreen.routeName,InfoScreen.routeName,];
+  final List<String> _routeNames = [BlogScreen.routeName,ProgramsScreen.routeName,ProfileScreen.routeName,AllSetsScreen.routeName,InfoScreen.routeName,];
   int _currentIndex = 0;
 
   
@@ -45,6 +46,10 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
                 icon: Icon(Icons.face_3_outlined),
                 label: 'Профиль',
                 activeIcon: Icon(Icons.face_3_rounded)),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.sports_gymnastics),
+                label: 'Сеты',
+                activeIcon: Icon(Icons.sports_gymnastics)),
             BottomNavigationBarItem(
                 icon: Icon(Icons.bubble_chart_outlined),
                 label: 'Инфо',

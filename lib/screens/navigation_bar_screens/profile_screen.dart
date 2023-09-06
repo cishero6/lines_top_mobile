@@ -6,12 +6,11 @@ import 'package:lines_top_mobile/screens/profile_screens/change_data_screen.dart
 import 'package:lines_top_mobile/screens/profile_screens/control_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/parameters_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/programs_progress_screen.dart';
-import 'package:lines_top_mobile/screens/profile_screens/register_parameters_screen.dart';
-import 'package:lines_top_mobile/widgets/auth_view.dart';
 import 'package:lines_top_mobile/widgets/list_items/profile_item.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/user_data_provider.dart';
+import '../../widgets/phone_auth_view.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -48,7 +47,7 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
   }
 
   Widget _buildProfileView(BuildContext ctx) {
-    print(authData);
+    //print(authData);
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -62,13 +61,13 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 style: Theme.of(context)
                     .textTheme
                     .headlineLarge!
-                    .copyWith(fontWeight: FontWeight.bold),
+                    .copyWith(fontWeight: FontWeight.bold,color: Colors.white),
               ),
               ),
             ),
           SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: [
             ProfileItem(
-              title: authData.username!,
+              title: authData.username ?? 'Ошибка',
               subtext: 'Твоё имя',
               onTap: () {
                 Navigator.of(context).pushNamed(ChangeDataScreen.routeName);
@@ -76,8 +75,8 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               isGrid: true,
             ),
             ProfileItem(
-              title: authData.email!,
-              subtext: 'Твоя почта',
+              title: authData.phoneNumber ?? 'Ошибка',
+              subtext: 'Твой номер',
               onTap: () {
                 Navigator.of(context).pushNamed(ChangeDataScreen.routeName);
               },
@@ -89,11 +88,7 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               title: 'Мои параметры',
               subtext: '',
               onTap: () {
-                if(authData.statisticts!.isEmpty){
-                  Navigator.of(context).pushNamed(RegisterParametersScreen.routeName,arguments: [false]);
-                }else{
                   Navigator.of(context).pushNamed(ParametersScreen.routeName,arguments: [false]);
-                }
                 },
               isGrid: false,
             ),
@@ -148,15 +143,15 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     authData = Provider.of<UserDataProvider>(context);
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_9.jpg'),opacity: 0.5,fit: BoxFit.cover),
+        decoration: BoxDecoration(
+          image: DecorationImage(image: const AssetImage('assets/images/backgrounds/bg_9.jpg'),opacity: authData.isAuth ? 0.5 : 1,fit: BoxFit.cover),
         ),
         child: StreamBuilder(stream: FirebaseAuth.instance.authStateChanges(),builder: (_,snapshot) {
           if(snapshot.connectionState == ConnectionState.waiting){
-            return const SizedBox();
+            return const CustomScrollView(slivers: [SliverToBoxAdapter(child: Center(child: Text('Загрузка'),),)],);
           }
           if(snapshot.data == null){
-            return const AuthView();
+            return const PhoneAuthView();
           }
           return _buildProfileView(context);
         }),
