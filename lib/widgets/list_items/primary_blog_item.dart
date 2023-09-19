@@ -7,7 +7,8 @@ import '../../models/blog_post.dart';
 class PrimaryBlogItem extends StatefulWidget {
   final BlogPost blogPost;
   final GlobalKey scrollableKey;
-  const PrimaryBlogItem(this.blogPost,{required this.scrollableKey,super.key});
+  final double? width;
+  const PrimaryBlogItem(this.blogPost,{required this.scrollableKey,this.width,super.key});
 
   @override
   State<PrimaryBlogItem> createState() => _PrimaryBlogItemState();
@@ -28,8 +29,13 @@ Widget _buildParallaxBackground(BuildContext context) {
       ),
       children: [
         FadeInImage(
+          imageErrorBuilder: (context, error, stackTrace) {
+              widget.blogPost.fetchMissingFile();
+              return Image.asset(
+                'assets/images/placeholders/grey_gradient.jpg');
+            },
             placeholder: const AssetImage(
-                'assets/images/placeholders/grey_gradient.jpeg'),
+                'assets/images/placeholders/grey_gradient.jpg'),
             image: FileImage(widget.blogPost.images.first),
             key: _backgroundImageKey,
             fit: BoxFit.cover,
@@ -68,16 +74,19 @@ Widget _buildParallaxBackground(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.blogPost.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          SizedBox(
+            width:widget.width != null ? widget.width!-55 : null,
+            child: Text(
+              widget.blogPost.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.height*0.32,
+            width: widget.width != null ? widget.width!-55 : null,
             child: Text(
               widget.blogPost.shortDesc,
               overflow: TextOverflow.ellipsis,

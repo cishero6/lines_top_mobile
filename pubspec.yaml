@@ -90,7 +90,7 @@ flutter:
     - assets/icon/icon.png
     - assets/theme/appainter_theme.json
     - assets/images/BlackLogo.png
-    - assets/images/placeholders/grey_gradient.jpeg
+    - assets/images/placeholders/grey_gradient.jpg
     - assets/temp/placeholder_video.mp4
     - assets/images/backgrounds/bg_1.jpg
     - assets/images/backgrounds/bg_2.jpg

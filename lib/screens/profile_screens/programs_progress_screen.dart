@@ -64,7 +64,7 @@ class _ProgramsProgressScreenState extends State<ProgramsProgressScreen> with Ti
                             dataLabelSettings:const DataLabelSettings(isVisible : true),
                           ),
                         ],
-                        legend: Legend(isVisible: true,overflowMode: LegendItemOverflowMode.wrap,textStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white)),
+                        legend: Legend(position: LegendPosition.bottom,isVisible: true,overflowMode: LegendItemOverflowMode.wrap,textStyle: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white)),
                       ),
                       
               ),

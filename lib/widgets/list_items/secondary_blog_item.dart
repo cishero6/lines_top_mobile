@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import '../../helpers/parallax_flow_delegate.dart';
 import '../../models/blog_post.dart';
 import '../../screens/details_screens/blog_post_details_screen.dart';
 import '../../screens/more_screens.dart/all_posts_screen.dart';
@@ -12,9 +11,11 @@ class SecondaryBlogItem extends StatefulWidget {
   late BlogPost? blogPost = null;
   late String? title;
   late String? subtext;
+  final double? width;
 
-  SecondaryBlogItem(this.blogPost,{super.key});
-  SecondaryBlogItem.empty(this.title,this.subtext,{super.key});
+
+  SecondaryBlogItem(this.blogPost,{this.width,super.key});
+  SecondaryBlogItem.empty(this.title,this.subtext,{this.width,super.key});
 
   @override
   State<SecondaryBlogItem> createState() => _SecondaryBlogItemState();
@@ -43,7 +44,11 @@ class _SecondaryBlogItemState extends State<SecondaryBlogItem> {
 
 
 Widget _buildParallaxBackground(BuildContext context) {
-  return widget.blogPost != null ? ConstrainedBox(constraints: const BoxConstraints.tightFor(width: double.infinity),child: FadeInImage(placeholder: const AssetImage('assets/images/placeholders/grey_gradient.jpeg'), image: FileImage(widget.blogPost!.images.first),key: _backgroundImageKey,fit: BoxFit.cover)) : Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,);
+  return widget.blogPost != null ? ConstrainedBox(constraints: const BoxConstraints.tightFor(width: double.infinity),child: FadeInImage(imageErrorBuilder: (context, error, stackTrace) {
+              widget.blogPost!.fetchMissingFile();
+              return Image.asset(
+                'assets/images/placeholders/grey_gradient.jpg',fit: BoxFit.cover,);
+            },placeholder: const AssetImage('assets/images/placeholders/grey_gradient.jpg'), image: FileImage(widget.blogPost!.images.first),key: _backgroundImageKey,fit: BoxFit.cover)) : Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,);
     /*return Flow(
       delegate: ParallaxFlowDelegate(
         scrollable: Scrollable.of(context),
@@ -77,7 +82,7 @@ Widget _buildParallaxBackground(BuildContext context) {
   Widget _buildTitleAndSubtitle() {
     return Positioned(
       left: 20,
-      bottom: 20,
+      bottom: 15,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +96,7 @@ Widget _buildParallaxBackground(BuildContext context) {
             ),
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
+            width: widget.width != null ? widget.width!-50 : null,
             child: Text(
               subtext,
               maxLines: 1,

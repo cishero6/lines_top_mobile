@@ -75,14 +75,14 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
         children: [
           Text(
             'Тренировка выполнена!',
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           ElevatedButton(
               onPressed: _finishTraining,
               child: Text(
                 'Завершить тренировку',
-                style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),
               ))
         ],
       );
@@ -113,9 +113,9 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
               CurvedAnimation(
                   parent: _animtaionController, curve: Curves.ease));
       await _animtaionController.forward();
-      _primaryWidget = const SizedBox();
-      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(10, 0));
       _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
+
     } else {
       _primaryOffsetAnimation =
           Tween(begin: const Offset(1.4, 0.0), end: const Offset(0.0, 0.0))
@@ -125,17 +125,18 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
           Tween(begin: const Offset(0, 0), end: const Offset(-1.4, 0)).animate(
               CurvedAnimation(
                   parent: _animtaionController, curve: Curves.ease));
+      if (!mounted) {
+        return;
+      }
       await _animtaionController.forward();
-      _secondWidget = const SizedBox(
-        width: 1,
-        height: 1,
-      );
       _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
-      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(10, 0));
+
     }
 
     _secondIsPrimary = !_secondIsPrimary;
-    setState(() {});
+
+      setState(() {});
   }
 
   void _previousPage() async {
@@ -166,12 +167,10 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
                   parent: _animtaionController, curve: Curves.ease));
       await _animtaionController.forward();
 
-      _primaryWidget = const SizedBox(
-        width: 1,
-        height: 1,
-      );
+
       _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
-      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+      _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(10, 0));
+
     } else {
       _primaryOffsetAnimation =
           Tween(begin: const Offset(-1.4, 0), end: const Offset(0, 0)).animate(
@@ -181,14 +180,9 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
           Tween(begin: const Offset(0, 0), end: const Offset(1.4, 0)).animate(
               CurvedAnimation(
                   parent: _animtaionController, curve: Curves.ease));
-
       await _animtaionController.forward();
 
-      _secondWidget = const SizedBox(
-        width: 1,
-        height: 1,
-      );
-      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(-10, 0));
+      _primaryOffsetAnimation = const AlwaysStoppedAnimation(Offset(110, 0));
       _secondOffsetAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
     }
 
@@ -198,62 +192,70 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
   @override
   void dispose() {
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
     ]);
+        _animtaionController.dispose();
     super.dispose();
+
   }
 
   @override
   Widget build(BuildContext context) {
     widget.currentIndex = _currentIndex;
     return SizedBox(
-      height: MediaQuery.of(context).size.height-kBottomNavigationBarHeight,
       width: MediaQuery.of(context).size.width,
       child: Stack(children: [
         Column(
           children: [
-            SizedBox(height: widget.skipHeight,),
             Flexible(
               fit: FlexFit.tight,
-              flex: 6,
-              child: Stack(
-                children: [
-                  SlideTransition(
-                      position: _primaryOffsetAnimation,
+              flex: 8,
+              child: Container(
+                decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.white70,Colors.transparent],begin: Alignment.bottomCenter,end: Alignment.topCenter,stops: [0.0,0.4])),
+                child: Stack(
+                  children: [
+                    SlideTransition(
+                        position: _primaryOffsetAnimation,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: _primaryWidget,
+                        )),
+                    SlideTransition(
+                      position: _secondOffsetAnimation,
                       child: Align(
                         alignment: Alignment.center,
-                        child: _primaryWidget,
-                      )),
-                  SlideTransition(
-                    position: _secondOffsetAnimation,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: _secondWidget,
+                        child: _secondWidget,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                      onPressed: _currentIndex == 0 ? null : _previousPage,
+              child: Container(
+                decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.white,Colors.white70],stops: [0.0,1],begin: Alignment.bottomCenter,end: Alignment.topCenter)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                        onPressed: _currentIndex == 0 ? null : _previousPage,
+                        icon: const Icon(
+                          Icons.arrow_back_ios
+                        )),
+                    IconButton(
+                      onPressed:
+                          _currentIndex == widget.items.length ? null : _nextPage,
                       icon: const Icon(
-                        Icons.arrow_back_ios,
-                      )),
-                  IconButton(
-                    onPressed:
-                        _currentIndex == widget.items.length ? null : _nextPage,
-                    icon: const Icon(
-                      Icons.arrow_forward_ios,
+                        Icons.arrow_forward_ios
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

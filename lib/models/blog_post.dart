@@ -1,7 +1,12 @@
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:lines_top_mobile/helpers/file_from_url.dart';
 import 'package:lines_top_mobile/models/lines_top_model.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../helpers/network_connectivity.dart';
 
 class BlogPost extends LinesTopModel{
   @override
@@ -22,6 +27,28 @@ class BlogPost extends LinesTopModel{
   BlogPost({this.id = '',this.title = '',this.shortDesc = '',this.bodyText = '',List<File>? images,String? date,this.version = 0,this.isPrimary = false}){
     this.images = images ?? [];
     this.date = date ?? DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now());
+  }
+
+  Future<void> fetchMissingFile()async{
+    bool internetConnected = await NetworkConnectivity.checkConnection();
+    if(!internetConnected) {
+      return;
+    }
+    try{
+      var path =  (await getApplicationDocumentsDirectory()).path;
+      for(int i = 0;i < images.length;i++){
+        if(!(await images[i].exists())){
+          var imageRef = FirebaseStorage.instance.ref('blog/$id/$i');
+          var downloadURL = await imageRef.getDownloadURL();
+          var tempFile = await fileFromUrl(downloadURL, '${id}_$i'); 
+          images[i] = await tempFile.copy('$path/${id}_$i');
+        }
+      }
+      print('bl loaded missing');
+    }catch(e){
+      print('tried to load bl - failed');
+      return;
+    }
   }
 
 }

@@ -26,7 +26,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   Widget build(BuildContext context) {
     _currentIndex = Provider.of<BottomNavigationProvider>(context).index;
     return Theme(
-      data: ThemeData(canvasColor: Colors.white54),
+      data: ThemeData(canvasColor: Colors.white),
       child: BottomNavigationBar(
           iconSize: 28,
           selectedItemColor: Colors.black,

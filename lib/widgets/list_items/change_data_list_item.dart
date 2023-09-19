@@ -6,16 +6,19 @@ import 'package:flutter/material.dart';
 class ChangeDataListItem extends StatefulWidget {
   final String leadingText;
   final TextEditingController textEditingController;
+  late FocusNode focusNode;
   final bool readOnly;
   
-  ChangeDataListItem({required this.leadingText,required this.textEditingController,this.readOnly = false,super.key});
+  ChangeDataListItem({required this.leadingText,required this.textEditingController,this.readOnly = false,FocusNode? focusNode,super.key}){
+    this.focusNode = focusNode ?? FocusNode();
+  }
 
   @override
   State<ChangeDataListItem> createState() => _ChangeDataListItemState();
 }
 
 class _ChangeDataListItemState extends State<ChangeDataListItem> {
-  final FocusNode _focusNode = FocusNode();
+  late FocusNode _focusNode = FocusNode();
   
 
 
@@ -24,6 +27,7 @@ class _ChangeDataListItemState extends State<ChangeDataListItem> {
 
   @override
   void initState() {
+    _focusNode = widget.focusNode;
     super.initState();
   }
 

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/section_name_provider.dart';
 import 'package:lines_top_mobile/providers/user_data_provider.dart';
-import 'package:lines_top_mobile/screens/navigation_bar_screens/blog_screen.dart';
+import 'package:lines_top_mobile/screens/navigation_bar_screens/all_sets_screen.dart';
 import 'package:lines_top_mobile/widgets/list_items/exercise_carousel_item.dart';
 import 'package:provider/provider.dart';
 import '../../models/training.dart';
@@ -38,7 +38,7 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
           child: Image.asset(
             'assets/images/backgrounds/ex_$e.jpg',
             fit: BoxFit.cover,
-            opacity: const AlwaysStoppedAnimation(0.5),
+            opacity: const AlwaysStoppedAnimation(1),
           )))
       .toList();
 
@@ -68,7 +68,7 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
     }
     if (_isSet) {
       _onEndTraining = () {
-        Navigator.of(context).pushReplacementNamed(BlogScreen.routeName);
+        Navigator.of(context).pushReplacementNamed(AllSetsScreen.routeName);
         return Future.value(true);
         };
     } else {
@@ -113,22 +113,22 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
       onWillPop: _onEndTraining,
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: const Color.fromARGB(255, 220, 220, 220),
+        backgroundColor: Colors.black,
         appBar: appBar,
-        body: Stack(
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 600),
-              child: SizedBox(
-                key: ValueKey(Provider.of<SectionNameProvider>(context).getIndex),
-                height: MediaQuery.of(context).size.height-kBottomNavigationBarHeight,
-                child: _backgrounds[
-                    Provider.of<SectionNameProvider>(context).getIndex],
+        body:  Stack(
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 600),
+                child: SizedBox(
+                  key: ValueKey(Provider.of<SectionNameProvider>(context).getIndex),
+                  height: MediaQuery.of(context).size.height-kBottomNavigationBarHeight,
+                  child: _backgrounds[
+                      Provider.of<SectionNameProvider>(context).getIndex],
+                ),
               ),
-            ),
-            exCarousel,
-          ],
-        ),
+              exCarousel,
+            ],
+          ),
       ),
     );
   }

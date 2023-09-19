@@ -1,5 +1,10 @@
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../helpers/file_from_url.dart';
+import '../helpers/network_connectivity.dart';
 import 'exercise.dart';
 import 'lines_top_model.dart';
 
@@ -29,6 +34,27 @@ class Training extends LinesTopModel{
   @override
   String toString() {
     return 'Training - $id';
+  }
+
+  Future<void> fetchMissingFile()async{
+    bool internetConnected = await NetworkConnectivity.checkConnection();
+    if(!internetConnected) {
+      return;
+    }
+    try{
+      if(image == null){
+      var path =  await getApplicationDocumentsDirectory();
+      image = File('$path/$id');
+      }
+      var downloadURL = await FirebaseStorage.instance.ref('trainings/$id').getDownloadURL();
+      File tempFile = await fileFromUrl(downloadURL, 'trainings_$id');
+      var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
+      image = await tempFile.copy('$path/$id');
+      print('tr loaded missing');
+    }catch(e){
+      print('tried to load tr - failed');
+      return;
+    }
   }
 
 }

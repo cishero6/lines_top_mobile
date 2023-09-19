@@ -96,7 +96,7 @@ class BlogProvider with ChangeNotifier {
             } catch (e) {
               print('error loading $e');
               blogPost.images
-                  .add(await fileFromAsset('assets/temp/bubbles1.jpeg'));
+                  .add(await fileFromAsset('assets/images/placeholders/grey_gradient.jpg'));
             }
           }
           pathsOfImages = pathsOfImages.substring(0,pathsOfImages.length-1);
@@ -366,4 +366,8 @@ class BlogProvider with ChangeNotifier {
     notifyListeners();
     loadingText = '';
   }
+
+
+
+  
 }

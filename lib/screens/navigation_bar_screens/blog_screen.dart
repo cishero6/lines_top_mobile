@@ -32,6 +32,7 @@ class _BlogScreenState extends State<BlogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size =MediaQuery.of(context).size;
     _sets = Provider.of<TrainingsProvider>(context, listen: false)
         .items
         .where((element) => element.isSet)
@@ -86,6 +87,7 @@ class _BlogScreenState extends State<BlogScreen> {
                   itemBuilder: (ctx, index) => PrimaryBlogItem(
                     _primaryPosts[index],
                     scrollableKey: _key,
+                    width: 260*4/3,
                   ),
                   itemCount: _primaryPosts.length,
                 ),
@@ -110,7 +112,7 @@ class _BlogScreenState extends State<BlogScreen> {
             SliverGrid(
                 delegate: SliverChildListDelegate(
                   [
-                  ..._secondaryPosts.map((e) => SecondaryBlogItem(e)).toList(),
+                  ..._secondaryPosts.map((e) => SecondaryBlogItem(e,width: size.width/(size.width/600).ceil())).toList(),
                   SecondaryBlogItem.empty('Больше новостей', ''),
                   ]
                 ),
@@ -136,11 +138,11 @@ class _BlogScreenState extends State<BlogScreen> {
             SliverGrid(
                 delegate: SliverChildListDelegate(
                   [
-                    ..._sets.sublist(0,5).map((e) => SetBlogItem(e)).toList(),
-                    SetBlogItem.empty('Все сеты', ''),
+                    ..._sets.sublist(0,5).map((e) => SetBlogItem(e,width: size.width/(size.width/600).ceil(),)).toList(),
+                    SetBlogItem.empty('Все сеты', '',),
                   ]),
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 300, childAspectRatio: 4 / 3)),
+                    maxCrossAxisExtent: 600, childAspectRatio: 4 / 3)),
           ],
         ),
       ),

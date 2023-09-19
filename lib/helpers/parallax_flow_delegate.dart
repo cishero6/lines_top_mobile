@@ -36,8 +36,8 @@ BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
     // Determine the percent position of this list item within the
     // scrollable area.
     final viewportDimension = scrollable.position.viewportDimension;
-    final scrollFraction = isHorizontal ? (listItemOffset.dx / viewportDimension).clamp(-1.0, 1.0):
-        (listItemOffset.dy / viewportDimension).clamp(0.0, 1.0);
+    final scrollFraction = isHorizontal ? (listItemOffset.dx / viewportDimension).clamp(-2.0, 2.0):
+        (listItemOffset.dy / viewportDimension).clamp(-1.0, 2.0);
 
     // Calculate the vertical alignment of the background
     // based on the scroll percent.

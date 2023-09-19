@@ -22,7 +22,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  bool isFirst =await DBHelper.exists();
+  bool isFirst = !(await DBHelper.exists());
+
   runApp(MyApp(isFirstBuild: isFirst,));
 }
 

@@ -128,6 +128,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
 
   @override
   Widget build(BuildContext context) {
+
     var progressData = Provider.of<UserDataProvider>(context).progress;
     return Scaffold(
       body: Container(
@@ -189,7 +190,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
                               opacity: _waitTextFadeAnimation,
                               child: Text(
                                 'Загружаем программу...',
-                                style: Theme.of(context).textTheme.headlineSmall,
+                                style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),

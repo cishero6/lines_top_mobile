@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -12,7 +11,9 @@ class ProfileItem extends StatefulWidget {
   final File? image;
   final void Function() onTap;
   final bool isGrid;
-  const ProfileItem({this.isGrid = false,required this.title,required this.subtext,required this.onTap,this.image,super.key});
+  final double? width;
+  final int? maxLines;
+  const ProfileItem({this.isGrid = false,required this.title,required this.subtext,required this.onTap,this.maxLines,this.width,this.image,super.key});
 
   @override
   State<ProfileItem> createState() => _ProfileItemState();
@@ -87,14 +88,26 @@ class _ProfileItemState extends State<ProfileItem> {
             ),
           ),
           SizedBox(
-            width: !_isGrid ? MediaQuery.of(context).size.width * 0.8 : min(160, MediaQuery.of(context).size.width * 0.3),
-            child: Text(
+            width: widget.width != null ? widget.width!-50:null,
+            child: widget.maxLines != 1? Text(
               _title,
-              maxLines: 3,
+              maxLines: widget.maxLines ?? 2,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+              ),
+            ): FittedBox(
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.scaleDown,
+              child: Text(
+                _title,
+                maxLines: widget.maxLines ?? 2,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

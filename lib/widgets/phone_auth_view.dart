@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/user_data_provider.dart';
@@ -44,6 +46,22 @@ late Widget Function() _currentBuild;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Неверный формат номера!',style: Theme.of(context).textTheme.titleMedium,),backgroundColor: Colors.white70,));
       return;
     }
+      bool exists = await userProvider.doesUserExist('+7${_phoneTextEditingController.text}');
+    if(!_isReg!){
+      print(exists);
+      if (!exists){
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Такого пользователя нет!',style: Theme.of(context).textTheme.titleMedium,),backgroundColor: Colors.white70,duration: const Duration(seconds: 6),));
+        return;
+      }
+    }else{
+      if(exists){
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Номер уже используется!',style: Theme.of(context).textTheme.titleMedium,),backgroundColor: Colors.white70,duration: const Duration(seconds: 6),));
+        return;
+      }
+    }
+
     await userProvider.verifyPhoneNumber('+7${_phoneTextEditingController.text}',ctx: context);
   }
 
@@ -56,7 +74,7 @@ late Widget Function() _currentBuild;
     return;
    }
     ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result),backgroundColor: Colors.white70,duration: const Duration(seconds: 6),));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result,style: Theme.of(context).textTheme.titleMedium,),backgroundColor: Colors.white70,duration: const Duration(seconds: 6),));
   }
 
   void _submitName(){
@@ -76,6 +94,7 @@ late Widget Function() _currentBuild;
     _animationController =AnimationController(vsync: this,duration: const Duration(milliseconds: 600));
     _opacityAnimation = Tween(begin: 0.0,end: 1.0).animate(_animationController);
     _slideAnimation = Tween(begin: const Offset(0, 1),end: const Offset(0.0, 0.0)).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
+    Provider.of<VerificationIdProvider>(context,listen: false).removeVerificationId();
     super.initState();
   }
 
@@ -116,6 +135,12 @@ return FadeTransition(
               child: Padding(
                 padding: const EdgeInsets.all(22.0),
                 child: ElevatedButton(onPressed: _submitName, child: Text('Готово',style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.w600),)),
+              ),
+            ),
+            UnconstrainedBox(
+              child: Padding(
+                padding: const EdgeInsets.all(22.0),
+                child: TextButton(onPressed: ()=>setState((){_isReg = null;}), child: Text('Назад',style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.w600),)),
               ),
             ),
           ],
@@ -161,6 +186,12 @@ return FadeTransition(
               child: Padding(
                 padding: const EdgeInsets.all(22.0),
                 child: ElevatedButton(onPressed: _sendCode, child: Text('Выслать код',style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.w600),)),
+              ),
+            ),
+            UnconstrainedBox(
+              child: Padding(
+                padding: const EdgeInsets.all(22.0),
+                child: TextButton(onPressed: ()=>setState((){_isReg = null;}), child: Text('Назад',style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.w600),)),
               ),
             ),
           ],

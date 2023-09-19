@@ -105,6 +105,14 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
   }
 
   @override
+  void dispose() {
+    _firstController.dispose();
+    _progressController.dispose();
+    _waitTextController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(

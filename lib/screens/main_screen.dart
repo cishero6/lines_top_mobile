@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:lines_top_mobile/screens/details_screens/blog_post_details_screen.dart';
+import 'package:lines_top_mobile/screens/more_screens.dart/delete_account_verification_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/add_parameters_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/change_data_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/parameters_screen.dart';
@@ -96,7 +97,7 @@ class _MainScreenState extends State<MainScreen> {
       //appBar: AppBar(title: const Text('Саша ЧМООО'),elevation: 1,),
       body: _isLoading
           ? Container(
-            color: Theme.of(context).colorScheme.primary,
+            color: Colors.white,
             child: Center(
                 child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +138,8 @@ class _MainScreenState extends State<MainScreen> {
               return PageTransition(child: const ParametersScreen(), type: PageTransitionType.bottomToTopJoined,childCurrent: args[1],curve: Curves.fastLinearToSlowEaseIn,duration: const Duration(seconds: 2));
                 }
                 return MaterialPageRoute(builder: (ctx)=> const ParametersScreen());
+            case DeleteAccountVerificationScreen.routeName:
+                return MaterialPageRoute(builder: (ctx)=> const DeleteAccountVerificationScreen());
             case ExerciseProcessScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return PageTransition(child: ExerciseProcessScreen(args[0],args[1],programId: args[2],trainingIndex: args[3],), type: PageTransitionType.rightToLeft);

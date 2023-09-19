@@ -48,8 +48,9 @@ class UserDataProvider with ChangeNotifier{
     List<Map<String,dynamic>> dataFromDB = await DBHelper.getData('user_data');
     if (dataFromDB.any((userDB) => userDB['id'] == uid)){
       if (dataFromDB.singleWhere((userDB) => userDB['id'] == uid)['needs_upload'] == 1){
+        print('Надо обновить!!');
         Map<String,List<int>> tempProgress = {};
-        Map<String,dynamic> progressFromDBDynamic = dataFromDB.singleWhere((userDB) => userDB['id'] == uid)['progress'] as Map<String,dynamic>;
+        Map<String,dynamic> progressFromDBDynamic = jsonDecode(dataFromDB.singleWhere((userDB) => userDB['id'] == uid)['progress'])  as Map<String,dynamic>;
         for (String prName in progressFromDBDynamic.keys) {
           List<int> temp = [];
           for (int i = 0; i < progressFromDBDynamic[prName].length; i++) {
@@ -61,6 +62,7 @@ class UserDataProvider with ChangeNotifier{
           await docRef.update({'progress': tempProgress});
           progress = {...tempProgress};
           await DBHelper.update('user_data', {'id': uid,'needs_upload': 0});
+          print('updated');
         } on FirebaseException catch (e){
           print(e);
         }
@@ -75,8 +77,6 @@ class UserDataProvider with ChangeNotifier{
     if(!internetConnected) {
       return false;
     }
-        print('12');
-
     var docRef = FirebaseFirestore.instance.doc('users/$uid');
     var docSnapshot = await docRef.get();
     if(!docSnapshot.exists){
@@ -245,7 +245,7 @@ class UserDataProvider with ChangeNotifier{
     await docRef.set({
       'username' : username,
       'phone_number' : phoneNumber,
-      'progress' : {},
+      'progress' : progress,
       'statistics' : statistics,
       'stats_dates' : [],
       'paid_account' : false,
@@ -339,6 +339,7 @@ class UserDataProvider with ChangeNotifier{
     try {
       var userRef = FirebaseFirestore.instance.doc('users/$userId');
       await userRef.update({'username' : newUsername});
+      username = newUsername;
     } on FirebaseException catch (e){
       print(e);
       return 'Что-то пошло не так!';
@@ -448,7 +449,10 @@ class UserDataProvider with ChangeNotifier{
     bool internetConnected = await NetworkConnectivity.checkConnection();
     if(!internetConnected){
       await DBHelper.insert('user_data', {'id': userId!,'needs_upload': 1,'progress': jsonEncode(progress)});
-      return 'Отложено!';
+      print('ОТложено!!');
+    notifyListeners();
+    return 'Отложено!';
+
     }
     try {
     var userData = FirebaseFirestore.instance.doc('users/$userId');
@@ -499,6 +503,40 @@ class UserDataProvider with ChangeNotifier{
 });
     notifyListeners();
     return;
+  }
+
+  Future<bool> doesUserExist(String phoneNumber)async{
+    var users = await FirebaseFirestore.instance.collection('users').get();
+    for(var userSnapshot in users.docs){
+      if(userSnapshot.data()['phone_number'] == phoneNumber){
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  Future<String> deleteUser(AuthCredential newAuthCredential)async{
+    bool internetConnected = await NetworkConnectivity.checkConnection();
+    if(!internetConnected){
+      return 'Отсутвует подключение к интернету!';
+    }
+    try{
+      await FirebaseFirestore.instance.doc('users/$userId').delete();
+      await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(newAuthCredential);
+      await FirebaseAuth.instance.currentUser!.delete();
+      return 'Успешно!';
+    } on FirebaseException catch(e){
+      switch (e.code) {
+        case 'invalid-verification-code':
+          return 'Неверный код!';
+        default:
+          return 'Что-то пошло не так!!';
+      }
+    } catch (otherError){
+      print(otherError.toString());
+      return 'Что-то очень пошло не так!';
+    }
   }
 
   

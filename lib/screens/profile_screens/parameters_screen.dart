@@ -165,18 +165,21 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
           ),
         ),
       ),
+      const SizedBox(height: 30,),
       SlideTransition(position: _distributionPositionAnimation,child: FadeTransition(opacity: _distributionOpacityAnimation,child: Padding(
               padding: const EdgeInsets.only(top: 15,left: 30),
               child: Column(children: [
                 ...BZUWidgets.map((texts) => Stack(children: [Positioned(left: 12,child: texts[0],),Center(child: texts[1],),Positioned(right: 30,child: texts[2])],)).toList(),
               ],)
       ),),),
+            const SizedBox(height: 30,),
+
       SlideTransition(position: _distributionPositionAnimation,child: FadeTransition(opacity: _distributionOpacityAnimation,child: Padding(
               padding: const EdgeInsets.only(top: 15,left: 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Распределение суточной калорийности:\n',style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),),
+                  Text('Распределение суточной калорийности:\n',style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: Colors.white,fontWeight: FontWeight.bold),),
                   Text('${DISstrings[0]} ${DISstrings[1]} ${DISstrings[2]} ${DISstrings[3]} ${DISstrings[4]}',style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),),
                 ],
               ),
@@ -350,8 +353,10 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
             int.parse(strings[1]),
             int.parse(strings[0]),
           );
-    if(DateTime.now().difference(date).inSeconds > 30){
+    if(DateTime.now().difference(date).inDays > 30){
+      if(mounted){
       showDialog(context: context, builder: (ctx)=>_buildAskDialog(ctx));
+      }
     }
   }
 
@@ -368,7 +373,9 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
+
     userData= Provider.of<UserDataProvider>(context);
+    print(userData);
     return WillPopScope(
       onWillPop: () {Navigator.of(context).pushNamedAndRemoveUntil(ProfileScreen.routeName, (route) => false);return Future.value(true);},
       child: Scaffold(
@@ -383,12 +390,15 @@ class _ParametersScreenState extends State<ParametersScreen> with TickerProvider
                   opacity: _titleOpacityAnimation,
                   child: SlideTransition(
                     position: _titlePositionAnimation,
-                    child: Text(
-                      'Мои параметры',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineLarge!
-                          .copyWith(fontWeight: FontWeight.bold,color: Colors.white),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Мои параметры',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineLarge!
+                            .copyWith(fontWeight: FontWeight.bold,color: Colors.white),
+                      ),
                     ),
                   ),
                 ),

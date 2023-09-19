@@ -15,8 +15,9 @@ class SetBlogItem extends StatefulWidget {
   late Training? set = null;
   late String? title;
   late String? subtext;
-  SetBlogItem(this.set,{super.key});
-  SetBlogItem.empty(this.title,this.subtext,{super.key});
+  late double? width;
+  SetBlogItem(this.set,{this.width,super.key});
+  SetBlogItem.empty(this.title,this.subtext,{this.width,super.key});
 
   @override
   State<SetBlogItem> createState() => _SetBlogItemState();
@@ -44,6 +45,7 @@ class _SetBlogItemState extends State<SetBlogItem> {
             }
           }
         }
+        Provider.of<BottomNavigationProvider>(context,listen:false).setIndex(3);
         shouldLoad
             ? Navigator.of(context).pushNamed(
                 LoadSetScreen.routeName,
@@ -69,7 +71,10 @@ class _SetBlogItemState extends State<SetBlogItem> {
 
 
 
+
 Widget _buildParallaxBackground(BuildContext context) {
+
+  
     return Flow(
       delegate: ParallaxFlowDelegate(
         scrollable: Scrollable.of(context),
@@ -79,14 +84,19 @@ Widget _buildParallaxBackground(BuildContext context) {
       children: [
         if(widget.set != null) FadeInImage(
             placeholder: const AssetImage(
-                'assets/images/placeholders/grey_gradient.jpeg'),
+                'assets/images/placeholders/grey_gradient.jpg'),
             image: FileImage(widget.set!.image!),
+            imageErrorBuilder: (context, error, stackTrace) {
+              widget.set!.fetchMissingFile();
+              return Image.asset(
+                'assets/images/placeholders/grey_gradient.jpg');
+            },
             key: _backgroundImageKey,
             fit: BoxFit.cover,
-            placeholderFit: BoxFit.cover,
+            placeholderFit: BoxFit.fill,
             fadeInDuration: const Duration(milliseconds: 500),
           ),
-        if(widget.set == null) Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,),
+        if(widget.set == null) Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 500,),
       ],
     );
   }
@@ -97,8 +107,8 @@ Widget _buildParallaxBackground(BuildContext context) {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-            begin: Alignment.centerRight,
-            end: Alignment.centerLeft,
+            end: Alignment.bottomCenter,
+            begin: Alignment.topCenter,
             stops: const [0.6, 0.95],
           ),
         ),
@@ -114,18 +124,25 @@ Widget _buildParallaxBackground(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          SizedBox(
+            width: widget.width != null ? widget.width!-50 : null,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.width*0.35,
+            width: widget.width != null ? widget.width!-50 : null,
             child: Text(
               subtext,
+              textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -143,12 +160,11 @@ Widget _buildParallaxBackground(BuildContext context) {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180,
       margin: const EdgeInsets.all(10),
       child: GestureDetector(
         onTap: onTap,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(36),
           child: Stack(children: [
             _buildParallaxBackground(context),
             _buildGradient(),

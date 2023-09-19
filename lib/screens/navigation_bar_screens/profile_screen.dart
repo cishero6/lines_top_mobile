@@ -21,33 +21,23 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late UserDataProvider authData;
+  late bool _isAdmin = false;
 
   @override
   void initState() {
     authData = Provider.of<UserDataProvider>(context,listen: false);
+    if(authData.phoneNumber == '+79313733536'){
+      _isAdmin = true;
+    }
     super.initState();
   }
 
-  Widget _buildConfirmDialog(BuildContext ctx){
-    return AlertDialog(
-      backgroundColor: Colors.white70,
-      surfaceTintColor: Colors.transparent,
-      content: Padding(
-        padding: const EdgeInsets.only(top:12.0),
-        child: Text('Вы уверены?',style: Theme.of(context).textTheme.headlineSmall,),
-      ),
-      actions: [TextButton(onPressed: ()=> authData.logoutUser().then((result) {
-ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(result,style: Theme.of(context).textTheme.titleMedium,),
-              backgroundColor: Colors.white70,
-            ));
-            Navigator.of(ctx).pop();
-      } )  , child: Text('Да', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: CupertinoColors.systemRed),),),TextButton(onPressed: ()=>Navigator.of(ctx).pop(), child: Text('Отмена', style: Theme.of(context).textTheme.bodyMedium,),)],
-    );
-  }
+
 
   Widget _buildProfileView(BuildContext ctx) {
     //print(authData);
+    var size = MediaQuery.of(context).size;
+    double maxExtent = 300;
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -65,13 +55,15 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               ),
               ),
             ),
-          SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: [
+          SliverGrid.extent(maxCrossAxisExtent: maxExtent,childAspectRatio: 4/3,children: [
             ProfileItem(
               title: authData.username ?? 'Ошибка',
               subtext: 'Твоё имя',
               onTap: () {
                 Navigator.of(context).pushNamed(ChangeDataScreen.routeName);
               },
+              width: size.width/(size.width/maxExtent).ceil(),
+              maxLines: 1,
               isGrid: true,
             ),
             ProfileItem(
@@ -80,10 +72,12 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               onTap: () {
                 Navigator.of(context).pushNamed(ChangeDataScreen.routeName);
               },
+              width: size.width/(size.width/maxExtent).ceil(),
+              maxLines: 1,
               isGrid: true,
             ),
           ],),
-          SliverToBoxAdapter(child: 
+          SliverGrid.extent(maxCrossAxisExtent: maxExtent*2,childAspectRatio: 5/3,children: [ 
             ProfileItem(
               title: 'Мои параметры',
               subtext: '',
@@ -91,45 +85,51 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   Navigator.of(context).pushNamed(ParametersScreen.routeName,arguments: [false]);
                 },
               isGrid: false,
-            ),
+            ),],
           ),
-          SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: [
+          SliverGrid.extent(maxCrossAxisExtent: maxExtent,childAspectRatio: 4/3,children: [
             ProfileItem(
               title: 'Прогресс программ',
               subtext: '',
               onTap: () {
                 Navigator.of(context).pushNamed(ProgramsProgressScreen.routeName);
               },
+              width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
             ProfileItem(
-              title: 'Выйти',
+              title: 'Настройки',
               subtext: '',
-              onTap: ()=>showDialog(context: context, builder: _buildConfirmDialog),
+              onTap: (){Navigator.of(context).pushNamed(ChangeDataScreen.routeName);},
+              width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
-            ProfileItem(
+            if(_isAdmin) ProfileItem(
               title: 'Сменить все версии',
               subtext: '',
               onTap: authData.changeAllVersions,
+              width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
-            const ProfileItem(
+            if(_isAdmin) ProfileItem(
               title: 'Удалить таблицы',
               subtext: '',
               onTap: DBHelper.deleteTables,
+              width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
-            ProfileItem(
+            if(_isAdmin) ProfileItem(
               title: 'Удалить статы',
               subtext: '',
               onTap: authData.deleteStats,
+              width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
-            ProfileItem(
+            if(_isAdmin) ProfileItem(
               title: 'Панель',
               subtext: '',
               onTap: ()=>Navigator.of(ctx).pushNamed(ControlScreen.routeName),
+              width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
 
@@ -152,6 +152,9 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           }
           if(snapshot.data == null){
             return const PhoneAuthView();
+          }
+          if(authData.phoneNumber == null){
+            return const CustomScrollView(slivers: [SliverToBoxAdapter(child: Center(child: Text(''),),)],);
           }
           return _buildProfileView(context);
         }),

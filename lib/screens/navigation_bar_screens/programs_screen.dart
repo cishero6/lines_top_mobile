@@ -15,22 +15,40 @@ class ProgramsScreen extends StatefulWidget {
 
 class _ProgramsScreenState extends State<ProgramsScreen> {
 late List<Program> _programs =[];
+
+
+  Future<void> _loadIfMissing()async{
+    for(var program in _programs){
+      if(!(await program.image.exists())){
+        program.fetchMissingFile();
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    _programs = Provider.of<ProgramsProvider>(context,listen: false).items;
+
+    _loadIfMissing();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     _programs = Provider.of<ProgramsProvider>(context).items;
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_10.jpg'),fit: BoxFit.cover,opacity: 0.5)),
+        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_10.jpg'),fit: BoxFit.cover)),
         child: CustomScrollView(
           physics: const NeverScrollableScrollPhysics(),
           slivers: [
-          SliverAppBar(backgroundColor: Colors.transparent,automaticallyImplyLeading: false,title: Text('Программы',style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),),),
+          SliverAppBar(backgroundColor: Colors.transparent,automaticallyImplyLeading: false,title: Text('Программы',style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold,color: Colors.white),),),
           SliverList(
             delegate: SliverChildListDelegate([
               Center(
                 child: CarouselSlider.builder(
                   itemCount: _programs.length,
-                  options: CarouselOptions(enlargeCenterPage: true,enlargeFactor: 0.4,viewportFraction: 1,height: MediaQuery.of(context).size.height*0.75,autoPlay: false,enableInfiniteScroll: false),
+                  options: CarouselOptions(enlargeCenterPage: true,enlargeFactor: 0.4,viewportFraction: 1,height: MediaQuery.of(context).size.height*0.75,autoPlay:false,enableInfiniteScroll: false,),
                   itemBuilder: (ctx, index, i) {
                     return ProgramListItem(_programs[index]);
                   },

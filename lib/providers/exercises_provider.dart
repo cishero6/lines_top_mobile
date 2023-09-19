@@ -32,6 +32,8 @@ class ExercisesProvider with ChangeNotifier {
             id: item['id'],
             title: item['title'],
             description: item['description'],
+            exerciseListText: item['exercise_list_text'],
+            repetitionListText: item['repetition_list_text'],
             video: item['video'] == 'null' ? null : File(item['video']),
             version: item['version'],
           ),
@@ -58,6 +60,8 @@ class ExercisesProvider with ChangeNotifier {
         Exercise exercise = Exercise(
           id: docSnapshot.id,
           title: doc['title'],
+          exerciseListText: doc['exercise_list_text'],
+          repetitionListText: doc['repetition_list_text'],
           description: doc['description'],
           version: doc['version'],
         );
@@ -72,6 +76,8 @@ class ExercisesProvider with ChangeNotifier {
           'id': exercise.id,
           'title': exercise.title,
           'description': exercise.description,
+          'exercise_list_text': exercise.exerciseListText,
+          'repetition_list_text': exercise.repetitionListText,
           'version': exercise.version,
           'video': 'null',
         });
@@ -124,6 +130,8 @@ class ExercisesProvider with ChangeNotifier {
       'title': newExercise.title,
       'description': newExercise.description,
       'video': 'null',
+      'exercise_list_text': newExercise.exerciseListText,
+      'repetition_list_text': newExercise.repetitionListText,
       'version': 1,
     };
     var docReference = collectionReference.doc(newId);
@@ -134,15 +142,17 @@ class ExercisesProvider with ChangeNotifier {
     await videoRef.putFile(newExercise.video!).whenComplete(() {});
     loadingText = 'Обновляем упражнение';
     notifyListeners();
-    await docReference.update({'video_url': 'exercises/$newId'});
+    await docReference.update({'video': 'exercises/$newId'});
 
     var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
-    newExercise.video = await newExercise.video!.copy('$path/${newExercise.id}');
+    newExercise.video = await newExercise.video!.copy('$path/${newExercise.id}.mov');
 
     DBHelper.insert('exercises', {
       'id': newExercise.id,
       'title': newExercise.title,
       'description': newExercise.description,
+      'exercise_list_text': newExercise.exerciseListText,
+      'repetition_list_text': newExercise.repetitionListText,
       'version': 1,
       'video': '$path/${newExercise.id}',
     });
@@ -192,6 +202,12 @@ class ExercisesProvider with ChangeNotifier {
     if (newData.containsKey('description')) {
       item.description = newData['description'];
     }
+    if (newData.containsKey('exercise_list_text')) {
+      item.exerciseListText = newData['exercise_list_text'];
+    }
+    if (newData.containsKey('repetition_list_text')) {
+      item.repetitionListText = newData['repetition_list_text'];
+    }
     newData.addAll({'version': exercise.version + 1});
     await docRef.update(newData);
 
@@ -200,6 +216,8 @@ class ExercisesProvider with ChangeNotifier {
       'id': item.id,
       'title': item.title,
       'description': item.description,
+      'exercise_list_text': item.exerciseListText,
+      'repetition_list_text': item.repetitionListText,
       'video': '$path/${item.id}',
       'version': item.version
     });
@@ -247,6 +265,8 @@ class ExercisesProvider with ChangeNotifier {
         'id': exercise.id,
         'title': exercise.title,
         'video': '$path/${exercise.id}.mov',
+        'exercise_list_text': exercise.exerciseListText,
+        'repetition_list_text': exercise.repetitionListText,
         'description': exercise.description,
         'version': exercise.version,
       });
@@ -258,4 +278,9 @@ class ExercisesProvider with ChangeNotifier {
       exercise.video = file;
     }
   }
+
+
+
+
+
 }

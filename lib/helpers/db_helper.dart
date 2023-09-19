@@ -8,7 +8,7 @@ class DBHelper {
     return sql.openDatabase(path.join(dbPath, 'lines_top.db'),
         onCreate: (db, version) async{
           await db.execute('CREATE TABLE user_data(id TEXT PRIMARY KEY,progress TEXT,needs_upload INTEGER)');
-          await db.execute('CREATE TABLE exercises(id TEXT PRIMARY KEY, title TEXT,video TEXT,description TEXT,version INTEGER)');
+          await db.execute('CREATE TABLE exercises(id TEXT PRIMARY KEY, title TEXT,video TEXT,description TEXT,exercise_list_text TEXT,repetition_list_text TEXT,version INTEGER)');
           await db.execute('CREATE TABLE trainings(id TEXT PRIMARY KEY, title TEXT,sections TEXT,is_set INTEGER,description TEXT,image TEXT,version INTEGER)');
           await db.execute('CREATE TABLE programs(id TEXT PRIMARY KEY, title TEXT,priority TEXT,subtext TEXT,trainings TEXT,body_text TEXT,image TEXT,is_free INTEGER,version INTEGER)');
       return db.execute('CREATE TABLE blog_posts(id TEXT PRIMARY KEY, title TEXT, short_desc TEXT, body_text TEXT, date TEXT, images TEXT,is_primary INTEGER,version INTEGER)');
@@ -44,18 +44,6 @@ class DBHelper {
   }
 
   static Future<void> deleteTables() async {
-    final db = await DBHelper.database();
-    int a;
-    a = await db.delete('exercises');
-    print('ex $a');
-    a = await db.delete('trainings');
-    print('tr $a');
-    a = await db.delete('blog_posts');
-    print('bl $a');
-    a = await db.delete('programs');
-    print('pr $a');
-    a = await db.delete('user_data');
-    print('user $a');
     final dbPath = await sql.getDatabasesPath();
     await sql.deleteDatabase(path.join(dbPath, 'lines_top.db'));
     print('dropped db');

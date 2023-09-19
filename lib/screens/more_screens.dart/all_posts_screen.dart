@@ -24,6 +24,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -51,7 +52,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
               ),
               ),
             ),
-            SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: _blogPosts.map((post) => PrimaryBlogItem(post, scrollableKey: _key)).toList(),),
+            SliverGrid.extent(maxCrossAxisExtent: 600,childAspectRatio: 4/3,children: _blogPosts.map((post) => PrimaryBlogItem(post, scrollableKey: _key,width: size.width/(size.width/600).ceil(),)).toList(),),
           ],
         ),
       ),

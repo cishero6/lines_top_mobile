@@ -23,6 +23,7 @@ class _AllSetsScreenState extends State<AllSetsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -35,6 +36,7 @@ class _AllSetsScreenState extends State<AllSetsScreen> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
+              automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               expandedHeight: 150,
               flexibleSpace: FlexibleSpaceBar(
@@ -49,7 +51,7 @@ class _AllSetsScreenState extends State<AllSetsScreen> {
               ),
               ),
             ),
-            SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: _sets.map((set) => SetBlogItem(set)).toList(),),
+            SliverGrid.extent(maxCrossAxisExtent: 300,childAspectRatio: 4/3,children: _sets.map((set) => SetBlogItem(set,width: size.width/(size.width/300).ceil(),)).toList(),),
           ],
         ),
       ),

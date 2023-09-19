@@ -31,7 +31,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          backgroundColor: Colors.white70,
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -113,18 +113,23 @@ class _ProgramListItemState extends State<ProgramListItem> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.program.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Text(
+                  widget.program.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               SizedBox(
-                width: MediaQuery.of(context).size.width * 0.6,
+                width: MediaQuery.of(context).size.width * 0.8,
                 child: Text(
                   widget.program.subtext,
+                  textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 4,
                   style: const TextStyle(

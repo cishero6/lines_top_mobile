@@ -9,6 +9,11 @@ class VerificationIdProvider with ChangeNotifier {
     return;
   }
 
+  void removeVerificationId() {
+    _verificationId = '';
+    return;
+  }
+
   String get verificationId {
     return _verificationId;
   }
