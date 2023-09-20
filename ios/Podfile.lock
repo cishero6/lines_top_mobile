@@ -89,12 +89,6 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.3.1)
-  - purchases_flutter (5.6.5):
-    - Flutter
-    - PurchasesHybridCommon (= 6.1.2)
-  - PurchasesHybridCommon (6.1.2):
-    - RevenueCat (= 4.25.9)
-  - RevenueCat (4.25.9)
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
@@ -113,7 +107,6 @@ DEPENDENCIES:
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
@@ -133,8 +126,6 @@ SPEC REPOS:
     - GTMSessionFetcher
     - nanopb
     - PromisesObjC
-    - PurchasesHybridCommon
-    - RevenueCat
 
 EXTERNAL SOURCES:
   cloud_firestore:
@@ -156,8 +147,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
-  purchases_flutter:
-    :path: ".symlinks/plugins/purchases_flutter/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
   video_player_avfoundation:
@@ -193,9 +182,6 @@ SPEC CHECKSUMS:
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
-  purchases_flutter: 440e09b1d692a20438574da78a45fda193bb80c5
-  PurchasesHybridCommon: b7c4205b6d2479cdd8914084a2b536e5e5b1445f
-  RevenueCat: 4160d04575059fc1edbb973981f541b705ddebef
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
   video_player_avfoundation: 81e49bb3d9fb63dccf9fa0f6d877dc3ddbeac126
   wakelock_plus: 8b09852c8876491e4b6d179e17dfe2a0b5f60d47

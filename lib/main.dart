@@ -71,6 +71,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: lightColorScheme,
             fontFamily: 'SourceSerifPro'),
+        //home: const IntroScreen(),
         home: (isFirstBuild ? const IntroScreen() : const MainScreen(didFetch: false)),
       ),
     );
