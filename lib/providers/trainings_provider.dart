@@ -8,6 +8,7 @@ import 'package:lines_top_mobile/helpers/file_from_url.dart';
 import 'package:lines_top_mobile/providers/programs_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import '../helpers/db_helper.dart';
+import '../helpers/file_from_asset.dart';
 import '../helpers/network_connectivity.dart';
 import '../models/exercise.dart';
 import './exercises_provider.dart';
@@ -34,7 +35,16 @@ class TrainingsProvider with ChangeNotifier {
         Map<String, List<Exercise>> doneSections = {};
         Map<String, dynamic> dynamicSections = jsonDecode(item['sections']);
         Map<String, List<String>> stringSections = dynamicSections.map((key, value) => MapEntry(key,List<String>.generate(value.length, (index) => value[index])));
-        doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
+        for(var sectionName in stringSections.keys){
+          List<Exercise> list = [];
+          for(var exId in stringSections[sectionName]!){
+            if(exercises.any((element) => element.id == exId)){
+              list.add(exercises.singleWhere((element) => element.id == exId));
+            }
+          }
+          doneSections.addAll({sectionName: list});
+        }
+        //doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
         //ADDING ITEM
         _items.add(Training(
           id: item['id'],
@@ -299,5 +309,68 @@ class TrainingsProvider with ChangeNotifier {
     return null;
   }
 
+   Future<void> preLoadItems(BuildContext ctx)async{
+    var exercises = Provider.of<ExercisesProvider>(ctx,listen: false).items;
+    var path = (await getApplicationDocumentsDirectory()).path;
+    var trainingsFile = await fileFromAsset('assets/pre_compiled_data/trainings.txt');
+    var trainingsStr = await trainingsFile.readAsString();
+    var trainingsStrList = trainingsStr.split('\n/||/\n');
+    for(var trStr in trainingsStrList){
+      var argList = trStr.split('|');
+      Map<String, dynamic> dynamicSections = jsonDecode(argList[3]);
+        Map<String, List<String>> stringSections = dynamicSections.map((key, value) => MapEntry(key,List<String>.generate(value.length, (index) => value[index])));
+        Map<String, List<Exercise>> doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
+      Training newTraining = Training(
+        id: argList[0],
+        version: int.parse(argList[1]),
+        title: argList[2],
+        sections: doneSections,
+        isSet: argList[4] == 'true',
+      );
+      if(newTraining.isSet){
+        try {
+        var tempFile =
+            await fileFromAsset('assets/pre_compiled_data/${newTraining.id}');
+        File file = await tempFile.copy('$path/${newTraining.id}');
+        newTraining.image = file;
+      } catch (e) {
+        print(e);
+      }
+      }
+      _items.add(newTraining);
+      await DBHelper.insert('trainings', { //INSERT EDITED TRAININGS IN DATABASE
+      'id': newTraining.id,
+      'title': newTraining.title,
+      'description': newTraining.description ?? 'null',
+      'sections': argList[3],
+      'is_set': newTraining.isSet? 1:0,
+      'image': newTraining.image == null ? 'null' : '$path/${newTraining.id}',
+      'version': newTraining.version
+    });
+    }
+  }
 
+Future<void> compileDatabaseIntoPreload()async{
+    List<Map<String,dynamic>> compiledList = [];
+    for(var item in items){
+      Map<String,List<String>> sectionsMapIds = {};
+      for(var sectionName in item.sections.keys){
+        List<String> temp = [];
+        for(var ex in item.sections[sectionName]!){
+          temp.add(ex.id);
+        }
+        sectionsMapIds.addAll({sectionName:temp});
+      }
+      Map<String,dynamic> mapItem = {
+        'id':item.id,
+        'title': item.title,
+        'description': item.description ?? 'null',
+        'is_set': item.isSet,
+        'sections': jsonEncode(sectionsMapIds),
+        'version': item.version,
+      };
+      compiledList.add(mapItem);
+    }
+    await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'trainings':jsonEncode(compiledList)});
+  }
 }

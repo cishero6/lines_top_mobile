@@ -11,6 +11,7 @@ import 'package:lines_top_mobile/screens/profile_screens/programs_progress_scree
 import 'package:lines_top_mobile/screens/profile_screens/register_parameters_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/load_set_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
+import 'package:video_player/video_player.dart';
 import '../providers/exercises_provider.dart';
 import '../widgets/my_bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
@@ -49,6 +50,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
+  late VideoPlayerController _videoController;
 
   bool _isLoading = true;
   String _loadingText = '';
@@ -84,6 +86,11 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     if(!widget.didFetch){
       _fetchEverything();
+      _videoController = VideoPlayerController.asset('assets/videos/intro2.mp4')..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
+      _videoController.setLooping(true);
     } else{
       _isLoading = false;
     }
@@ -91,12 +98,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //appBar: AppBar(title: const Text('Саша ЧМООО'),elevation: 1,),
-      body: _isLoading
-          ? Container(
+
+  Widget _buildOldStage(){
+return Container(
             color: Colors.white,
             child: Center(
                 child: Column(
@@ -119,7 +123,34 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
               )),
-          )
+          );
+  }
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    if(!widget.didFetch){
+      if(!_videoController.value.isInitialized){
+        return const Scaffold(backgroundColor: Colors.black,);
+      }else{
+        _videoController.play();
+      }
+    }
+    return Scaffold(
+      backgroundColor: Colors.black,
+      //appBar: AppBar(title: const Text('Саша ЧМООО'),elevation: 1,),
+      body: _isLoading
+          ? Stack(
+      children: [
+        Center(child: AspectRatio(aspectRatio: 1080/1920,child: VideoPlayer(_videoController))),
+        Positioned(bottom: 100,child: SizedBox(width: MediaQuery.of(context).size.width,child: Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.center,children: [Text(_loadingText,style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white),),const SizedBox(width: 20,),const CircularProgressIndicator(color: Colors.white,)],))),
+      ],
+    )
           : Navigator(
               key: _navigatorKey,
               onGenerateRoute: (settings) {

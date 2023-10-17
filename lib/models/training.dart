@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../helpers/db_helper.dart';
 import '../helpers/file_from_url.dart';
 import '../helpers/network_connectivity.dart';
 import 'exercise.dart';
@@ -50,6 +51,8 @@ class Training extends LinesTopModel{
       File tempFile = await fileFromUrl(downloadURL, 'trainings_$id');
       var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
       image = await tempFile.copy('$path/$id');
+      await DBHelper.update('trainings',{'id':id,'image': '$path/$id'});      
+
       print('tr loaded missing');
     }catch(e){
       print('tried to load tr - failed');

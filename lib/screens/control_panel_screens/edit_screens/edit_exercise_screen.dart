@@ -132,7 +132,7 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
                       decoration:
                           const InputDecoration(hintText: 'Название упражнения'),
                       controller: _titleController,
-                      maxLength: 20,
+                      maxLength: 80,
                     ),
                   ),
                   const Divider(
@@ -151,7 +151,7 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
                       decoration:
                           const InputDecoration(hintText: 'Описание упражнения'),
                       controller: _descriptionController,
-                      maxLength: 200,
+                      maxLength: 400,
                     ),
                   ),
                   UnconstrainedBox(
@@ -184,7 +184,7 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
                                 decoration: const InputDecoration(
                                     hintText: 'Список упражнений'),
                                 controller: _exListController,
-                                maxLength: 200,
+                                maxLength: 400,
                               ),
                             ),
                             UnconstrainedBox(
@@ -215,7 +215,7 @@ class _EditExerciseScreenState extends State<EditExerciseScreen> {
                                 decoration: const InputDecoration(
                                     hintText: 'Повторения'),
                                 controller: _repsListController,
-                                maxLength: 200,
+                                maxLength: 400,
                               ),
                             ),
                             UnconstrainedBox(

@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lines_top_mobile/models/lines_top_model.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../helpers/db_helper.dart';
 import '../helpers/file_from_url.dart';
 import '../helpers/network_connectivity.dart';
 import 'training.dart';
@@ -39,6 +40,7 @@ class Program extends LinesTopModel{
       File tempFile = await fileFromUrl(downloadURL, id);
       var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
       image = await tempFile.copy('$path/$id');
+      await DBHelper.update('programs',{'id':id,'image': '$path/$id'});      
       print('pr loaded missing');
     }catch(e){
       print('tried to load pr - failed');

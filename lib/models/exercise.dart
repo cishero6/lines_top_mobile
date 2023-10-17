@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/models/lines_top_model.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -33,12 +34,19 @@ class Exercise extends LinesTopModel{
       var videoRef = FirebaseStorage.instance.ref('exercises/$id');
       var downloadURL = await videoRef.getDownloadURL();
       video = await fileFromUrl(downloadURL, id);
-      video = await video!.copy('$path/$id.mov');      
+      video = await video!.copy('$path/$id.mov');
+      await DBHelper.update('exercises',{'id':id,'video': '$path/$id.mov'});      
       print('ex loaded missing');
     }catch(e){
       print('tried to load ex - failed');
       return;
     }
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return id;
   }
 
 }

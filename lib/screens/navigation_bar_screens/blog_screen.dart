@@ -45,6 +45,8 @@ class _BlogScreenState extends State<BlogScreen> {
         .items
         .where((element) => !element.isPrimary)
         .toList();
+
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -66,16 +68,6 @@ class _BlogScreenState extends State<BlogScreen> {
                     .textTheme
                     .headlineLarge!
                     .copyWith(fontWeight: FontWeight.bold,color: Colors.white),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Text(
-                'Самое важное',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium!
-                    .copyWith(fontWeight: FontWeight.bold,color:Colors.white),
-                textAlign: TextAlign.center,
               ),
             ),
             SliverToBoxAdapter(

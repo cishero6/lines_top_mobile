@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -89,6 +90,7 @@ class BlogProvider with ChangeNotifier {
               downloadURL = await storage.ref(imageUrl).getDownloadURL();
               File tempFile =
                   await fileFromUrl(downloadURL, imageUrl.replaceAll('/', '_'));
+              print('got image');
               File file = await tempFile.copy('$path/${blogPost.id}_$index');
               pathsOfImages += '$path/${blogPost.id}_$index|';
               index++;
@@ -367,7 +369,67 @@ class BlogProvider with ChangeNotifier {
     loadingText = '';
   }
 
+  Future<void> preLoadItems()async{
+    var path = (await getApplicationDocumentsDirectory()).path;
+    var postsFile = await fileFromAsset('assets/pre_compiled_data/blog_posts.txt');
+    var postsStr = await postsFile.readAsString();
+    var postsStrList = postsStr.split('\n/||/\n');
+    for(var postStr in postsStrList){
+      var argList = postStr.split('|');
+      String pathsOfImages = '';
+      BlogPost newPost = BlogPost(
+        id: argList[0],
+        version: int.parse(argList[1]),
+        title: argList[2],
+        shortDesc: argList[3],
+        bodyText: argList[4],
+        date: argList[5],
+        isPrimary: argList[6] == 'true',
+        images: [],
+      );
+      for(int i = 0;i<int.parse(argList.last);i++){
+        try {
+              var tempFile =
+                  await fileFromAsset('assets/pre_compiled_data/${newPost.id}_$i');
+              File file = await tempFile.copy('$path/${newPost.id}_$i');
+              pathsOfImages += '$path/${newPost.id}_$i|';
+              newPost.images.add(file);
+        } catch (e){
+          print(e);
+        }
+      }
+      pathsOfImages = pathsOfImages.substring(0, pathsOfImages.length - 1);
+      _items.add(newPost);
+      await DBHelper.insert('blog_posts', {
+        'id': newPost.id,
+        'title': newPost.title,
+        'short_desc': newPost.shortDesc,
+        'body_text': newPost.bodyText,
+        'date': newPost.date,
+        'images': pathsOfImages,
+        'is_primary': newPost.isPrimary ? 1 : 0,
+        'version': newPost.version,
+      });
+    }
+  }
+  
 
-
+  Future<void> compileDatabaseIntoPreload()async{
+    List<Map<String,dynamic>> compiledList = [];
+    for(var item in items){
+      Map<String,dynamic> mapItem = {
+        'id':item.id,
+        'title': item.title,
+        'date': item.date,
+        'short_desc': item.shortDesc,
+        'body_text': item.bodyText,
+        'images_count': item.images.length,
+        'version': item.version,
+        'is_primary': item.isPrimary,
+      };
+      compiledList.add(mapItem);
+    }
+    await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'blog_posts':jsonEncode(compiledList)});
+  }
   
 }

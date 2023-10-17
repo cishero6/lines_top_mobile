@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../helpers/db_helper.dart';
+import '../helpers/file_from_asset.dart';
 import '../helpers/file_from_url.dart';
 import '../helpers/network_connectivity.dart';
 import 'trainings_provider.dart';
@@ -154,7 +156,7 @@ class ExercisesProvider with ChangeNotifier {
       'exercise_list_text': newExercise.exerciseListText,
       'repetition_list_text': newExercise.repetitionListText,
       'version': 1,
-      'video': '$path/${newExercise.id}',
+      'video': '$path/${newExercise.id}.mov',
     });
     
     _items.add(newExercise);
@@ -218,7 +220,7 @@ class ExercisesProvider with ChangeNotifier {
       'description': item.description,
       'exercise_list_text': item.exerciseListText,
       'repetition_list_text': item.repetitionListText,
-      'video': '$path/${item.id}',
+      'video': '$path/${item.id}.mov',
       'version': item.version
     });
     notifyListeners();
@@ -280,7 +282,55 @@ class ExercisesProvider with ChangeNotifier {
   }
 
 
-
-
+ Future<void> preLoadItems()async{
+    var path = (await getApplicationDocumentsDirectory()).path;
+    var exercisesFile = await fileFromAsset('assets/pre_compiled_data/exercises.txt');
+    var exercisesStr = await exercisesFile.readAsString();
+    var exercisesStrList = exercisesStr.split('\n/||/\n');
+    for(var exStr in exercisesStrList){
+      var argList = exStr.split('|');
+      Exercise newExercise = Exercise(
+        id: argList[0],
+        version: int.parse(argList[1]),
+        title: argList[2],
+        description: argList[3],
+        exerciseListText: argList[4],
+        repetitionListText: argList[5],
+      );
+      try {
+        var tempFile =
+            await fileFromAsset('assets/pre_compiled_data/${newExercise.id}.mov');
+        File file = await tempFile.copy('$path/${newExercise.id}.mov');
+        newExercise.video = file;
+      } catch (e) {
+        print(e);
+      }
+      _items.add(newExercise);
+      DBHelper.insert('exercises', {
+          'id': newExercise.id,
+          'title': newExercise.title,
+          'description': newExercise.description,
+          'exercise_list_text': newExercise.exerciseListText,
+          'repetition_list_text': newExercise.repetitionListText,
+          'version': newExercise.version,
+          'video': '$path/${newExercise.id}.mov',
+        });
+    }
+  }
+  Future<void>  compileDatabaseIntoPreload()async{
+    List<Map<String,dynamic>> compiledList = [];
+    for(var item in items){
+      Map<String,dynamic> mapItem = {
+        'id':item.id,
+        'title': item.title,
+        'description': item.description,
+        'exercise_list_text': item.exerciseListText,
+        'repetitions_list_text': item.repetitionListText,
+        'version': item.version,
+      };
+      compiledList.add(mapItem);
+    }
+    await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'exercises':jsonEncode(compiledList)});
+  }
 
 }

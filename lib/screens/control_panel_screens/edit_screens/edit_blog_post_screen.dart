@@ -44,12 +44,6 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
       );
       return;
     }
-    if (_otherImages.isEmpty) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Нет Остальных фотографий!')));
-      return;
-    }
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -146,7 +140,7 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
                       decoration:
                           const InputDecoration(hintText: 'Название поста'),
                       controller: _titleController,
-                      maxLength: 20,
+                      maxLength: 25,
                     ),
                   ),
                   const Divider(
@@ -185,7 +179,7 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
                       decoration:
                           const InputDecoration(hintText: 'Текст поста'),
                       controller: _bodyTextController,
-                      maxLength: 1500,
+                      maxLength: 2500,
                     ),
                   ),
                   ElevatedButton(

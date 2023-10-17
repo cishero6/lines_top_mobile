@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:path_provider/path_provider.dart';
+import '../helpers/file_from_asset.dart';
 import '../helpers/file_from_url.dart';
 import '../helpers/network_connectivity.dart';
 import '../models/program.dart';
@@ -65,7 +67,13 @@ class ProgramsProvider with ChangeNotifier {
         var doc = docSnapshot.data();
         List<dynamic> listOfString1 = doc['trainings'];
         List<String> listOfString2 = List<String>.generate(listOfString1.length, (index) => listOfString1[index]);
-        List<Training> listOfTrainings = listOfString2.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList();
+        List<Training> listOfTrainings = [];
+        for(String trId in listOfString2){
+          if(trainings.any((element) => element.id == trId)){
+            listOfTrainings.add(trainings.singleWhere((element) => element.id == trId));
+          }
+        }
+        //List<Training> listOfTrainings = listOfString2.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList();
         Program program = Program(
           id: docSnapshot.id,
           title: doc['title'],
@@ -374,6 +382,73 @@ class ProgramsProvider with ChangeNotifier {
     return;
   }
 
+
+ Future<void> preLoadItems(BuildContext ctx)async{
+    var trainings =
+        Provider.of<TrainingsProvider>(ctx, listen: false).items;
+    var path = (await getApplicationDocumentsDirectory()).path;
+    var programsFile = await fileFromAsset('assets/pre_compiled_data/programs.txt');
+    var programsStr = await programsFile.readAsString();
+    var programsStrList = programsStr.split('\n/||/\n');
+    for(var prStr in programsStrList){
+      var argList = prStr.split('|');
+      List<dynamic> listOfString1 = jsonDecode(argList[5]);
+        List<String> listOfString2 = List<String>.generate(listOfString1.length, (index) => listOfString1[index]);
+        List<Training> listOfTrainings = listOfString2.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList();
+      Program newProgram = Program(
+        id: argList[0],
+        version: int.parse(argList[1]),
+        title: argList[2],
+        subtext: argList[3],
+        bodyText: argList[4],
+        trainings: listOfTrainings,
+      );
+      try {
+        var tempFile =
+            await fileFromAsset('assets/pre_compiled_data/${newProgram.id}');
+        File file = await tempFile.copy('$path/${newProgram.id}');
+        newProgram.image = file;
+      } catch (e) {
+        print(e);
+      }
+      _items.add(newProgram);
+      String trainingsArr = '';
+          for(var tr in newProgram.trainings){
+            trainingsArr += '${tr.id}|';
+          }
+          trainingsArr = trainingsArr.substring(0,trainingsArr.length-1);
+      DBHelper.insert('programs', {
+            'id': newProgram.id,
+            'title': newProgram.title,
+            'subtext': newProgram.subtext,
+            'body_text': newProgram.bodyText,
+            'is_free': newProgram.isFree ? 1:0,
+            'image': '$path/${newProgram.id}',
+            'trainings': trainingsArr,
+            'version': newProgram.version
+          });
+    }
+  }
+
+  Future<void> compileDatabaseIntoPreload()async{
+    List<Map<String,dynamic>> compiledList = [];
+    for(var item in items){
+      List<String> listOfIds = [];
+      for(var tr in item.trainings){
+        listOfIds.add(tr.id);
+      }
+      Map<String,dynamic> mapItem = {
+        'id':item.id,
+        'title': item.title,
+        'subtext': item.subtext,
+        'body_text': item.bodyText,
+        'trainings': jsonEncode(listOfIds),
+        'version': item.version,
+      };
+      compiledList.add(mapItem);
+    }
+    await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'programs':jsonEncode(compiledList)});
+  }
 
 
 

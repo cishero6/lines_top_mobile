@@ -136,7 +136,7 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
                             decoration: const InputDecoration(
                                 hintText: 'Название Программы'),
                             controller: _titleController,
-                            maxLength: 20,
+                            maxLength: 60,
                           ),
                         ),
                         const Divider(
@@ -180,7 +180,7 @@ class _AddProgramScreenState extends State<AddProgramScreen> {
                             decoration: const InputDecoration(
                                 hintText: 'Текст про программу'),
                             controller: _bodyTextController,
-                            maxLength: 600,
+                            maxLength: 2600,
                           ),
                         ),
                         UnconstrainedBox(

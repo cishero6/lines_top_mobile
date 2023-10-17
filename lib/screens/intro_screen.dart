@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
@@ -40,13 +40,13 @@ class _IntroScreenState extends State<IntroScreen>
 */
 
   int _currentIndex = 0;
+  bool _isLoading = true;
+  bool _isWatching = true;
 
 
-
-
-    bool _isLoading = true;
-    bool _isWatching = true;
-  
+  void _preLoadData()async {
+    await Provider.of<BlogProvider>(context,listen: false).preLoadItems();
+  }
 
   void _fetchEverything() async {
     await Provider.of<UserDataProvider>(context,listen:false).setListener();

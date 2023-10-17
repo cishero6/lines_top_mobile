@@ -128,25 +128,42 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
                 NewParametersListItem(leadingText: 'Обхват груди (см):', textEditingController: _chestController,initialValue: authData.statistics!['chest']!.last.toString(),isRightAligned: true,),
                 NewParametersListItem(leadingText: 'Обхват бедра (см):', textEditingController: _thighsController,initialValue: authData.statistics!['thighs']!.last.toString(),isRightAligned: true),
                 NewParametersListItem(leadingText: 'Обхват талии (см):', textEditingController: _waistController,initialValue: authData.statistics!['waist']!.last.toString(),isRightAligned: true),
-                Row(children: [
-                  Flexible(
-              fit: FlexFit.tight,
-              child: Padding(
+                Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'Моя активность',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.white),
+                  'Моя активность:',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Colors.white),
                 ),
-              )),
-                  Flexible(
-                    child: DropdownButton(dropdownColor: Colors.black54,isExpanded: true,value: _dropDownValue,items: _activityOptions.keys.map((e) => DropdownMenuItem(value: e,child: Text(e,overflow: TextOverflow.ellipsis,style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),),),).toList() , onChanged: (value){
-                      setState(() {
-                        _dropDownValue =value!;
-                        _activityCoefficient = _activityOptions[value]!;
-                      });
-                    }),
-                  ),
-                ],),
+              ),
+              DropdownButton(
+                dropdownColor: Colors.black54,
+                isExpanded: true,
+                value: _dropDownValue,
+                items: _activityOptions.keys
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(
+                          e,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(color: Colors.white),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _dropDownValue = value!;
+                    _activityCoefficient = _activityOptions[value]!;
+                  });
+                },
+              ),
                 
               ]),
             SliverToBoxAdapter(child: UnconstrainedBox(child: Padding(

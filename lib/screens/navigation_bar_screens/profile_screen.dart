@@ -1,7 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
+import 'package:lines_top_mobile/providers/blog_provider.dart';
+import 'package:lines_top_mobile/providers/exercises_provider.dart';
+import 'package:lines_top_mobile/providers/programs_provider.dart';
+import 'package:lines_top_mobile/providers/trainings_provider.dart';
 import 'package:lines_top_mobile/screens/profile_screens/change_data_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/control_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/parameters_screen.dart';
@@ -132,7 +138,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: size.width/(size.width/maxExtent).ceil(),
               isGrid: true,
             ),
-
+            if(_isAdmin) ProfileItem(
+              title: 'pre_compile',
+              subtext: '',
+              onTap: ()async{
+                await Provider.of<BlogProvider>(context,listen: false).compileDatabaseIntoPreload();
+                await Provider.of<ExercisesProvider>(context,listen: false).compileDatabaseIntoPreload();
+                await Provider.of<TrainingsProvider>(context,listen: false).compileDatabaseIntoPreload();
+                await Provider.of<ProgramsProvider>(context,listen: false).compileDatabaseIntoPreload();
+              },
+              width: size.width/(size.width/maxExtent).ceil(),
+              isGrid: true,
+            ),
           ],),
       ],
     );

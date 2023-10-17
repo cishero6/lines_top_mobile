@@ -161,7 +161,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
                 opacity: _widgetsAnimations.last['fade'] as Animation<double>,
                 child: Text(
                   element,
-                  style: Theme.of(ctx).textTheme.bodyLarge!.copyWith(color: Colors.white),
+                  style: Theme.of(ctx).textTheme.bodyLarge!.copyWith(color: Colors.white,fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize!+1),
                   textAlign: TextAlign.start,
                 ),
               ),

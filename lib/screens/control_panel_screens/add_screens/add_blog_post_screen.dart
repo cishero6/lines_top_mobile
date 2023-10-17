@@ -29,7 +29,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_mainImage == null || _otherImages.isEmpty) {
+    if (_mainImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Приложите фото!'),
       ));
@@ -102,7 +102,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
                           decoration:
                               const InputDecoration(hintText: 'Название поста'),
                           controller: _titleController,
-                          maxLength: 20,
+                          maxLength: 25,
                         ),
                       ),
                       const Divider(
@@ -137,7 +137,7 @@ class _AddBlogPostScreenState extends State<AddBlogPostScreen> {
                           decoration:
                               const InputDecoration(hintText: 'Текст поста'),
                           controller: _bodyTextController,
-                          maxLength: 1500,
+                          maxLength: 2500,
                         ),
                       ),
                       ElevatedButton(
