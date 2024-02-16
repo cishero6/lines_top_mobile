@@ -31,14 +31,26 @@ class ProgramsProvider with ChangeNotifier {
     if (itemsDB.isNotEmpty) {
       for (var item in itemsDB) {
         List<String> listOfString = item['trainings'].split('|');
-        List<Training> listOfTrainings = listOfString.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList(); //ИНОГДА ВЫЛЕТ
+        List<Training> listOfTrainings = [];
+        for(String trId in listOfString){
+          if(trainings.any((element) => element.id == trId)){
+            listOfTrainings.add(trainings.singleWhere((element) => element.id == trId));
+          }
+        }
+        // List<Training> listOfTrainings = listOfString.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList(); //ИНОГДА ВЫЛЕТ
+        File? image1;
+        if(!(await File(item['image']).exists())){
+          image1 = null;
+        }else{
+          image1 = File(item['image']);
+        }
         _items.add(
           Program(
             id: item['id'],
             title: item['title'],
             subtext: item['subtext'],
             bodyText: item['body_text'],
-            image: File(item['image']),
+            image: image1,
             trainings: listOfTrainings,
             isFree: item['is_free']==1,
             version: item['version'],
@@ -85,20 +97,21 @@ class ProgramsProvider with ChangeNotifier {
         );
         if((_items.indexWhere((element) => element.id == program.id) == -1) || (_items.singleWhere((element) => element.id == program.id)).version != program.version){
           print('start pr LOAD');
-          var imageRef = FirebaseStorage.instance.ref('programs/${program.id}');
+          try{var imageRef = FirebaseStorage.instance.ref('programs/${program.id}');
           var downloadURL = await imageRef.getDownloadURL();
           File tempFile = await fileFromUrl(downloadURL, program.id);
           File file = await tempFile.copy('$path/${program.id}');
-          program.image = file;
+          program.image = file;}catch(e){
+            print(e);
+          }
           firebaseItems.add(program);
-
 
           String trainingsArr = '';
           for(var tr in program.trainings){
             trainingsArr += '${tr.id}|';
           }
           trainingsArr = trainingsArr.substring(0,trainingsArr.length-1);
-          DBHelper.insert('programs', {
+          await DBHelper.insert('programs', {
             'id': program.id,
             'title': program.title,
             'subtext': program.subtext,
@@ -223,7 +236,7 @@ class ProgramsProvider with ChangeNotifier {
     notifyListeners();
     final photoRef = FirebaseStorage.instance.ref('programs/$newId');
 
-    await photoRef.putFile(newProgram.image).whenComplete(() {});
+    await photoRef.putFile(newProgram.image!).whenComplete(() {});
     loadingText = 'Обновляем программу';
     notifyListeners();
     await docReference.update({'image_url': 'programs/$newId'});
@@ -334,7 +347,7 @@ class ProgramsProvider with ChangeNotifier {
       tempProgress.remove(program.id);
       await FirebaseFirestore.instance
           .doc('users/${user.id}')
-          .set({'progress': tempProgress});
+          .update({'progress': tempProgress});
     }
     notifyListeners();
     loadingText = '';
@@ -383,52 +396,6 @@ class ProgramsProvider with ChangeNotifier {
   }
 
 
- Future<void> preLoadItems(BuildContext ctx)async{
-    var trainings =
-        Provider.of<TrainingsProvider>(ctx, listen: false).items;
-    var path = (await getApplicationDocumentsDirectory()).path;
-    var programsFile = await fileFromAsset('assets/pre_compiled_data/programs.txt');
-    var programsStr = await programsFile.readAsString();
-    var programsStrList = programsStr.split('\n/||/\n');
-    for(var prStr in programsStrList){
-      var argList = prStr.split('|');
-      List<dynamic> listOfString1 = jsonDecode(argList[5]);
-        List<String> listOfString2 = List<String>.generate(listOfString1.length, (index) => listOfString1[index]);
-        List<Training> listOfTrainings = listOfString2.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList();
-      Program newProgram = Program(
-        id: argList[0],
-        version: int.parse(argList[1]),
-        title: argList[2],
-        subtext: argList[3],
-        bodyText: argList[4],
-        trainings: listOfTrainings,
-      );
-      try {
-        var tempFile =
-            await fileFromAsset('assets/pre_compiled_data/${newProgram.id}');
-        File file = await tempFile.copy('$path/${newProgram.id}');
-        newProgram.image = file;
-      } catch (e) {
-        print(e);
-      }
-      _items.add(newProgram);
-      String trainingsArr = '';
-          for(var tr in newProgram.trainings){
-            trainingsArr += '${tr.id}|';
-          }
-          trainingsArr = trainingsArr.substring(0,trainingsArr.length-1);
-      DBHelper.insert('programs', {
-            'id': newProgram.id,
-            'title': newProgram.title,
-            'subtext': newProgram.subtext,
-            'body_text': newProgram.bodyText,
-            'is_free': newProgram.isFree ? 1:0,
-            'image': '$path/${newProgram.id}',
-            'trainings': trainingsArr,
-            'version': newProgram.version
-          });
-    }
-  }
 
   Future<void> compileDatabaseIntoPreload()async{
     List<Map<String,dynamic>> compiledList = [];
@@ -449,6 +416,46 @@ class ProgramsProvider with ChangeNotifier {
     }
     await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'programs':jsonEncode(compiledList)});
   }
+
+  Future<void> firstLoadItems(BuildContext ctx)async{
+    _items = [];
+    var trainings = Provider.of<TrainingsProvider>(ctx,listen: false).items;
+    var path = (await getApplicationDocumentsDirectory()).path;
+    var file = await fileFromAsset('assets/content/programs.txt');
+    var fileStr = await file.readAsString();
+ List<dynamic> compiledListDynamic = jsonDecode(fileStr);
+    List<Map<String, dynamic>> compiledList = [];
+    for(var item in compiledListDynamic){
+      compiledList.add(item);
+    }
+         for (Map<String,dynamic> item in compiledList){
+      Program program = Program(id: item['id'],title: item['title'],subtext: item['subtext'],bodyText: item['body_text'],version: item['version']);
+      List<dynamic> ldynamic = jsonDecode(item['trainings']);
+      var lstring = ldynamic.map((e) => e.toString()).toList();
+      List<Training> listOfTrainings = lstring.map((trainingId) => trainings.singleWhere((element) => element.id == trainingId)).toList();
+      program.trainings = listOfTrainings;
+
+      _items.add(program);
+      String trainingsArr = '';
+
+          for(var tr in program.trainings){
+            trainingsArr += '${tr.id}|';
+          }
+          trainingsArr = trainingsArr.substring(0,trainingsArr.length-1);
+      await DBHelper.insert('programs', {
+            'id': program.id,
+            'title': program.title,
+            'subtext': program.subtext,
+            'body_text': program.bodyText,
+            'is_free': program.isFree ? 1:0,
+            'image': '$path/${program.id}',
+            'trainings': trainingsArr,
+            'version': program.version
+      });
+    }
+
+  }
+
 
 
 

@@ -29,14 +29,32 @@ class ExercisesProvider with ChangeNotifier {
     List<Map<String, dynamic>> itemsDB = await DBHelper.getData('exercises');
     if (itemsDB.isNotEmpty) {
       for (var item in itemsDB) {
+        List<String> exList = [];
+        List<String> repList = [];
+        var docEx = jsonDecode(item['exercise_list_texts']);
+        var docRep = jsonDecode(item['repetition_list_texts']);
+        for(int i = 0;i<docEx.length;i++){
+          exList.add(docEx[i]);
+          repList.add(docRep[i]);
+        }
+        File? video;
+        if(item['video'] == 'null'){
+          video = null;
+        }else{
+          if(!(await File(item['video']).exists())){
+            video = null;
+          }else{
+            video = File(item['video']);
+          }
+        }
         _items.add(
           Exercise(
             id: item['id'],
             title: item['title'],
             description: item['description'],
-            exerciseListText: item['exercise_list_text'],
-            repetitionListText: item['repetition_list_text'],
-            video: item['video'] == 'null' ? null : File(item['video']),
+            exerciseListTexts: exList ,
+            repetitionListTexts: repList,
+            video: video,
             version: item['version'],
           ),
         );
@@ -59,18 +77,27 @@ class ExercisesProvider with ChangeNotifier {
       List<Exercise> firebaseItems = [];
       for (var docSnapshot in docs) {
         var doc = docSnapshot.data();
+        List<String> exList = [];
+        List<String> repList = [];
+        for(int i = 0;i<doc['exercise_list_texts'].length;i++){
+          exList.add(doc['exercise_list_texts'][i]);
+          repList.add(doc['repetition_list_texts'][i]);
+        }
         Exercise exercise = Exercise(
           id: docSnapshot.id,
           title: doc['title'],
-          exerciseListText: doc['exercise_list_text'],
-          repetitionListText: doc['repetition_list_text'],
+          exerciseListTexts: exList,
+          repetitionListTexts: repList,
           description: doc['description'],
           version: doc['version'],
         );
+        bool videoExists = false;
+        var path = (await getApplicationDocumentsDirectory()).path;
         if(_items.indexWhere((element) => element.id == exercise.id) != -1){
           var dbEx = _items.singleWhere((element) => element.id == exercise.id);
           if ((dbEx.version == exercise.version) && (dbEx.video != null)){
             exercise.video = dbEx.video;
+            videoExists = true;
           }
         }
         firebaseItems.add(exercise);
@@ -78,10 +105,10 @@ class ExercisesProvider with ChangeNotifier {
           'id': exercise.id,
           'title': exercise.title,
           'description': exercise.description,
-          'exercise_list_text': exercise.exerciseListText,
-          'repetition_list_text': exercise.repetitionListText,
+          'exercise_list_texts': jsonEncode(exercise.exerciseListTexts),
+          'repetition_list_texts': jsonEncode(exercise.repetitionListTexts),
           'version': exercise.version,
-          'video': 'null',
+          'video': videoExists ? '$path/${exercise.id}.mov' : 'null',
         });
 
       }
@@ -90,7 +117,10 @@ class ExercisesProvider with ChangeNotifier {
       print(error);
       return false;
     }
-    return true;
+
+    _items.sort((a,b)=> int.parse(a.id.split('_').last).compareTo(int.parse(b.id.split('_').last)));
+
+  return true;
 
 /*
     _items = [];
@@ -132,8 +162,8 @@ class ExercisesProvider with ChangeNotifier {
       'title': newExercise.title,
       'description': newExercise.description,
       'video': 'null',
-      'exercise_list_text': newExercise.exerciseListText,
-      'repetition_list_text': newExercise.repetitionListText,
+      'exercise_list_texts': newExercise.exerciseListTexts,
+      'repetition_list_texts': newExercise.repetitionListTexts,
       'version': 1,
     };
     var docReference = collectionReference.doc(newId);
@@ -153,8 +183,8 @@ class ExercisesProvider with ChangeNotifier {
       'id': newExercise.id,
       'title': newExercise.title,
       'description': newExercise.description,
-      'exercise_list_text': newExercise.exerciseListText,
-      'repetition_list_text': newExercise.repetitionListText,
+      'exercise_list_texts': jsonEncode(newExercise.exerciseListTexts),
+      'repetition_list_texts': jsonEncode(newExercise.repetitionListTexts),
       'version': 1,
       'video': '$path/${newExercise.id}.mov',
     });
@@ -204,11 +234,11 @@ class ExercisesProvider with ChangeNotifier {
     if (newData.containsKey('description')) {
       item.description = newData['description'];
     }
-    if (newData.containsKey('exercise_list_text')) {
-      item.exerciseListText = newData['exercise_list_text'];
+    if (newData.containsKey('exercise_list_texts')) {
+      item.exerciseListTexts = newData['exercise_list_texts'];
     }
-    if (newData.containsKey('repetition_list_text')) {
-      item.repetitionListText = newData['repetition_list_text'];
+    if (newData.containsKey('repetition_list_texts')) {
+      item.repetitionListTexts = newData['repetition_list_texts'];
     }
     newData.addAll({'version': exercise.version + 1});
     await docRef.update(newData);
@@ -218,8 +248,8 @@ class ExercisesProvider with ChangeNotifier {
       'id': item.id,
       'title': item.title,
       'description': item.description,
-      'exercise_list_text': item.exerciseListText,
-      'repetition_list_text': item.repetitionListText,
+      'exercise_list_texts': jsonEncode(item.exerciseListTexts) ,
+      'repetition_list_texts': jsonEncode(item.repetitionListTexts) ,
       'video': '$path/${item.id}.mov',
       'version': item.version
     });
@@ -267,8 +297,8 @@ class ExercisesProvider with ChangeNotifier {
         'id': exercise.id,
         'title': exercise.title,
         'video': '$path/${exercise.id}.mov',
-        'exercise_list_text': exercise.exerciseListText,
-        'repetition_list_text': exercise.repetitionListText,
+        'exercise_list_texts': jsonEncode(exercise.exerciseListTexts) ,
+        'repetition_list_texts': jsonEncode(exercise.repetitionListTexts) ,
         'description': exercise.description,
         'version': exercise.version,
       });
@@ -282,41 +312,7 @@ class ExercisesProvider with ChangeNotifier {
   }
 
 
- Future<void> preLoadItems()async{
-    var path = (await getApplicationDocumentsDirectory()).path;
-    var exercisesFile = await fileFromAsset('assets/pre_compiled_data/exercises.txt');
-    var exercisesStr = await exercisesFile.readAsString();
-    var exercisesStrList = exercisesStr.split('\n/||/\n');
-    for(var exStr in exercisesStrList){
-      var argList = exStr.split('|');
-      Exercise newExercise = Exercise(
-        id: argList[0],
-        version: int.parse(argList[1]),
-        title: argList[2],
-        description: argList[3],
-        exerciseListText: argList[4],
-        repetitionListText: argList[5],
-      );
-      try {
-        var tempFile =
-            await fileFromAsset('assets/pre_compiled_data/${newExercise.id}.mov');
-        File file = await tempFile.copy('$path/${newExercise.id}.mov');
-        newExercise.video = file;
-      } catch (e) {
-        print(e);
-      }
-      _items.add(newExercise);
-      DBHelper.insert('exercises', {
-          'id': newExercise.id,
-          'title': newExercise.title,
-          'description': newExercise.description,
-          'exercise_list_text': newExercise.exerciseListText,
-          'repetition_list_text': newExercise.repetitionListText,
-          'version': newExercise.version,
-          'video': '$path/${newExercise.id}.mov',
-        });
-    }
-  }
+
   Future<void>  compileDatabaseIntoPreload()async{
     List<Map<String,dynamic>> compiledList = [];
     for(var item in items){
@@ -324,13 +320,50 @@ class ExercisesProvider with ChangeNotifier {
         'id':item.id,
         'title': item.title,
         'description': item.description,
-        'exercise_list_text': item.exerciseListText,
-        'repetitions_list_text': item.repetitionListText,
+        'exercise_list_texts': jsonEncode(item.exerciseListTexts),
+        'repetitions_list_texts': jsonEncode(item.repetitionListTexts),
         'version': item.version,
       };
       compiledList.add(mapItem);
     }
     await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'exercises':jsonEncode(compiledList)});
   }
+  
 
+  Future<void> firstLoadItems() async {
+    _items = [];
+    var path = (await getApplicationDocumentsDirectory()).path;
+    var file = await fileFromAsset('assets/content/exercises.txt');
+    var fileStr = await file.readAsString();
+     List<dynamic> compiledListDynamic = jsonDecode(fileStr);
+    List<Map<String, dynamic>> compiledList = [];
+    for(var item in compiledListDynamic){
+      compiledList.add(item);
+    }
+    for (Map<String, dynamic> item in compiledList) {
+      Exercise exercise = Exercise(
+          id: item['id'],
+          title: item['title'],
+          description: item['description']);
+      File video = File('$path/${exercise.id}.mov');
+      exercise.video = video;
+      List<dynamic> ldynamic = jsonDecode(item['exercise_list_texts']);
+      List<String> lstring = ldynamic.map((e) => e.toString()).toList();
+      exercise.exerciseListTexts = lstring;
+      ldynamic = jsonDecode(item['repetitions_list_texts']);
+      lstring = ldynamic.map((e) => e.toString()).toList();
+      exercise.repetitionListTexts = lstring;
+      _items.add(exercise);
+      DBHelper.insert('exercises', {
+          'id': exercise.id,
+          'title': exercise.title,
+          'description': exercise.description,
+          'exercise_list_texts': jsonEncode(exercise.exerciseListTexts),
+          'repetition_list_texts': jsonEncode(exercise.repetitionListTexts),
+          'version': exercise.version,
+          'video': '$path/${exercise.id}.mov',
+      });
+
+    }
+  }
 }

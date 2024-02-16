@@ -1,9 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:lines_top_mobile/widgets/list_items/new_parameters_list_item.dart';
 import 'package:provider/provider.dart';
+
+import '../../providers/user_provider.dart';
 
 class AddParametersScreen extends StatefulWidget {
   const AddParametersScreen({super.key});
@@ -13,7 +14,7 @@ class AddParametersScreen extends StatefulWidget {
 }
 
 class _AddParametersScreenState extends State<AddParametersScreen> {
-  late UserDataProvider authData;
+  late UserProvider authData;
 
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
@@ -69,22 +70,22 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
       return;
     }
     if(_ageController.text != ''){
-      newData.addAll({'age': [int.parse(_ageController.text)]});
+      newData.addAll({'age': [double.parse(_ageController.text.replaceAll(',', '.'))]});
     }
     if(_thighsController.text != ''){
-      newData.addAll({'thighs': [double.parse(_thighsController.text)]});
+      newData.addAll({'thighs': [double.parse(_thighsController.text.replaceAll(',', '.'))]});
     }
     if(_heightController.text != ''){
-      newData.addAll({'height': [int.parse(_heightController.text)]});
+      newData.addAll({'height': [double.parse(_heightController.text.replaceAll(',', '.'))]});
     }
     if(_weightController.text != ''){
-      newData.addAll({'weight': [int.parse(_weightController.text)]});
+      newData.addAll({'weight': [double.parse(_weightController.text.replaceAll(',', '.'))]});
     }
     if(_chestController.text != ''){
-      newData.addAll({'chest': [double.parse(_chestController.text)]});
+      newData.addAll({'chest': [double.parse(_chestController.text.replaceAll(',', '.'))]});
     }
     if(_waistController.text != ''){
-      newData.addAll({'waist': [int.parse(_waistController.text)]});
+      newData.addAll({'waist': [double.parse(_waistController.text.replaceAll(',', '.'))]});
     }
     if(_activityCoefficient != authData.statistics!['activity']!.last){
       newData.addAll({'activity': [_activityCoefficient]});
@@ -95,14 +96,14 @@ class _AddParametersScreenState extends State<AddParametersScreen> {
       return;
     }
     String result = await authData.updateStatistics(newData);
-     if(result == 'Успешно!') Navigator.of(context).pop();
+     if(result == '') Navigator.of(context).pop();
       ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result,style: Theme.of(context).textTheme.titleMedium,),backgroundColor: Colors.white70,));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result == '' ? 'Успешно!' : result,style: Theme.of(context).textTheme.titleMedium,),backgroundColor: Colors.white70,));
   }
 
   @override
   void initState() {
-    authData = Provider.of<UserDataProvider>(context,listen: false);
+    authData = Provider.of<UserProvider>(context,listen: false);
     _dropDownValue =_activityOptions.keys.toList()[_activityOptions.values.toList().indexOf(authData.statistics!['activity']!.last)];
         _activityCoefficient = _activityOptions[_dropDownValue]!;
     super.initState();

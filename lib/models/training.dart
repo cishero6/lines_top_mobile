@@ -15,6 +15,7 @@ class Training extends LinesTopModel{
   @override
   String title = ''; //Название тренировки
   Map<String,List<Exercise>> sections = {}; //Секции
+  Map<String,List<int>> exRepetitionsIds = {}; //Номер повторений для каждого упражнения
   bool isSet = false; //Является ли Сетом
   File? image; //Фотография (ТОЛЬКО ДЛЯ СЕТА)
   String? description; //Описание (ТОЛЬКО ДЛЯ СЕТА)
@@ -23,7 +24,8 @@ class Training extends LinesTopModel{
 
 
   Training.empty();
-  Training({this.id='',this.title = '',Map<String,List<Exercise>>? sections,this.version = 0,this.isSet = false,this.image,this.description}){
+  Training({this.id='',this.title = '',Map<String,List<Exercise>>? sections,Map<String,List<int>>? exRepetitionsIds,this.version = 0,this.isSet = false,this.image,this.description}){
+    this.exRepetitionsIds = exRepetitionsIds ?? {};
     this.sections = sections ?? {};
     if (!isSet && image != null){
       image = null;

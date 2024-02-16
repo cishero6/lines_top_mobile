@@ -40,17 +40,19 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>zalupa</string>
+	<string>This app required Camera Usage in case administrator wants to pick photo for content via camera</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>zalupa</string>
+	<string>This app required Camera Usage in case administrator wants to pick video for content via camera and video has an audio</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>zalupa</string>
+	<string>This app required Camera Usage in case administrator wants to pick photo for content via photo library</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIStatusBarStyle</key>
+	<string></string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

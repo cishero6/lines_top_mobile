@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/user_provider.dart';
 import '../../widgets/list_items/new_parameters_list_item.dart';
 
 class RegisterParametersScreen extends StatefulWidget {
@@ -14,7 +14,7 @@ class RegisterParametersScreen extends StatefulWidget {
 
 class _RegisterParametersScreenState extends State<RegisterParametersScreen>
     with TickerProviderStateMixin {
-  late UserDataProvider authData;
+  late UserProvider authData;
 
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
@@ -105,28 +105,28 @@ class _RegisterParametersScreenState extends State<RegisterParametersScreen>
       return;
     }
     newData.addAll({
-      'age': [int.parse(_ageController.text)]
+      'age': [double.parse(_ageController.text.replaceAll(',', '.'))]
     });
     newData.addAll({
-      'thighs': [double.parse(_thighsController.text)]
+      'thighs': [double.parse(_thighsController.text.replaceAll(',', '.'))]
     });
     newData.addAll({
-      'height': [int.parse(_heightController.text)]
+      'height': [double.parse(_heightController.text.replaceAll(',', '.'))]
     });
     newData.addAll({
-      'weight': [int.parse(_weightController.text)]
+      'weight': [double.parse(_weightController.text.replaceAll(',', '.'))]
     });
     newData.addAll({
-      'chest': [double.parse(_chestController.text)]
+      'chest': [double.parse(_chestController.text.replaceAll(',', '.'))]
     });
     newData.addAll({
-      'waist': [int.parse(_waistController.text)]
+      'waist': [double.parse(_waistController.text.replaceAll(',', '.'))]
     });
     newData.addAll({
       'activity': [_activityCoefficient]
     });
     String result = await authData.updateStatistics(newData);
-    if (result == 'Успешно!') Navigator.of(context).pop();
+    if (result == '') {Navigator.of(context).pop();return;};
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(
@@ -139,7 +139,7 @@ class _RegisterParametersScreenState extends State<RegisterParametersScreen>
 
   @override
   void initState() {
-    authData = Provider.of<UserDataProvider>(context, listen: false);
+    authData = Provider.of<UserProvider>(context, listen: false);
     _dropDownValue = _activityOptions.keys.toList()[0];
     _activityCoefficient = _activityOptions[_dropDownValue]!;
     super.initState();

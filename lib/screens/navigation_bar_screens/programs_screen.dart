@@ -17,10 +17,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
 late List<Program> _programs =[];
 
 
-  Future<void> _loadIfMissing()async{
-    for(var program in _programs){
-      if(!(await program.image.exists())){
-        program.fetchMissingFile();
+  Future<void> _loadIfMissing() async {
+    for (var program in _programs) {
+      if (program.image != null) {
+        if (!(await program.image!.exists())) {
+          program.fetchMissingFile();
+        }
       }
     }
   }

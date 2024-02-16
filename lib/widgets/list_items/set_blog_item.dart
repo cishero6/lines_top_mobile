@@ -74,7 +74,6 @@ class _SetBlogItemState extends State<SetBlogItem> {
 
 Widget _buildParallaxBackground(BuildContext context) {
 
-  
     return Flow(
       delegate: ParallaxFlowDelegate(
         scrollable: Scrollable.of(context),
@@ -85,7 +84,7 @@ Widget _buildParallaxBackground(BuildContext context) {
         if(widget.set != null) FadeInImage(
             placeholder: const AssetImage(
                 'assets/images/placeholders/grey_gradient.jpg'),
-            image: FileImage(widget.set!.image!),
+            image: (widget.set!.image == null? AssetImage('assets/content/trainings/${widget.set!.id}') : FileImage(widget.set!.image!)) as ImageProvider,
             imageErrorBuilder: (context, error, stackTrace) {
               widget.set!.fetchMissingFile();
               return Image.asset(

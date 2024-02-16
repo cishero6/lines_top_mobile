@@ -1,11 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/exercises_provider.dart';
 import '../../models/program.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/list_items/horizontal_list_item.dart';
 import 'sections_list_screen.dart';
 import 'package:provider/provider.dart';
-import '../../providers/user_data_provider.dart';
 
 class TrainingsListScreen extends StatefulWidget {
   final Program program;
@@ -71,15 +72,18 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
       _progressController.forward();
     }
     List<String> fetchedIds = [];
+    var collection = (await FirebaseFirestore.instance.collection('exercises').get()).docs;
     for (var training in widget.program.trainings) {
       for (var section in training.sections.entries) {
         for (var exercise in section.value) {
           if (exercise.video == null) {
-            if (!fetchedIds.contains(exercise.id)) {
-              if (mounted) {
-                await Provider.of<ExercisesProvider>(context, listen: false)
-                    .fetchVideo(exercise);
-                fetchedIds.add(exercise.id);
+            if (exercise.version != collection.singleWhere((element) => element.id == exercise.id).data()['version']){
+              if (!fetchedIds.contains(exercise.id)) {
+                if (mounted) {
+                  await Provider.of<ExercisesProvider>(context, listen: false)
+                      .fetchVideo(exercise);
+                  fetchedIds.add(exercise.id);
+                }
               }
             }
           }
@@ -129,10 +133,15 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
   @override
   Widget build(BuildContext context) {
 
-    var progressData = Provider.of<UserDataProvider>(context).progress;
+    var progressData = Provider.of<UserProvider>(context).progress;
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_5.jpg'),fit: BoxFit.cover,opacity: 0.8)),
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage('assets/images/backgrounds/bg_24.jpg'),
+                fit: BoxFit.cover,
+                opacity: 0.9),
+            ),
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(
@@ -177,7 +186,7 @@ class _TrainingsListScreenState extends State<TrainingsListScreen>
                                     ? const Icon(
                                         Icons.done_rounded,
                                         size: 70,
-                                        color: Color.fromARGB(255, 242, 70, 101),
+                                        color: Colors.green,
                                       )
                                     : const CupertinoActivityIndicator(
                                         radius: 30,

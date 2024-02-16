@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/models/program.dart';
-import 'package:provider/provider.dart';
 
 import '../../helpers/parallax_flow_delegate.dart';
-import '../../providers/bottom_navigation_provider.dart';
-import '../../providers/user_data_provider.dart';
 import '../../screens/details_screens/program_details_screen.dart';
-import '../../screens/navigation_bar_screens/profile_screen.dart';
 import '../../screens/program_process_screens/trainings_list_screen.dart';
 
 class ProgramListItem extends StatefulWidget {
@@ -21,43 +17,49 @@ class _ProgramListItemState extends State<ProgramListItem> {
   final GlobalKey _backgroundImageKey = GlobalKey();
 
 
-
-
-  void _tryStart() {
-    if (Provider.of<UserDataProvider>(context, listen: false).isAuth) {
+  void _pressCard(){
       Navigator.of(context).pushNamed(TrainingsListScreen.routeName,
           arguments: [widget.program]);
-    } else {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.white70,
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Вы не вошли в аккаунт!',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .pushReplacementNamed(ProfileScreen.routeName);
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    Provider.of<BottomNavigationProvider>(context,
-                            listen: false)
-                        .setIndex(1);
-                  },
-                  child: Text(
-                    'Войти',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),),
-            ],
-          ),
-        ),
-      );
-      return;
-    }
+  }
+
+  void _pressStart(){
+    // if (!Provider.of<UserDataProvider>(context,listen: false).isAuth) {
+    //   ScaffoldMessenger.of(context).clearSnackBars();
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       backgroundColor: Colors.white70,
+    //       content: Row(
+    //         mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //         children: [
+    //           Text(
+    //             'Вы не вошли в аккаунт!',
+    //             style: Theme.of(context).textTheme.bodyMedium,
+    //           ),
+    //           TextButton(
+    //               onPressed: () {
+    //                 Navigator.of(context)
+    //                     .pushReplacementNamed(ProfileScreen.routeName);
+    //                 ScaffoldMessenger.of(context).clearSnackBars();
+    //                 Provider.of<BottomNavigationProvider>(context,
+    //                         listen: false)
+    //                     .setIndex(2);
+    //               },
+    //               child: Text(
+    //                 'Войти',
+    //                 style: Theme.of(context).textTheme.bodyMedium,
+    //               ),),
+    //         ],
+    //       ),
+    //     ),
+    //   );
+    //   return;
+    // }
+    Navigator.of(context).pushNamed(TrainingsListScreen.routeName,arguments: [widget.program]);
+  }
+
+  void _pressDetails() {
+    Navigator.of(context).pushNamed(ProgramDetailsScreen.routeName,
+          arguments: [widget.program]);
   }
 
 
@@ -82,8 +84,14 @@ class _ProgramListItemState extends State<ProgramListItem> {
             placeholderFit: BoxFit.cover,
             fadeInDuration: const Duration(milliseconds: 500),
           ),*/
-          Image.file(widget.program.image, key: _backgroundImageKey,
-            fit: BoxFit.cover,),
+          if (widget.program.image == null)
+            Image.asset('assets/content/programs/${widget.program.id}',key: _backgroundImageKey,fit: BoxFit.cover,),
+          if (widget.program.image != null)
+            Image.file(
+              widget.program.image!,
+              key: _backgroundImageKey,
+              fit: BoxFit.cover,
+            ),
         ]);
   }
 
@@ -104,7 +112,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
 
   Widget _buildTitleAndSubtitle() {
     return InkWell(
-      onTap: _tryStart,
+      onTap: _pressCard,
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -148,11 +156,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
                             const MaterialStatePropertyAll(Colors.white60),
                         shape: MaterialStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)))),
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(
-                          ProgramDetailsScreen.routeName,
-                          arguments: [widget.program]);
-                    },
+                    onPressed: _pressDetails,
                     child: Text(
                       'Подробнее',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -167,7 +171,7 @@ class _ProgramListItemState extends State<ProgramListItem> {
                             const MaterialStatePropertyAll(Colors.white60),
                         shape: MaterialStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)))),
-                    onPressed: _tryStart,
+                    onPressed: _pressStart,
                     child: Text(
                       'Начать',
                       style: Theme.of(context).textTheme.titleMedium,

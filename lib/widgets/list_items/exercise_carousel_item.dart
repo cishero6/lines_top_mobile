@@ -9,7 +9,8 @@ import 'package:chewie/chewie.dart';
 
 class ExerciseCarouselItem extends StatefulWidget {
   final Exercise exercise;
-  const ExerciseCarouselItem(this.exercise,{super.key});
+  final int repId;
+  const ExerciseCarouselItem(this.exercise,{required this.repId,super.key});
 
   @override
   State<ExerciseCarouselItem> createState() => _ExerciseCarouselItemState();
@@ -25,12 +26,21 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
 
   List<bool> _checkMarks = [];
 
-
+  void turnOffVideo()async{
+    _videoController.pause();
+  }
   
     void _startAnimations()async{
 
-    _videoController = VideoPlayerController.file(widget.exercise.video!,videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true));
+      if(widget.exercise.video == null){
+        _videoController = VideoPlayerController.asset('assets/content/exercises/${widget.exercise.id}.mov',videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true));
+      }else{
+        _videoController = VideoPlayerController.file(widget.exercise.video!,videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true));
+      }
     _chewieController = ChewieController(
+      showControlsOnInitialize: true,
+      allowMuting: true,
+      hideControlsTimer: const Duration(milliseconds: 1500),
       customControls: const CupertinoControls(backgroundColor: Color.fromARGB(117, 142, 142, 147), iconColor: Colors.black),
       placeholder: Container(color: Colors.black),
       allowedScreenSleep: false,
@@ -66,7 +76,6 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
         ]);
       }
     });
-
     await Future.delayed(const Duration(milliseconds:400));
     // ignore: empty_catches
     if(mounted){
@@ -81,7 +90,7 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
     _opacityAnimation = Tween(begin: 0.0,end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
     _slideAnimation = Tween(begin:const Offset(0.0,1.0),end: const Offset(0.0,0.0)).animate(CurvedAnimation(parent: _animationController, curve: Curves.fastLinearToSlowEaseIn));
     _startAnimations();
-    _checkMarks = List.generate(widget.exercise.exerciseListText.split('\n').length, (index) => false);
+    _checkMarks = List.generate(widget.exercise.exerciseListTexts[widget.repId].split('\n').length, (index) => false);
     super.initState();
   }
 
@@ -94,8 +103,8 @@ class _ExerciseCarouselItemState extends State<ExerciseCarouselItem> with Ticker
   }
 
   Widget _buildExerciseRepetitionTable(){
-    List<String> exercisesList = widget.exercise.exerciseListText.split('\n');
-    List<String> repetitionsList = widget.exercise.repetitionListText.split('\n');
+    List<String> exercisesList = widget.exercise.exerciseListTexts[widget.repId].split('\n');
+    List<String> repetitionsList = widget.exercise.repetitionListTexts[widget.repId].split('\n');
     List<Widget> tableList = [];
     for(int i = 0;i<exercisesList.length;i++){
       tableList.add(GestureDetector(

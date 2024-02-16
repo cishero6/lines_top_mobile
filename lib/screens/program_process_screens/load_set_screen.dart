@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/exercise_process_screen.dart';
@@ -72,10 +73,12 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
     }
    await Future.delayed(const Duration(milliseconds: 800));
     List<String> fetchedIds = [];
-      for (var section in widget.training.sections.entries) {
-        for (var exercise in section.value) {
-          if (exercise.video == null) {
-            if (!fetchedIds.contains(exercise.id)) {
+    var collection = (await FirebaseFirestore.instance.collection('exercises').get()).docs;
+    for (var section in widget.training.sections.entries) {
+      for (var exercise in section.value) {
+        if (exercise.video == null) {
+          if (!fetchedIds.contains(exercise.id)) {
+            if (exercise.version != collection.singleWhere((element) => element.id == exercise.id).data()['version']){
               if (mounted) {
                 await Provider.of<ExercisesProvider>(context, listen: false)
                     .fetchVideo(exercise);
@@ -85,6 +88,7 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
           }
         }
       }
+    }
     
     if(mounted){
       await _waitTextController.reverse();
@@ -119,8 +123,8 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
         decoration: const BoxDecoration(
           color: Colors.black,
             image: DecorationImage(
-                image: AssetImage('assets/images/backgrounds/bg_2.jpg'),
-                opacity: 0.8,
+                image: AssetImage('assets/images/backgrounds/bg_24.jpg'),
+                opacity: 0.9,
                 fit: BoxFit.cover)),
         child: CustomScrollView(
           physics: const NeverScrollableScrollPhysics(),
@@ -166,7 +170,7 @@ class _LoadSetScreenState extends State<LoadSetScreen> with TickerProviderStateM
                                     ? const Icon(
                                         Icons.done_rounded,
                                         size: 70,
-                                        color: Color.fromARGB(255, 242, 70, 101),
+                                        color: Colors.green,
                                       )
                                     : const CupertinoActivityIndicator(
                                         radius: 30,

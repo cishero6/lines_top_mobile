@@ -7,9 +7,9 @@ class DBHelper {
     final dbPath = await sql.getDatabasesPath();
     return sql.openDatabase(path.join(dbPath, 'lines_top.db'),
         onCreate: (db, version) async{
-          await db.execute('CREATE TABLE user_data(id TEXT PRIMARY KEY,progress TEXT,needs_upload INTEGER)');
-          await db.execute('CREATE TABLE exercises(id TEXT PRIMARY KEY, title TEXT,video TEXT,description TEXT,exercise_list_text TEXT,repetition_list_text TEXT,version INTEGER)');
-          await db.execute('CREATE TABLE trainings(id TEXT PRIMARY KEY, title TEXT,sections TEXT,is_set INTEGER,description TEXT,image TEXT,version INTEGER)');
+          await db.execute('CREATE TABLE user_data(id TEXT PRIMARY KEY,progress TEXT,statistics TEXT,username TEXT,stats_dates TEXT)');
+          await db.execute('CREATE TABLE exercises(id TEXT PRIMARY KEY, title TEXT,video TEXT,description TEXT,exercise_list_texts TEXT,repetition_list_texts TEXT,version INTEGER)');
+          await db.execute('CREATE TABLE trainings(id TEXT PRIMARY KEY, title TEXT,sections TEXT,is_set INTEGER,description TEXT,image TEXT,version INTEGER,ex_repetitions_ids TEXT)');
           await db.execute('CREATE TABLE programs(id TEXT PRIMARY KEY, title TEXT,priority TEXT,subtext TEXT,trainings TEXT,body_text TEXT,image TEXT,is_free INTEGER,version INTEGER)');
       return db.execute('CREATE TABLE blog_posts(id TEXT PRIMARY KEY, title TEXT, short_desc TEXT, body_text TEXT, date TEXT, images TEXT,is_primary INTEGER,version INTEGER)');
     }, version: 1);

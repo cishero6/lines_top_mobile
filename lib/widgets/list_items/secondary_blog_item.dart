@@ -48,7 +48,7 @@ Widget _buildParallaxBackground(BuildContext context) {
               widget.blogPost!.fetchMissingFile();
               return Image.asset(
                 'assets/images/placeholders/grey_gradient.jpg',fit: BoxFit.cover,);
-            },placeholder: const AssetImage('assets/images/placeholders/grey_gradient.jpg'), image: FileImage(widget.blogPost!.images.first),key: _backgroundImageKey,fit: BoxFit.cover)) : Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,);
+            },placeholder: const AssetImage('assets/images/placeholders/grey_gradient.jpg'), image: (widget.blogPost!.images.isEmpty ? AssetImage('assets/content/blog_posts/${widget.blogPost!.id}_0') : FileImage(widget.blogPost!.images.first)) as ImageProvider,key: _backgroundImageKey,fit: BoxFit.cover)) : Container(key: _backgroundImageKey,decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Color.fromARGB(255, 105, 105, 105)],begin: Alignment.topLeft,end: Alignment.bottomRight)),height: 300,);
     /*return Flow(
       delegate: ParallaxFlowDelegate(
         scrollable: Scrollable.of(context),

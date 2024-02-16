@@ -19,8 +19,21 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   late XFile? _pickedVideo = null;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _exListController = TextEditingController();
-  final TextEditingController _repsListController = TextEditingController();
+
+  final TextEditingController _exListController1 = TextEditingController();
+  final TextEditingController _repsListController1 = TextEditingController();
+  final TextEditingController _exListController2 = TextEditingController();
+  final TextEditingController _repsListController2 = TextEditingController();
+  final TextEditingController _exListController3 = TextEditingController();
+  final TextEditingController _repsListController3 = TextEditingController();
+  final TextEditingController _exListController4 = TextEditingController();
+  final TextEditingController _repsListController4 = TextEditingController();
+  final TextEditingController _exListController5 = TextEditingController();
+  final TextEditingController _repsListController5 = TextEditingController();
+
+
+  final List<String> _exListTexts = ['','','','',''];
+  final List<String> _repsListTexts = ['','','','',''];
 
   final ImagePicker _picker = ImagePicker();
   Color videoTextColor = Colors.black;
@@ -30,11 +43,20 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    if(_exListController.text.split('\n').length != _repsListController.text.split('\n').length){
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Количество строк в списке упражнений и повторениях должны совпадать!')));
-      return;
+    _exListTexts.clear();
+    _exListTexts.addAll([_exListController1.text,_exListController2.text,_exListController3.text,_exListController4.text,_exListController5.text]);
+    _repsListTexts.clear();
+    _repsListTexts.addAll([_repsListController1.text,_repsListController2.text,_repsListController3.text,_repsListController4.text,_repsListController5.text]);
+    for (int i = 0; i < 5; i++) {
+      if (_exListTexts[i].split('\n').length !=
+          _repsListTexts[i].split('\n').length) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Количество строк в списке упражнений и повторениях должны совпадать!')));
+        return;
+      }
     }
+    
     if (_pickedVideo == null) {
       setState(() {
         videoTextColor = Colors.red;
@@ -58,7 +80,10 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     Exercise newExercise = Exercise(
         title: _titleController.text,
         description: _descriptionController.text,
-        video: File(_pickedVideo!.path));
+        video: File(_pickedVideo!.path),
+        exerciseListTexts: _exListTexts,
+        repetitionListTexts: _repsListTexts,
+        );
     try {
       await Provider.of<ExercisesProvider>(context, listen: false)
           .addExercise(newExercise);
@@ -139,6 +164,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                   const Divider(
                     thickness: 6,
                   ),
+                  const Center(child: Text('СЛОТ 1')),
                   Row(
                     children: [
                       Flexible(
@@ -156,7 +182,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                                 maxLines: null,
                                 decoration: const InputDecoration(
                                     hintText: 'Список упражнений'),
-                                controller: _exListController,
+                                controller: _exListController1,
                                 maxLength: 400,
                               ),
                             ),
@@ -185,7 +211,271 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                                 maxLines: null,
                                 decoration: const InputDecoration(
                                     hintText: 'Повторения'),
-                                controller: _repsListController,
+                                controller: _repsListController1,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    thickness: 6,
+                  ),
+                  const Center(child: Text('СЛОТ 2')),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Список упражнений'),
+                                controller: _exListController2,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Повторения'),
+                                controller: _repsListController2,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    thickness: 6,
+                  ),
+                  const Center(child: Text('СЛОТ 3')),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Список упражнений'),
+                                controller: _exListController3,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Повторения'),
+                                controller: _repsListController3,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    thickness: 6,
+                  ),
+                  const Center(child: Text('СЛОТ 4')),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Список упражнений'),
+                                controller: _exListController4,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Повторения'),
+                                controller: _repsListController4,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    thickness: 6,
+                  ),
+                  const Center(child: Text('СЛОТ 5')),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Список упражнений'),
+                                controller: _exListController5,
+                                maxLength: 400,
+                              ),
+                            ),
+                            UnconstrainedBox(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    FocusScope.of(context).unfocus(),
+                                child: const Text('Готово'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value == '')
+                                    return 'Введите текст!';
+                                  return null;
+                                },
+                                maxLines: null,
+                                decoration: const InputDecoration(
+                                    hintText: 'Повторения'),
+                                controller: _repsListController5,
                                 maxLength: 400,
                               ),
                             ),
@@ -241,9 +531,10 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                           .copyWith(color: videoTextColor),
                     ),
                   ),
-                  const Divider(
-                    thickness: 6,
-                  ),
+                  
+                  const Divider(thickness: 6,),
+
+
                   const SizedBox(
                     height: 50,
                   ),

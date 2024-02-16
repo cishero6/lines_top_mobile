@@ -53,9 +53,9 @@ dependencies:
   photo_view: ^0.14.0
   path: ^1.8.3
   sqflite: ^2.3.0
-  syncfusion_flutter_charts: ^22.2.9
-  flutter_launcher_icons: ^0.13.1
   pin_code_fields: ^8.0.1
+  url_launcher: ^6.2.4
+  fl_chart: ^0.66.2
 
 dev_dependencies:
   flutter_test:
@@ -106,12 +106,155 @@ flutter:
     - assets/images/backgrounds/bg_13.jpg
     - assets/images/backgrounds/bg_14.jpg
     - assets/images/backgrounds/bg_15.jpg
+    - assets/images/backgrounds/bg_16.jpg
+    - assets/images/backgrounds/bg_17.jpg
+    - assets/images/backgrounds/bg_18.jpg
+    - assets/images/backgrounds/bg_19.jpg
+    - assets/images/backgrounds/bg_20.jpg
+    - assets/images/backgrounds/bg_21.jpg
+    - assets/images/backgrounds/bg_22.jpg
+    - assets/images/backgrounds/bg_23.jpg
+    - assets/images/backgrounds/bg_24.jpg
+    - assets/images/backgrounds/bg_25.jpg
+    - assets/images/backgrounds/bg_26.jpg
+    - assets/images/backgrounds/bg_27.jpg
+    - assets/images/backgrounds/bg_28.jpg
+    - assets/images/backgrounds/bg_29.jpg
+    - assets/images/backgrounds/bg_30.jpg
     - assets/images/backgrounds/ex_1.jpg
     - assets/images/backgrounds/ex_2.jpg
     - assets/images/backgrounds/ex_3.jpg
     - assets/images/backgrounds/ex_4.jpg
     - assets/videos/intro1.mp4
     - assets/videos/intro2.mp4
+    - assets/images/backgrounds/about_me.jpg
+    - assets/content/blog_posts/post_16_0
+    - assets/content/blog_posts/post_17_0
+    - assets/content/blog_posts/post_18_0
+    - assets/content/blog_posts/post_19_0
+    - assets/content/blog_posts/post_20_0
+    - assets/content/blog_posts/post_21_0
+    - assets/content/programs/pr_2
+    - assets/content/programs/pr_6
+    - assets/content/programs/pr_7
+    - assets/content/trainings/tr_10
+    - assets/content/trainings/tr_11
+    - assets/content/trainings/tr_12
+    - assets/content/trainings/tr_13
+    - assets/content/trainings/tr_15
+    - assets/content/trainings/tr_27
+    - assets/content/trainings/tr_33
+    - assets/content/trainings/tr_38
+    - assets/content/trainings/tr_48
+    - assets/content/exercises/ex_1.mov
+    - assets/content/exercises/ex_3.mov
+    - assets/content/exercises/ex_4.mov
+    - assets/content/exercises/ex_6.mov
+    - assets/content/exercises/ex_7.mov
+    - assets/content/exercises/ex_8.mov
+    - assets/content/exercises/ex_9.mov
+    - assets/content/exercises/ex_10.mov
+    - assets/content/exercises/ex_11.mov
+    - assets/content/exercises/ex_12.mov
+    - assets/content/exercises/ex_13.mov
+    - assets/content/exercises/ex_14.mov
+    - assets/content/exercises/ex_15.mov
+    - assets/content/exercises/ex_16.mov
+    - assets/content/exercises/ex_17.mov
+    - assets/content/exercises/ex_18.mov
+    - assets/content/exercises/ex_20.mov
+    - assets/content/exercises/ex_21.mov
+    - assets/content/exercises/ex_22.mov
+    - assets/content/exercises/ex_23.mov
+    - assets/content/exercises/ex_24.mov
+    - assets/content/exercises/ex_25.mov
+    - assets/content/exercises/ex_26.mov
+    - assets/content/exercises/ex_27.mov
+    - assets/content/exercises/ex_28.mov
+    - assets/content/exercises/ex_29.mov
+    - assets/content/exercises/ex_31.mov
+    - assets/content/exercises/ex_33.mov
+    - assets/content/exercises/ex_34.mov
+    - assets/content/exercises/ex_35.mov
+    - assets/content/exercises/ex_38.mov
+    - assets/content/exercises/ex_39.mov
+    - assets/content/exercises/ex_40.mov
+    - assets/content/exercises/ex_41.mov
+    - assets/content/exercises/ex_42.mov
+    - assets/content/exercises/ex_43.mov
+    - assets/content/exercises/ex_44.mov
+    - assets/content/exercises/ex_46.mov
+    - assets/content/exercises/ex_47.mov
+    - assets/content/exercises/ex_49.mov
+    - assets/content/exercises/ex_51.mov
+    - assets/content/exercises/ex_54.mov
+    - assets/content/exercises/ex_55.mov
+    - assets/content/exercises/ex_57.mov
+    - assets/content/exercises/ex_58.mov
+    - assets/content/exercises/ex_59.mov
+    - assets/content/exercises/ex_62.mov
+    - assets/content/exercises/ex_63.mov
+    - assets/content/exercises/ex_64.mov
+    - assets/content/exercises/ex_65.mov
+    - assets/content/exercises/ex_66.mov
+    - assets/content/exercises/ex_67.mov
+    - assets/content/exercises/ex_68.mov
+    - assets/content/exercises/ex_69.mov
+    - assets/content/exercises/ex_70.mov
+    - assets/content/exercises/ex_71.mov
+    - assets/content/exercises/ex_72.mov
+    - assets/content/exercises/ex_73.mov
+    - assets/content/exercises/ex_74.mov
+    - assets/content/exercises/ex_75.mov
+    - assets/content/exercises/ex_76.mov
+    - assets/content/exercises/ex_77.mov
+    - assets/content/exercises/ex_78.mov
+    - assets/content/exercises/ex_79.mov
+    - assets/content/exercises/ex_80.mov
+    - assets/content/exercises/ex_81.mov
+    - assets/content/exercises/ex_82.mov
+    - assets/content/exercises/ex_83.mov
+    - assets/content/exercises/ex_84.mov
+    - assets/content/exercises/ex_85.mov
+    - assets/content/exercises/ex_86.mov
+    - assets/content/exercises/ex_87.mov
+    - assets/content/exercises/ex_88.mov
+    - assets/content/exercises/ex_89.mov
+    - assets/content/exercises/ex_90.mov
+    - assets/content/exercises/ex_91.mov
+    - assets/content/exercises/ex_92.mov
+    - assets/content/exercises/ex_93.mov
+    - assets/content/exercises/ex_94.mov
+    - assets/content/exercises/ex_95.mov
+    - assets/content/exercises/ex_96.mov
+    - assets/content/exercises/ex_97.mov
+    - assets/content/exercises/ex_98.mov
+    - assets/content/exercises/ex_99.mov
+    - assets/content/exercises/ex_100.mov
+    - assets/content/exercises/ex_101.mov
+    - assets/content/exercises/ex_102.mov
+    - assets/content/exercises/ex_103.mov
+    - assets/content/exercises/ex_104.mov
+    - assets/content/exercises/ex_105.mov
+    - assets/content/exercises/ex_106.mov
+    - assets/content/exercises/ex_107.mov
+    - assets/content/exercises/ex_108.mov
+    - assets/content/exercises/ex_109.mov
+    - assets/content/exercises/ex_110.mov
+    - assets/content/exercises/ex_111.mov
+    - assets/content/exercises/ex_112.mov
+    - assets/content/exercises/ex_113.mov
+    - assets/content/exercises/ex_114.mov
+    - assets/content/exercises/ex_115.mov
+    - assets/content/exercises/ex_116.mov
+    - assets/content/exercises/ex_117.mov
+    - assets/content/exercises/ex_118.mov
+    - assets/content/exercises/ex_119.mov
+    - assets/content/exercises/ex_120.mov
+    - assets/content/blog_posts.txt
+    - assets/content/exercises.txt
+    - assets/content/trainings.txt
+    - assets/content/programs.txt
 
 
 

@@ -59,7 +59,7 @@ class _SectionsListScreenState extends State<SectionsListScreen> with TickerProv
     return Scaffold(
       body: Container(
         decoration:const BoxDecoration(
-          image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_3.jpg'),opacity: 0.8,fit: BoxFit.cover)
+          image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_27.jpg'),opacity: 0.85,fit: BoxFit.cover)
         ),
         child: CustomScrollView(
           slivers: [

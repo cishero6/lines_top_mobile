@@ -245,9 +245,12 @@ class _EditProgramScreenState extends State<EditProgramScreen> {
                     width: 100,
                     height: 100,
                     child: _pickedPhoto == null
-                        ? Image.file(
-                            widget.program.image,
-                          )
+                        ? (widget.program.image == null
+                            ? Image.asset(
+                                'assets/content/programs/${widget.program.id}')
+                            : Image.file(
+                                widget.program.image!,
+                              ))
                         : Image.file(File(_pickedPhoto!.path)),
                   )),
                   const Divider(

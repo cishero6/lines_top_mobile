@@ -1,10 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lines_top_mobile/helpers/phone_auth_status.dart';
 import 'package:lines_top_mobile/providers/bottom_navigation_provider.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/all_sets_screen.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/blog_screen.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/profile_screen.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/programs_screen.dart';
+import 'package:lines_top_mobile/screens/profile_screens/parameters_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../screens/navigation_bar_screens/info_screen.dart';
@@ -17,10 +18,13 @@ class MyBottomNavigationBar extends StatefulWidget {
 }
 
 class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
-  final List<String> _routeNames = [BlogScreen.routeName,ProgramsScreen.routeName,ProfileScreen.routeName,AllSetsScreen.routeName,InfoScreen.routeName,];
+  late List<String> _routeNames = [BlogScreen.routeName,ProgramsScreen.routeName,ProfileScreen.routeName,AllSetsScreen.routeName,InfoScreen.routeName,];
   int _currentIndex = 0;
 
-  
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +61,11 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
           ],
           onTap: (value) {
             Provider.of<BottomNavigationProvider>(context,listen: false).setIndex(value);
+            print('is_reg - $isReg');
+            if(value == 2 && !isReg){
+              widget.navigatorKey.currentState!.pushNamedAndRemoveUntil(ParametersScreen.routeName, (route) => false);
+              return;
+            }
             widget.navigatorKey.currentState!.pushNamedAndRemoveUntil(_routeNames[value], (route) => false);
           },
         ),

@@ -17,12 +17,11 @@ class Program extends LinesTopModel{
   String subtext = ''; //Текст, отображаемый на виджете в списке программ
   String bodyText = ''; //Подробное описание программы
   bool isFree = true; //Переменная идентифицирует, является ли программа полносьтью бесплатной
-  File image = File('assets/temp/bubbles1.jpeg');
+  File? image;
   List<Training> trainings = []; //Список, содержащий id тренировок
   int version = 0; //Версия программы
 
-  Program({this.id = '',this.title = '',this.subtext = '',this.bodyText = '',List<Training>? trainings,File? image,this.isFree = true,this.version = 0}){
-    this.image = image ?? File('assets/temp/bubbles1.jpeg');
+  Program({this.id = '',this.title = '',this.subtext = '',this.bodyText = '',List<Training>? trainings,this.image,this.isFree = true,this.version = 0}){
     this.trainings = trainings ?? [];
   }
   Program.empty();

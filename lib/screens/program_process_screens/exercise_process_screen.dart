@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:lines_top_mobile/providers/section_name_provider.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
 import 'package:lines_top_mobile/screens/navigation_bar_screens/all_sets_screen.dart';
 import 'package:lines_top_mobile/widgets/list_items/exercise_carousel_item.dart';
 import 'package:provider/provider.dart';
 import '../../models/training.dart';
-import '../../models/exercise.dart';
 
+import '../../providers/user_provider.dart';
 import '../../widgets/exercises_carousel.dart';
 
 class ExerciseProcessScreen extends StatefulWidget {
@@ -25,7 +24,7 @@ class ExerciseProcessScreen extends StatefulWidget {
 class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
   late ExercisesCarousel exCarousel;
   late AppBar appBar;
-  List<Map<String, Exercise>> _orderedExercises = [];
+  List<Map<String, dynamic>> _orderedExercises = [];
   late bool _isSet;
   late Future<bool> Function() _onEndTraining;
 
@@ -45,9 +44,9 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
   
 
   Future<bool> _onWillPop() async {
-    Map<String,List<int>> curProgress = {...Provider.of<UserDataProvider>(context,listen: false).progress!};
+    Map<String,List<int>> curProgress = {...Provider.of<UserProvider>(context,listen: false).progress!};
     curProgress[widget.programId]![widget.trainingIndex!] = (exCarousel.currentIndex / _orderedExercises.length * 100).round();
-    await Provider.of<UserDataProvider>(context,listen: false).updateProgress(curProgress);
+    Provider.of<UserProvider>(context,listen: false).updateProgress(curProgress);
     return true;
   }
 
@@ -58,8 +57,14 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
     var orderedKeys = widget.training.sections.keys.toList()
       ..sort((a, b) => a.split('_').last.compareTo(b.split('_').last));
     for (int i = 0; i < orderedKeys.length; i++) {
-      _orderedExercises.addAll(widget.training.sections[orderedKeys[i]]!
-          .map((e) => {orderedKeys[i]: e}));
+      for (int j = 0;j < widget.training.sections[orderedKeys[i]]!.length;j++) {
+          print(widget.training.sections[orderedKeys[i]]);
+          print(widget.training.exRepetitionsIds);
+        _orderedExercises.add({
+          orderedKeys[i]: widget.training.sections[orderedKeys[i]]![j],
+          'rep_id': widget.training.exRepetitionsIds[orderedKeys[i].split('_').first]![j]
+        });
+      }
     }
     if(widget.programId == null && widget.trainingIndex == null){
       _isSet = true;
@@ -105,7 +110,7 @@ class _ExerciseProcessScreenState extends State<ExerciseProcessScreen> {
       initialIndex: initialIndex,
                 onEndTraining: _onEndTraining,
                 items: _orderedExercises
-                    .map((e) => ExerciseCarouselItem(e.values.first,key: ValueKey(keyIndex++),))
+                    .map((e) => ExerciseCarouselItem(e.values.first,key: ValueKey(keyIndex++),repId: e['rep_id'],))
                     .toList(),
                 sectionNames: _orderedExercises.map((e) => e.keys.first).toList(),
               );

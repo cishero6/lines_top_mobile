@@ -105,8 +105,11 @@ class _EditBlogPostScreenState extends State<EditBlogPostScreen> {
     _shortDescriptionController.text = widget.blogPost.shortDesc;
     List<XFile> tempList =
         widget.blogPost.images.map((e) => XFile(e.path)).toList();
-    _mainImage = tempList.removeAt(0);
-    _otherImages = [...tempList];
+    if (tempList.isNotEmpty) {
+      _mainImage = tempList.removeAt(0);
+      _otherImages = [...tempList];
+    }
+
     super.initState();
   }
 

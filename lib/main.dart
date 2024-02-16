@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/providers/verification_id_provider.dart';
 import 'package:lines_top_mobile/screens/intro_screen.dart';
@@ -15,7 +15,7 @@ import 'providers/exercises_provider.dart';
 import './helpers/color_schemes.g.dart';
 
 import 'providers/section_name_provider.dart';
-import 'providers/user_data_provider.dart';
+import 'providers/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,16 +28,21 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  
   final bool isFirstBuild;
   const MyApp({required this.isFirstBuild ,super.key});
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+  ]);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<SectionNameProvider>(
           create: (_) => SectionNameProvider(),
         ),
-        ChangeNotifierProvider<ProgramsProvider>(
+        ChangeNotifierProvider<ProgramsProvider>( 
           create: (_) => ProgramsProvider(),
         ),
         ChangeNotifierProvider<ExercisesProvider>(
@@ -49,8 +54,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<BlogProvider>(
           create: (_) => BlogProvider(),
         ),
-        ChangeNotifierProvider<UserDataProvider>(
-          create: (_) => UserDataProvider(),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider(),
         ),
         ChangeNotifierProvider<BottomNavigationProvider>(
           create: (_) => BottomNavigationProvider(),

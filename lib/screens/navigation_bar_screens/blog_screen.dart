@@ -104,7 +104,8 @@ class _BlogScreenState extends State<BlogScreen> {
             SliverGrid(
                 delegate: SliverChildListDelegate(
                   [
-                  ..._secondaryPosts.map((e) => SecondaryBlogItem(e,width: size.width/(size.width/600).ceil())).toList(),
+                  if(_secondaryPosts.length>3) ..._secondaryPosts.sublist(0,3).map((e) => SecondaryBlogItem(e,width: size.width/(size.width/600).ceil())).toList(),
+                  if(_secondaryPosts.length<=3) ..._secondaryPosts.map((e) => SecondaryBlogItem(e,width: size.width/(size.width/600).ceil())).toList(),
                   SecondaryBlogItem.empty('Больше новостей', ''),
                   ]
                 ),
@@ -130,7 +131,7 @@ class _BlogScreenState extends State<BlogScreen> {
             SliverGrid(
                 delegate: SliverChildListDelegate(
                   [
-                    ..._sets.sublist(0,5).map((e) => SetBlogItem(e,width: size.width/(size.width/600).ceil(),)).toList(),
+                    if(_sets.isNotEmpty) ..._sets.sublist(0,5).map((e) => SetBlogItem(e,width: size.width/(size.width/600).ceil(),)).toList(),
                     SetBlogItem.empty('Все сеты', '',),
                   ]),
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(

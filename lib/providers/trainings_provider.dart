@@ -45,14 +45,29 @@ class TrainingsProvider with ChangeNotifier {
           doneSections.addAll({sectionName: list});
         }
         //doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
+        
+          //REFORMATTING LIST OF REPSIDS TO LIST<INT>
+        Map<String, dynamic> dynamicExReps = jsonDecode(item['ex_repetitions_ids']); //MAYBE ONE LINE
+        Map<String, List<int>> doneExReps = dynamicExReps.map((key, value) => MapEntry(key,List<int>.generate(value.length, (index) => value[index])));
+      File? image1;
+        if(item['image'] == 'null'){
+          image1 = null;
+        }else{
+          if(!(await File(item['image']).exists())){
+            image1 = null;
+          }else{
+            image1 = File(item['image']);
+          }
+        }
         //ADDING ITEM
         _items.add(Training(
           id: item['id'],
             title: item['title'],
             sections: doneSections,
+            exRepetitionsIds: doneExReps,
             isSet: item['is_set'] == 1,
             description: item['description'] == 'null' ? null : item['description'],
-            image: item['image'] == 'null' ? null : File(item['image']),
+            image: image1,
             version: item['version'],
           )
         );
@@ -71,7 +86,7 @@ class TrainingsProvider with ChangeNotifier {
     //3
     try{
       var qSnapshot =
-          await FirebaseFirestore.instance.collection('trainings').get();
+          await FirebaseFirestore.instance.collection('trainings').orderBy('priority').get();
       var docs = qSnapshot.docs;
       
       List<Training> firebaseItems = [];
@@ -80,6 +95,10 @@ class TrainingsProvider with ChangeNotifier {
         Map<String, dynamic> dynamicSections = doc['sections'];
         Map<String, List<String>> stringSections = dynamicSections.map((key, value) => MapEntry(key,List<String>.generate(value.length, (index) => value[index])));
         Map<String, List<Exercise>> doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
+
+        Map<String, dynamic> dynamicExReps = doc['ex_repetitions_ids'];
+        Map<String, List<int>> doneExReps = dynamicExReps.map((key, value) => MapEntry(key,List<int>.generate(value.length, (index) => value[index])));
+
         Training training = Training(
           id: docSnapshot.id,
           title: doc['title'],
@@ -87,6 +106,7 @@ class TrainingsProvider with ChangeNotifier {
           version: doc['version'],
           isSet: doc['is_set'],
           sections: doneSections,
+          exRepetitionsIds: doneExReps,
         );
         if(!training.isSet){ //IF SET DONT EVEN CHECK TO DOWNLOAD
           Map<String,List<String>> dbMapSections = {};
@@ -99,6 +119,7 @@ class TrainingsProvider with ChangeNotifier {
             'description': 'null',
             'image': 'null',
             'sections': jsonEncode(dbMapSections),
+            'ex_repetitions_ids': jsonEncode(training.exRepetitionsIds),
             'is_set': training.isSet ? 1:0,
             'version': training.version,
           });
@@ -108,21 +129,26 @@ class TrainingsProvider with ChangeNotifier {
         if((_items.indexWhere((element) => element.id == training.id) == -1) || (_items.singleWhere((element) => element.id == training.id)).version != training.version){
           //5
           print('start training LOAD');
-          String downloadURL = await FirebaseStorage.instance.ref(doc['image']).getDownloadURL();;
-          File tempFile = await fileFromUrl(downloadURL, 'trainings_${training.id}');
+          print(training.id);
           var path = (await getApplicationDocumentsDirectory()).path; //COPY FILES IN DOCUMENTS
-          training.image = await tempFile.copy('$path/${training.id}');
+          try{String downloadURL = await FirebaseStorage.instance.ref(doc['image']).getDownloadURL();;
+          File tempFile = await fileFromUrl(downloadURL, 'trainings_${training.id}');
+          training.image = await tempFile.copy('$path/${training.id}');} catch(E){
+            print(E);
+          }
           firebaseItems.add(training);
           Map<String,List<String>> dbMapSections = {};
           for(var section in training.sections.keys){
             dbMapSections.addAll({section: training.sections[section]!.map((e) => e.id).toList()});
           }
+          print('$path/${training.id}');
           await DBHelper.insert('trainings', {
             'id': training.id,
             'title': training.title,
             'description': training.description ?? 'null',
             'image': '$path/${training.id}',
             'sections': jsonEncode(dbMapSections),
+            'ex_repetitions_ids': jsonEncode(training.exRepetitionsIds),
             'is_set': training.isSet ? 1:0,
             'version': training.version,
           });
@@ -175,6 +201,7 @@ class TrainingsProvider with ChangeNotifier {
       {
         'title': newTraining.title,
         'sections': newTraining.sections.map((sectionName, listOfExercises) => MapEntry('${sectionName}_${keyOrder.indexOf(sectionName)}', listOfExercises.map((ex) => ex.id))),
+        'ex_repetitions_ids': newTraining.exRepetitionsIds,
         'description': newTraining.description ?? 'null',
         'is_set': newTraining.isSet,
         'version': 1,
@@ -242,17 +269,19 @@ class TrainingsProvider with ChangeNotifier {
       item.sections = tempMap;
 
       newData['sections'] = (newData['sections'] as Map<String,List<Exercise>>).map((key, value) => MapEntry('${key}_${keyOrder.indexOf(key)}', value.map((e) => e.id).toList()));
+      item.exRepetitionsIds = newData['ex_repetitions_ids'];
     }
     await docRef.update(newData);
 
-    await DBHelper.insert('trainings', { //INSERT EDITED TRAININGS IN DATABASE
+    await DBHelper.update('trainings', { //INSERT EDITED TRAININGS IN DATABASE
       'id': item.id,
       'title': item.title,
       'description': item.description ?? 'null',
-      'sections': jsonEncode(newData['sections']),
       'is_set': item.isSet? 1:0,
       'image': item.image == null ? 'null' : '$path/${item.id}',
-      'version': item.version
+      'version': item.version,
+      if(newData.containsKey('sections')) 'sections': jsonEncode(newData['sections']),
+      if(newData.containsKey('sections')) 'ex_repetitions_ids': jsonEncode(newData['ex_repetitions_ids']),
     });
     notifyListeners();
     return null;
@@ -294,61 +323,42 @@ class TrainingsProvider with ChangeNotifier {
     }
     for(QueryDocumentSnapshot<Map<String,dynamic>> training in trainings){
       var data = training.data();
-      for(List<dynamic> section in data['sections'].values){
-        if (section.contains(exercise.id)) {
-          section.removeWhere((element) => element == exercise.id);
+      // for(List<dynamic> section in data['sections'].values){
+      //   if (section.contains(exercise.id)) {
+      //     section.removeWhere((element) => element == exercise.id);
+      //   }
+      // }
+      for(String sectionName in data['sections'].keys){
+        if (data['sections'][sectionName].contains(exercise.id)) {
+          for(int i = data['sections'][sectionName].length-1;i>=0;i--){
+            if(data['sections'][sectionName][i].id == exercise.id){
+              (data['sections'][sectionName] as List<Exercise>).removeAt(i);
+              (data['ex_repetitions_ids'][sectionName] as List<int>).removeAt(i);
+            }
+          }
         }
       }
-      await trainingsRef.doc(training.id).update({'sections': data['sections']});
+      await trainingsRef.doc(training.id).update({'sections': data['sections'],'ex_repetitions_ids': data['ex_repetitions_ids']});
     }
     for(Training item in _items){
-      for(List<Exercise> section in item.sections.values){
-        section.removeWhere((element) => element == exercise);
+      for(String sectionName in item.sections.keys){
+        if (item.sections[sectionName]!.contains(exercise)) {
+          for(int i =item.sections[sectionName]!.length-1;i>=0;i--){
+            if(item.sections[sectionName]![i].id == exercise.id){
+              (item.sections[sectionName] as List<Exercise>).removeAt(i);
+              (item.exRepetitionsIds[sectionName] as List<int>).removeAt(i);
+            }
+          }
+        }
       }
+      // for(List<Exercise> section in item.sections.values){
+      //   section.removeWhere((element) => element == exercise);
+      // }
     }
     return null;
   }
 
-   Future<void> preLoadItems(BuildContext ctx)async{
-    var exercises = Provider.of<ExercisesProvider>(ctx,listen: false).items;
-    var path = (await getApplicationDocumentsDirectory()).path;
-    var trainingsFile = await fileFromAsset('assets/pre_compiled_data/trainings.txt');
-    var trainingsStr = await trainingsFile.readAsString();
-    var trainingsStrList = trainingsStr.split('\n/||/\n');
-    for(var trStr in trainingsStrList){
-      var argList = trStr.split('|');
-      Map<String, dynamic> dynamicSections = jsonDecode(argList[3]);
-        Map<String, List<String>> stringSections = dynamicSections.map((key, value) => MapEntry(key,List<String>.generate(value.length, (index) => value[index])));
-        Map<String, List<Exercise>> doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
-      Training newTraining = Training(
-        id: argList[0],
-        version: int.parse(argList[1]),
-        title: argList[2],
-        sections: doneSections,
-        isSet: argList[4] == 'true',
-      );
-      if(newTraining.isSet){
-        try {
-        var tempFile =
-            await fileFromAsset('assets/pre_compiled_data/${newTraining.id}');
-        File file = await tempFile.copy('$path/${newTraining.id}');
-        newTraining.image = file;
-      } catch (e) {
-        print(e);
-      }
-      }
-      _items.add(newTraining);
-      await DBHelper.insert('trainings', { //INSERT EDITED TRAININGS IN DATABASE
-      'id': newTraining.id,
-      'title': newTraining.title,
-      'description': newTraining.description ?? 'null',
-      'sections': argList[3],
-      'is_set': newTraining.isSet? 1:0,
-      'image': newTraining.image == null ? 'null' : '$path/${newTraining.id}',
-      'version': newTraining.version
-    });
-    }
-  }
+
 
 Future<void> compileDatabaseIntoPreload()async{
     List<Map<String,dynamic>> compiledList = [];
@@ -367,10 +377,67 @@ Future<void> compileDatabaseIntoPreload()async{
         'description': item.description ?? 'null',
         'is_set': item.isSet,
         'sections': jsonEncode(sectionsMapIds),
+        'ex_repetitions_ids': jsonEncode(item.exRepetitionsIds),
         'version': item.version,
       };
       compiledList.add(mapItem);
     }
     await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'trainings':jsonEncode(compiledList)});
   }
+
+
+
+
+  Future<void> firstLoadItems(BuildContext ctx)async{
+  _items = [];
+  var exercises = Provider.of<ExercisesProvider>(ctx,listen: false).items;
+  var path = (await getApplicationDocumentsDirectory()).path;
+    var file = await fileFromAsset('assets/content/trainings.txt');
+  var fileStr = await file.readAsString();
+    List<dynamic> compiledListDynamic = jsonDecode(fileStr);
+    List<Map<String, dynamic>> compiledList = [];
+    for(var item in compiledListDynamic){
+      compiledList.add(item);
+    }
+       for (Map<String,dynamic> item in compiledList){
+
+    Training training = Training(id: item['id'],title: item['title'],version: item['version'],isSet: item['is_set'],description: item['description'] == 'null' ? null : item['description']);
+        Map<String, dynamic> dynamicSections = jsonDecode(item['sections']);;
+        Map<String, List<String>> stringSections = dynamicSections.map((key, value) => MapEntry(key,List<String>.generate(value.length, (index) => value[index])));
+        Map<String, List<Exercise>> doneSections = stringSections.map((sectionName, listOfExercises) => MapEntry(sectionName,listOfExercises.map((ex) => exercises.firstWhere((element) => element.id == ex)).toList()));
+    training.sections = doneSections;
+
+
+        Map<String, dynamic> dynamicExReps = jsonDecode(item['ex_repetitions_ids']);
+        Map<String, List<int>> doneExReps = dynamicExReps.map((key, value) => MapEntry(key,List<int>.generate(value.length, (index) => value[index])));
+
+    training.exRepetitionsIds = doneExReps;
+    _items.add(training);
+    Map<String,List<String>> dbMapSections = {};
+          for(var section in training.sections.keys){
+            dbMapSections.addAll({section: training.sections[section]!.map((e) => e.id).toList()});
+          }
+     await DBHelper.insert('trainings', {
+            'id': training.id,
+            'title': training.title,
+            'description': training.description ?? 'null',
+            'image': '$path/${training.id}',
+            'sections': jsonEncode(dbMapSections),
+            'ex_repetitions_ids': jsonEncode(training.exRepetitionsIds),
+            'is_set': training.isSet ? 1:0,
+            'version': training.version,
+    });
+  }
 }
+
+Future<void> doShit()async{
+  var trainings = await FirebaseFirestore.instance.collection('trainings').get();
+  for (var training in trainings.docs){
+    var id = training.id;
+    await FirebaseFirestore.instance.doc('trainings/$id').update({'priority': id});
+  }
+  print('done');
+}
+}
+
+

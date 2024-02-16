@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
-import 'package:provider/provider.dart';
-
 import '../../models/program.dart';
-import '../../providers/bottom_navigation_provider.dart';
-import '../navigation_bar_screens/profile_screen.dart';
 import '../program_process_screens/trainings_list_screen.dart';
 
 class ProgramDetailsScreen extends StatefulWidget {
@@ -41,37 +36,37 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
   }
 
   void _tryStart() {
-    if (!Provider.of<UserDataProvider>(context,listen: false).isAuth) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Theme.of(context).cardColor,
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Вы не вошли в аккаунт!',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .pushReplacementNamed(ProfileScreen.routeName);
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    Provider.of<BottomNavigationProvider>(context,
-                            listen: false)
-                        .setIndex(1);
-                  },
-                  child: Text(
-                    'Войти',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),),
-            ],
-          ),
-        ),
-      );
-      return;
-    }
+    // if (!Provider.of<UserDataProvider>(context,listen: false).isAuth) {
+    //   ScaffoldMessenger.of(context).clearSnackBars();
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       backgroundColor: Colors.white70,
+    //       content: Row(
+    //         mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //         children: [
+    //           Text(
+    //             'Вы не вошли в аккаунт!',
+    //             style: Theme.of(context).textTheme.bodyMedium,
+    //           ),
+    //           TextButton(
+    //               onPressed: () {
+    //                 Navigator.of(context)
+    //                     .pushReplacementNamed(ProfileScreen.routeName);
+    //                 ScaffoldMessenger.of(context).clearSnackBars();
+    //                 Provider.of<BottomNavigationProvider>(context,
+    //                         listen: false)
+    //                     .setIndex(2);
+    //               },
+    //               child: Text(
+    //                 'Войти',
+    //                 style: Theme.of(context).textTheme.bodyMedium,
+    //               ),),
+    //         ],
+    //       ),
+    //     ),
+    //   );
+    //   return;
+    // }
     Navigator.of(context).pushNamed(TrainingsListScreen.routeName,arguments: [widget.program]);
   }
 
@@ -132,7 +127,7 @@ class _ProgramDetailsScreenState extends State<ProgramDetailsScreen>
     _animate();
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(color: Colors.black,image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_1.jpg'),fit: BoxFit.cover,opacity: 0.7)),
+        decoration: const BoxDecoration(color: Colors.black,image: DecorationImage(image: AssetImage('assets/images/backgrounds/bg_30.jpg'),fit: BoxFit.cover,opacity: 0.7)),
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(

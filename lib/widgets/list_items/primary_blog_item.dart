@@ -17,6 +17,7 @@ class PrimaryBlogItem extends StatefulWidget {
 class _PrimaryBlogItemState extends State<PrimaryBlogItem> {
 
     final GlobalKey _backgroundImageKey = GlobalKey();
+    late ImageProvider<Object> imageProvider;
 
 
 
@@ -36,7 +37,7 @@ Widget _buildParallaxBackground(BuildContext context) {
             },
             placeholder: const AssetImage(
                 'assets/images/placeholders/grey_gradient.jpg'),
-            image: FileImage(widget.blogPost.images.first),
+            image: (widget.blogPost.images.isEmpty ? AssetImage('assets/content/blog_posts/${widget.blogPost.id}_0') : FileImage(widget.blogPost.images.first)) as ImageProvider,
             key: _backgroundImageKey,
             fit: BoxFit.cover,
             placeholderFit: BoxFit.fill,
@@ -101,6 +102,7 @@ Widget _buildParallaxBackground(BuildContext context) {
       ),
     );
   }
+
 
 
 

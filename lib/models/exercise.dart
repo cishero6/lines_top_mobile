@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/models/lines_top_model.dart';
@@ -16,13 +17,16 @@ class Exercise extends LinesTopModel{
   @override
   String title = ''; //Название упражнения
   String description = ''; //Описание упражнения
-  String exerciseListText = ''; //Текст под "упражнение"
-  String repetitionListText = ''; //Текст под "уол-во повторений"
+  List<String> exerciseListTexts = []; //Текст под "упражнение"
+  List<String> repetitionListTexts = []; //Текст под "уол-во повторений"
   File? video; //Cсылка на видео
   int version = 0;
 
   Exercise.empty();
-  Exercise({this.id = '',this.title = '',this.description = '',this.exerciseListText = '',this.repetitionListText = '',this.video,this.version = 0});
+  Exercise({this.id = '',this.title = '',this.description = '',List<String>? exerciseListTexts,List<String>? repetitionListTexts,this.video,this.version = 0}){
+    this.exerciseListTexts = exerciseListTexts ?? [];
+    this.repetitionListTexts = repetitionListTexts ?? [];
+  }
 
   Future<void> fetchMissingFile()async{
     bool internetConnected = await NetworkConnectivity.checkConnection();
@@ -41,6 +45,14 @@ class Exercise extends LinesTopModel{
       print('tried to load ex - failed');
       return;
     }
+  }
+  Future<bool> isUpdateNeeded()async{
+    bool internetConnected = await NetworkConnectivity.checkConnection();
+    if(!internetConnected) {
+      return false;
+    }
+    var doc = await FirebaseFirestore.instance.doc('exercises/$id').get();
+    return doc.data()!['version'] != version;
   }
 
   @override

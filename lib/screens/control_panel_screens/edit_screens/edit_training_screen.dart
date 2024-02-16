@@ -26,6 +26,7 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   Map<String, List<Exercise>> _sections = {};
+    Map<String, List<int>> _repsIds = {};
   Color _containerColor = Colors.white70;
   final ScrollController _scrollController = ScrollController();
   List<String> _sectionKeys = [];
@@ -94,6 +95,7 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
     }
     if (_sections != tempTraining.sections) {
       newData.addAll({'sections': _sections});
+      newData.addAll({'ex_repetitions_ids': _repsIds});
     }
     if(_isSet){
 
@@ -146,12 +148,14 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
       title: widget.training.title,
       sections: widget.training.sections.map((sectionName, listOfEx) =>
           MapEntry(sectionName.split('_').first, listOfEx)),
+      exRepetitionsIds: widget.training.exRepetitionsIds,
       isSet: widget.training.isSet,
       description: widget.training.description,
       image: widget.training.image,
     );
     _titleEditingController.text = tempTraining.title;
     _sections = {...tempTraining.sections};
+    _repsIds = tempTraining.exRepetitionsIds;
     _exercises = Provider.of<ExercisesProvider>(context, listen: false).items;
     _isSet = tempTraining.isSet;
     _descriptionController.text = tempTraining.description ?? '';
@@ -285,6 +289,14 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
                                 _sections[_selectedSection]!.add(data);
                                 _anythingChanged =
                                     !(_sections == tempTraining.sections);
+                                int repId = 0;
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Выберите слот повторений'),
+                                    actions: [0,1,2,3,4].map((i) => ElevatedButton(onPressed: (){Navigator.of(ctx).pop();repId = i;_repsIds[_selectedSection]!.add(repId);}, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [Text(data.exerciseListTexts[i]),Flexible(child: Text(data.repetitionListTexts[i],)),],))).toList(),
+                                  ),
+                                );
                                 _containerColor = Colors.white70;
                                 setState(() {});
                               },
@@ -335,16 +347,20 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
                                                       IconButton(
                                                         splashRadius: 1,
                                                         onPressed: () {
-                                                          setState(() => _sections[
+                                                          int index = _sections[
                                                                   _selectedSection]!
-                                                              .remove(ex));
-                                                          print(_sections);
-                                                          print(tempTraining
-                                                              .sections);
+                                                              .lastIndexOf(ex);
+                                                          _sections[
+                                                                  _selectedSection]!
+                                                              .removeAt(index);
+                                                          _repsIds[
+                                                                  _selectedSection]!
+                                                              .removeAt(index);
                                                           _anythingChanged =
                                                               (_sections !=
                                                                   tempTraining
                                                                       .sections);
+                                                          setState(() {});
                                                         },
                                                         icon: const Icon(
                                                           Icons.delete,
@@ -421,6 +437,8 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
                                                         .remove(_selectedSection);
                                                     _sections
                                                         .remove(_selectedSection);
+                                                        _repsIds.remove(
+                                                        _selectedSection);
                                                         _selectedSection =
                                                             '_notSelected';
                                                   }),
@@ -456,6 +474,10 @@ class _EditTrainingScreenState extends State<EditTrainingScreen> {
                                                         _textEditingController
                                                             .text)) {
                                                   _sections.addAll({
+                                                    _textEditingController.text:
+                                                        []
+                                                  });
+                                                  _repsIds.addAll({
                                                     _textEditingController.text:
                                                         []
                                                   });

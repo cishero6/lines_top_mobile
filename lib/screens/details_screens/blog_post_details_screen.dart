@@ -230,7 +230,7 @@ class _BlogPostDetailsScreenState extends State<BlogPostDetailsScreen>
     _isBuilt= true;
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Colors.black,image: DecorationImage(image: FileImage(widget.blogPost.images.first),fit: BoxFit.cover,opacity: 0.6)),
+        decoration: BoxDecoration(color: Colors.black,image: DecorationImage(image: widget.blogPost.images.isEmpty?AssetImage('assets/content/blog_posts/${widget.blogPost.id}_0'): FileImage(widget.blogPost.images.first) as ImageProvider,fit: BoxFit.cover,opacity: 0.6)),
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(

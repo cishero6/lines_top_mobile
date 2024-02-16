@@ -1,9 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:lines_top_mobile/providers/user_data_provider.dart';
+import 'package:lines_top_mobile/helpers/db_helper.dart';
 import 'package:lines_top_mobile/screens/details_screens/blog_post_details_screen.dart';
-import 'package:lines_top_mobile/screens/more_screens.dart/delete_account_verification_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/add_parameters_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/change_data_screen.dart';
 import 'package:lines_top_mobile/screens/profile_screens/parameters_screen.dart';
@@ -12,7 +11,9 @@ import 'package:lines_top_mobile/screens/profile_screens/register_parameters_scr
 import 'package:lines_top_mobile/screens/program_process_screens/load_set_screen.dart';
 import 'package:lines_top_mobile/screens/program_process_screens/trainings_list_screen.dart';
 import 'package:video_player/video_player.dart';
+import '../helpers/phone_auth_status.dart';
 import '../providers/exercises_provider.dart';
+import '../providers/user_provider.dart';
 import '../widgets/my_bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import './navigation_bar_screens/blog_screen.dart';
@@ -53,11 +54,15 @@ class _MainScreenState extends State<MainScreen> {
   late VideoPlayerController _videoController;
 
   bool _isLoading = true;
+  bool _isError = false;
   String _loadingText = '';
   
 
   void _fetchEverything() async {
-    Provider.of<UserDataProvider>(context,listen:false).setListener();
+    try{
+      setState(() {
+        _isError = false;
+      });
     setState(() {
       _loadingText = 'Загружаем блог';
     });
@@ -77,16 +82,29 @@ class _MainScreenState extends State<MainScreen> {
     });
     await Provider.of<ProgramsProvider>(context, listen: false)
         .fetchAndSetItems(context);
+    await Provider.of<UserProvider>(context,listen:false).initializeData(context);
+          //print(Provider.of<UserProvider>(context,listen:false).username);
+    isReg = Provider.of<UserProvider>(context,listen:false).username == null;
     setState(() {
       _isLoading = false;
     });
+    _videoController.dispose();
+    } catch (e) {
+      setState(() {
+        _isError = true;
+      });
+      print(e.toString());
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+    
   }
 
   @override
   void initState() {
     if(!widget.didFetch){
       _fetchEverything();
-      _videoController = VideoPlayerController.asset('assets/videos/intro2.mp4')..initialize().then((_) {
+      _videoController = VideoPlayerController.asset('assets/videos/intro1.mp4')..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
       });
@@ -134,7 +152,8 @@ return Container(
 
   @override
   Widget build(BuildContext context) {
-    if(!widget.didFetch){
+    print('main screen build');
+    if(!widget.didFetch && _isLoading){
       if(!_videoController.value.isInitialized){
         return const Scaffold(backgroundColor: Colors.black,);
       }else{
@@ -146,9 +165,17 @@ return Container(
       //appBar: AppBar(title: const Text('Саша ЧМООО'),elevation: 1,),
       body: _isLoading
           ? Stack(
-      children: [
-        Center(child: AspectRatio(aspectRatio: 1080/1920,child: VideoPlayer(_videoController))),
+              children: [
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: 1080 / 1920,
+                    child: VideoPlayer(_videoController),
+                  ),
+                ),
         Positioned(bottom: 100,child: SizedBox(width: MediaQuery.of(context).size.width,child: Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.center,children: [Text(_loadingText,style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white),),const SizedBox(width: 20,),const CircularProgressIndicator(color: Colors.white,)],))),
+        if(_isError) Positioned(bottom: 150,child: SizedBox(width: MediaQuery.of(context).size.width,child: ElevatedButton(onPressed: _fetchEverything, child: Text('Попробовать еще раз',style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),)))),
+        if(_isError) Positioned(bottom: 350,child: SizedBox(width: MediaQuery.of(context).size.width,child: ElevatedButton(onPressed: DBHelper.deleteTables, child: Text('удалить табицы',style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),)))),
+
       ],
     )
           : Navigator(
@@ -164,13 +191,13 @@ return Container(
             case InfoScreen.routeName:
               return PageTransition(child: const InfoScreen(), type: PageTransitionType.fade);
             case ParametersScreen.routeName:
-                final List<dynamic> args = settings.arguments as List<dynamic>;
-                if(args[0]){
-              return PageTransition(child: const ParametersScreen(), type: PageTransitionType.bottomToTopJoined,childCurrent: args[1],curve: Curves.fastLinearToSlowEaseIn,duration: const Duration(seconds: 2));
-                }
-                return MaterialPageRoute(builder: (ctx)=> const ParametersScreen());
-            case DeleteAccountVerificationScreen.routeName:
-                return MaterialPageRoute(builder: (ctx)=> const DeleteAccountVerificationScreen());
+                //final List<dynamic> args = settings.arguments as List<dynamic>;
+              //   if(false){
+              // return PageTransition(child: const ParametersScreen(), type: PageTransitionType.bottomToTopJoined,childCurrent: args[1],curve: Curves.fastLinearToSlowEaseIn,duration: const Duration(seconds: 2));
+              //   }
+                return PageTransition(child: const ParametersScreen(), type: PageTransitionType.fade);
+            // case DeleteAccountVerificationScreen.routeName:
+            //     return MaterialPageRoute(builder: (ctx)=> const DeleteAccountVerificationScreen());
             case ExerciseProcessScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return PageTransition(child: ExerciseProcessScreen(args[0],args[1],programId: args[2],trainingIndex: args[3],), type: PageTransitionType.rightToLeft);
@@ -225,8 +252,8 @@ return Container(
               return MaterialPageRoute(builder: (ctx)=> const AddParametersScreen());
             case ProgramsProgressScreen.routeName:
               return MaterialPageRoute(builder: (ctx)=> const ProgramsProgressScreen());
-            case ChangeDataScreen.routeName:
-              return MaterialPageRoute(builder: (ctx)=> const ChangeDataScreen());
+            // case ChangeDataScreen.routeName:
+            //   return MaterialPageRoute(builder: (ctx)=> const ChangeDataScreen());
             case BlogPostDetailsScreen.routeName:
               final List<dynamic> args = settings.arguments as List<dynamic>;
               return MaterialPageRoute(builder: (ctx)=> BlogPostDetailsScreen(args[0]));

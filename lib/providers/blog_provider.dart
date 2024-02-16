@@ -41,8 +41,14 @@ class BlogProvider with ChangeNotifier {
       );
       List<String> pathOfImages = (item['images'] as String).split('|');
       List<File> images = pathOfImages.map((e) => File(e)).toList();
+      for (int i=0;i<images.length;i++){
+        if(!(await images[i].exists())){
+          images.removeAt(i);
+        }
+      }
         _items.last.images = images;
       }
+      
     }
     //2
     var isOnline = await NetworkConnectivity.checkConnection();
@@ -62,6 +68,7 @@ class BlogProvider with ChangeNotifier {
     //3-4
     try{
       var path = (await getApplicationDocumentsDirectory()).path;
+      
       var qSnapshot =
           await FirebaseFirestore.instance.collection('blog_posts').get();
       var docs = qSnapshot.docs;
@@ -101,7 +108,9 @@ class BlogProvider with ChangeNotifier {
                   .add(await fileFromAsset('assets/images/placeholders/grey_gradient.jpg'));
             }
           }
-          pathsOfImages = pathsOfImages.substring(0,pathsOfImages.length-1);
+          if(pathsOfImages.isNotEmpty){
+            pathsOfImages = pathsOfImages.substring(0,pathsOfImages.length-1);
+          }
           firebaseItems.add(blogPost);
           await DBHelper.insert('blog_posts', {
             'id': blogPost.id,
@@ -369,49 +378,6 @@ class BlogProvider with ChangeNotifier {
     loadingText = '';
   }
 
-  Future<void> preLoadItems()async{
-    var path = (await getApplicationDocumentsDirectory()).path;
-    var postsFile = await fileFromAsset('assets/pre_compiled_data/blog_posts.txt');
-    var postsStr = await postsFile.readAsString();
-    var postsStrList = postsStr.split('\n/||/\n');
-    for(var postStr in postsStrList){
-      var argList = postStr.split('|');
-      String pathsOfImages = '';
-      BlogPost newPost = BlogPost(
-        id: argList[0],
-        version: int.parse(argList[1]),
-        title: argList[2],
-        shortDesc: argList[3],
-        bodyText: argList[4],
-        date: argList[5],
-        isPrimary: argList[6] == 'true',
-        images: [],
-      );
-      for(int i = 0;i<int.parse(argList.last);i++){
-        try {
-              var tempFile =
-                  await fileFromAsset('assets/pre_compiled_data/${newPost.id}_$i');
-              File file = await tempFile.copy('$path/${newPost.id}_$i');
-              pathsOfImages += '$path/${newPost.id}_$i|';
-              newPost.images.add(file);
-        } catch (e){
-          print(e);
-        }
-      }
-      pathsOfImages = pathsOfImages.substring(0, pathsOfImages.length - 1);
-      _items.add(newPost);
-      await DBHelper.insert('blog_posts', {
-        'id': newPost.id,
-        'title': newPost.title,
-        'short_desc': newPost.shortDesc,
-        'body_text': newPost.bodyText,
-        'date': newPost.date,
-        'images': pathsOfImages,
-        'is_primary': newPost.isPrimary ? 1 : 0,
-        'version': newPost.version,
-      });
-    }
-  }
   
 
   Future<void> compileDatabaseIntoPreload()async{
@@ -430,6 +396,43 @@ class BlogProvider with ChangeNotifier {
       compiledList.add(mapItem);
     }
     await FirebaseFirestore.instance.doc('dev/pre_compiled_data').update({'blog_posts':jsonEncode(compiledList)});
+  }
+
+    Future<void> firstLoadItems() async {
+    _items = [];
+    var file = await fileFromAsset('assets/content/blog_posts.txt');
+    var fileStr = await file.readAsString();
+    List<dynamic> compiledListDynamic = jsonDecode(fileStr);
+    List<Map<String, dynamic>> compiledList = [];
+    for(var item in compiledListDynamic){
+      compiledList.add(item);
+    }
+     
+
+    for (Map<String, dynamic> item in compiledList) {
+      BlogPost blogPost = BlogPost(
+          id: item['id'],
+          title: item['title'],
+          shortDesc: item['short_desc'],
+          bodyText: item['body_text'],
+          date: item['date'],
+          version: item['version'],
+          isPrimary: item['is_primary'],
+          );
+          String pathsOfImages = '';
+
+      _items.add(blogPost);
+      await DBHelper.insert('blog_posts', {
+            'id': blogPost.id,
+            'title': blogPost.title,
+            'short_desc': blogPost.shortDesc,
+            'body_text': blogPost.bodyText,
+            'date': blogPost.date,
+            'images': pathsOfImages,
+            'is_primary': blogPost.isPrimary ? 1:0,
+            'version': blogPost.version,
+      });
+    }
   }
   
 }

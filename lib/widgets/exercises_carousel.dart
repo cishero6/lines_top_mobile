@@ -214,7 +214,7 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
               fit: FlexFit.tight,
               flex: 8,
               child: Container(
-                decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.white70,Colors.transparent],begin: Alignment.bottomCenter,end: Alignment.topCenter,stops: [0.0,0.4])),
+                decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.white54,Colors.transparent],begin: Alignment.bottomCenter,end: Alignment.topCenter,stops: [0.0,0.2])),
                 child: Stack(
                   children: [
                     SlideTransition(
@@ -238,7 +238,7 @@ class _ExercisesCarouselState extends State<ExercisesCarousel>
               fit: FlexFit.tight,
               flex: 1,
               child: Container(
-                decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.white,Colors.white70],stops: [0.0,1],begin: Alignment.bottomCenter,end: Alignment.topCenter)),
+                decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.white,Colors.white54],stops: [0.0,1],begin: Alignment.bottomCenter,end: Alignment.topCenter)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

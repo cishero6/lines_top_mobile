@@ -27,6 +27,12 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
   final ImagePicker _picker = ImagePicker();
   late XFile? _pickedPhoto = null;
 
+  Map<String, List<int>> _repsIds = {
+    'Разминка': [],
+    'Основная часть': [],
+    'Заминка': [],
+  };
+
   Map<String, List<Exercise>> _sections = {
     'Разминка': [],
     'Основная часть': [],
@@ -38,16 +44,16 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
   late BuildContext _dialogContext;
 
   void _submit() async {
-    if(_isSet && _pickedPhoto == null){
+    if (_isSet && _pickedPhoto == null) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Добавьте фото!')));
       return;
     }
-    if(_isSet && _descriptionController.text.isEmpty){
+    if (_isSet && _descriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Добавьте описание сету!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Добавьте описание сету!')));
       return;
     }
     if (_sections.isEmpty) {
@@ -93,9 +99,10 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
       Training newTraining = Training(
         title: _titleEditingController.text,
         sections: _sections,
+        exRepetitionsIds: _repsIds,
         isSet: _isSet,
       );
-      if(_isSet){
+      if (_isSet) {
         newTraining.description = _descriptionController.text;
         newTraining.image = File(_pickedPhoto!.path);
       }
@@ -116,9 +123,16 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    _trainings = Provider.of<TrainingsProvider>(context, listen: false).items;
+  void initState() {
+     _trainings = Provider.of<TrainingsProvider>(context, listen: false).items;
     _exercises = Provider.of<ExercisesProvider>(context, listen: false).items;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+   print(_repsIds);
+   print(_sections);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -239,6 +253,14 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                 _containerColor = Colors.black12;
                               }),
                               onAccept: (Exercise data) {
+                                int repId = 0;
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Выберите слот повторений'),
+                                    actions: [0,1,2,3,4].map((i) => ElevatedButton(onPressed: (){Navigator.of(ctx).pop();repId = i;_repsIds[_selectedSection]!.add(repId);}, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [Text(data.exerciseListTexts[i]),Flexible(child: Text(data.repetitionListTexts[i],)),],))).toList(),
+                                  ),
+                                );
                                 _sections[_selectedSection]!.add(data);
                                 _containerColor = Colors.white70;
                                 setState(() {});
@@ -291,10 +313,18 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                       ),
                                                       IconButton(
                                                         splashRadius: 1,
-                                                        onPressed: () => setState(
-                                                            () => _sections[
-                                                                    _selectedSection]!
-                                                                .remove(ex)),
+                                                        onPressed: () {
+                                                          int index = _sections[
+                                                                  _selectedSection]!
+                                                              .lastIndexOf(ex);
+                                                          _sections[
+                                                                  _selectedSection]!
+                                                              .removeAt(index);
+                                                          _repsIds[
+                                                                  _selectedSection]!
+                                                              .removeAt(index);
+                                                          setState(() {});
+                                                        },
                                                         icon: const Icon(
                                                           Icons.delete,
                                                           color: Colors.red,
@@ -371,6 +401,8 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                         _selectedSection);
                                                     _sections.remove(
                                                         _selectedSection);
+                                                    _repsIds.remove(
+                                                        _selectedSection);
                                                     _selectedSection =
                                                         '_notSelected';
                                                   }),
@@ -406,6 +438,10 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                                                         _textEditingController
                                                             .text)) {
                                                   _sections.addAll({
+                                                    _textEditingController.text:
+                                                        []
+                                                  });
+                                                  _repsIds.addAll({
                                                     _textEditingController.text:
                                                         []
                                                   });
@@ -497,47 +533,50 @@ class _AddTrainingScreenState extends State<AddTrainingScreen> {
                     maxLength: 40,
                   ),
                 ),
-              if (_isSet) const Divider(
-                thickness: 7,
-              ),
-              if (_isSet) Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                      onPressed: () async {
-                        _pickedPhoto = await _picker.pickImage(
-                            source: ImageSource.gallery);
-                        setState(() {});
-                      },
-                      icon: Icon(Icons.image),
-                      label: Text(
-                        'Выбрать фото',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      )),
-                  IconButton(
-                      onPressed: _pickedPhoto == null
-                          ? null
-                          : () => setState(() => _pickedPhoto = null),
-                      icon: Icon(
-                        Icons.delete,
-                        color: _pickedPhoto == null
-                            ? Colors.grey
-                            : Theme.of(context).colorScheme.error,
-                      )),
-                ],
-              ),
-              if (_isSet) Center(
-                  child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                  width: 0.5,
+              if (_isSet)
+                const Divider(
+                  thickness: 7,
+                ),
+              if (_isSet)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                        onPressed: () async {
+                          _pickedPhoto = await _picker.pickImage(
+                              source: ImageSource.gallery);
+                          setState(() {});
+                        },
+                        icon: Icon(Icons.image),
+                        label: Text(
+                          'Выбрать фото',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        )),
+                    IconButton(
+                        onPressed: _pickedPhoto == null
+                            ? null
+                            : () => setState(() => _pickedPhoto = null),
+                        icon: Icon(
+                          Icons.delete,
+                          color: _pickedPhoto == null
+                              ? Colors.grey
+                              : Theme.of(context).colorScheme.error,
+                        )),
+                  ],
+                ),
+              if (_isSet)
+                Center(
+                    child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                    width: 0.5,
+                  )),
+                  width: 100,
+                  height: 100,
+                  child: _pickedPhoto == null
+                      ? null
+                      : Image.file(File(_pickedPhoto!.path)),
                 )),
-                width: 100,
-                height: 100,
-                child: _pickedPhoto == null
-                    ? null
-                    : Image.file(File(_pickedPhoto!.path)),
-              )),
               const Divider(
                 thickness: 7,
               ),

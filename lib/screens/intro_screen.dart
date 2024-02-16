@@ -10,7 +10,7 @@ import '../providers/blog_provider.dart';
 import '../providers/exercises_provider.dart';
 import '../providers/programs_provider.dart';
 import '../providers/trainings_provider.dart';
-import '../providers/user_data_provider.dart';
+import '../providers/user_provider.dart';
 import 'main_screen.dart';
 
 class IntroScreen extends StatefulWidget {
@@ -42,18 +42,28 @@ class _IntroScreenState extends State<IntroScreen>
   int _currentIndex = 0;
   bool _isLoading = true;
   bool _isWatching = true;
+  bool _isError = false;
 
 
-  void _preLoadData()async {
-    await Provider.of<BlogProvider>(context,listen: false).preLoadItems();
-  }
+
 
   void _fetchEverything() async {
-    await Provider.of<UserDataProvider>(context,listen:false).setListener();
+    try{
+      setState(() {
+        _isError = false;
+      });
+    await Provider.of<BlogProvider>(context, listen: false).firstLoadItems();
+    await Provider.of<ExercisesProvider>(context, listen: false).firstLoadItems();
+    await Provider.of<TrainingsProvider>(context, listen: false).firstLoadItems(context);
+    await Provider.of<ProgramsProvider>(context, listen: false).firstLoadItems(context);
+    print('got here');
     await Provider.of<BlogProvider>(context, listen: false).fetchAndSetItems();
     await Provider.of<ExercisesProvider>(context, listen: false).fetchAndSetItems();
     await Provider.of<TrainingsProvider>(context, listen: false).fetchAndSetItems(context);
     await Provider.of<ProgramsProvider>(context, listen: false).fetchAndSetItems(context);
+    await Provider.of<UserProvider>(context,listen:false).initializeData(context);
+    print('initialized data');
+
     if(!_isWatching){
       _navigate();
       return;
@@ -61,6 +71,13 @@ class _IntroScreenState extends State<IntroScreen>
     setState(() {
       _isLoading = false;
     });
+    } catch(e){
+      print(e);
+      setState(() {
+        _isError = true;
+      });
+    }
+    
     
   }
 
@@ -157,6 +174,7 @@ class _IntroScreenState extends State<IntroScreen>
             ),
           ),
           if(!_isWatching) Positioned(bottom: 100,child: SizedBox(width: MediaQuery.of(context).size.width,child: FadeTransition(opacity: _opacityAnimation,child: Row(mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.center,children: [Text('Загрузка',style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white),),const SizedBox(width: 20,),const CircularProgressIndicator(color: Colors.white,)],),))),
+        if(_isError) Positioned(bottom: 150,child: SizedBox(width: MediaQuery.of(context).size.width,child: ElevatedButton(onPressed: _fetchEverything, child: Text('Попробовать еще раз',style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),)))),
         ],
       ),
     );
