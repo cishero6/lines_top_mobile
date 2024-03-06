@@ -147,9 +147,6 @@ class _ParametersScreenState extends State<ParametersScreen>
   @override
   void initState() {
     userData = Provider.of<UserProvider>(context, listen: false);
-    if (userData.username == 'zoPUTyCKyxbMEAIECGzB') {
-      _isAdmin = true;
-    }
     _initAnimations();
     _startAnimtaions();
     super.initState();
