@@ -10,6 +10,8 @@
 .svn/
 migrate_working_dir/
 
+lib/screens/profile_screens/parameters_screen.dart
+
 # IntelliJ related
 *.iml
 *.ipr
