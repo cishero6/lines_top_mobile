@@ -1,0 +1,1 @@
+ /Users/glebilitsinskiy/development/lines_top_mobile/.dart_tool/flutter_build/7a5e3f5048e357011951350c7ddaccad/native_assets.yaml: 
